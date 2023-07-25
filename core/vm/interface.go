@@ -81,17 +81,21 @@ type StateDB interface {
 	GetNFTOwner16(common.Address) common.Address
 	// *** modify to support nft transaction 20211215 end ***
 	//CreateNFTByOfficial([]common.Address, *big.Int)
-	CreateNFTByUser(common.Address, common.Address, uint16, string) (common.Address, bool)
+	CreateNFTByUser(common.Address, common.Address, uint16, string, *big.Int) (common.Address, bool)
 	ChangeApproveAddress(common.Address, common.Address)
 	CancelApproveAddress(common.Address, common.Address)
 	ChangeNFTApproveAddress(common.Address, common.Address)
 	CancelNFTApproveAddress(common.Address, common.Address)
 	ExchangeNFTToCurrency(common.Address, common.Address, *big.Int, int)
 	PledgeToken(common.Address, *big.Int, common.Address, *big.Int) error
-	GetPledgedTime(common.Address) *big.Int
+	StakerPledge(common.Address, common.Address, *big.Int, *big.Int, *types.Wormholes) error
+	GetPledgedTime(common.Address, common.Address) *big.Int
+	GetStakerPledged(common.Address, common.Address) *types.StakerExtension
 	MinerConsign(common.Address, common.Address) error
+	MinerBecome(common.Address, common.Address) error
 	CancelPledgedToken(common.Address, *big.Int)
-	OpenExchanger(common.Address, *big.Int, *big.Int, uint16, string, string)
+	CancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int)
+	OpenExchanger(common.Address, *big.Int, *big.Int, uint16, string, string, common.Address)
 	CloseExchanger(common.Address, *big.Int)
 	GetExchangerFlag(common.Address) bool
 	GetOpenExchangerTime(common.Address) *big.Int
@@ -114,6 +118,7 @@ type StateDB interface {
 	IsApprovedOne(common.Address, common.Address) bool
 	IsApprovedForAll(common.Address, common.Address) bool
 	GetPledgedBalance(common.Address) *big.Int
+	GetStakerPledgedBalance(common.Address, common.Address) *big.Int
 	InjectOfficialNFT(string, *big.Int, uint64, uint16, string)
 	AddExchangerToken(common.Address, *big.Int)
 	ModifyOpenExchangerTime(common.Address, *big.Int)
@@ -126,6 +131,7 @@ type StateDB interface {
 	AddVoteWeight(common.Address, *big.Int)
 	AddValidatorCoefficient(common.Address, uint8)
 	SubValidatorCoefficient(common.Address, uint8)
+	RemoveValidatorCoefficient(common.Address)
 	GetValidatorCoefficient(common.Address) uint8
 	NextIndex() *big.Int
 	//PledgeNFT(common.Address, *big.Int)
@@ -136,6 +142,12 @@ type StateDB interface {
 	CalculateExchangeAmount(uint8, uint32) *big.Int
 	GetExchangAmount(common.Address, *big.Int) *big.Int
 	IsOfficialNFT(common.Address) bool
+	GetOfficialMint() *big.Int
+	GetUserMint() *big.Int
+	ChangeSNFTAgentRecipient(common.Address, common.Address)
+	ChangeSNFTNoMerge(common.Address, bool)
+	GetDividendAddrs(common.Address) []common.Address
+	SetDividendAddrs(common.Address, []common.Address)
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM

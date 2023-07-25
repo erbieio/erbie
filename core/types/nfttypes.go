@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"math/big"
 	"regexp"
+	"strings"
 )
 
 type MintDeep struct {
@@ -96,11 +97,6 @@ type PledgedToken struct {
 	ProxyAddress common.Address
 }
 
-var DefaultDir string = "/ipfs/Qmf3xw9rEmsjJdQTV3ZcyF4KfYGtxMkXdNQ8YkVqNmLHY8"
-var DefaultNumber uint64 = 4096
-var DefaultRoyalty uint16 = 1000
-var DefaultCreator string = "0x0000000000000000000000000000000000000000"
-
 type InjectedOfficialNFT struct {
 	Dir        string         `json:"dir"`
 	StartIndex *big.Int       `json:"start_index"`
@@ -184,6 +180,28 @@ func (list *InjectedOfficialNFTList) MaxIndex() *big.Int {
 	return max
 }
 
+func (list *InjectedOfficialNFTList) DeepCopy() *InjectedOfficialNFTList {
+	tempList := &InjectedOfficialNFTList{
+		InjectedOfficialNFTs: make([]*InjectedOfficialNFT, 0, len(list.InjectedOfficialNFTs)),
+	}
+
+	for _, v := range list.InjectedOfficialNFTs {
+		tempInjected := &InjectedOfficialNFT{
+			Dir:        v.Dir,
+			StartIndex: new(big.Int).Set(v.StartIndex),
+			Number:     v.Number,
+			Royalty:    v.Royalty,
+			Creator:    v.Creator,
+			Address:    v.Address,
+			VoteWeight: new(big.Int).Set(v.VoteWeight),
+		}
+
+		tempList.InjectedOfficialNFTs = append(tempList.InjectedOfficialNFTs, tempInjected)
+	}
+
+	return tempList
+}
+
 // Wormholes struct for handling NFT transactions
 type Wormholes struct {
 	Type         uint8  `json:"type"`
@@ -209,13 +227,14 @@ type Wormholes struct {
 	RewardFlag    uint8            `json:"reward_flag,omitempty"`
 	BuyerAuth     TraderPayload    `json:"buyer_auth,omitempty"`
 	SellerAuth    TraderPayload    `json:"seller_auth,omitempty"`
+	NoAutoMerge   bool             `json:"no_automerge,omitempty"`
 }
 
 const WormholesVersion = "v0.0.1"
 const PattenAddr = "^0x[0-9a-fA-F]{40}$"
 
-//var PattenAddr = "^0[xX][0-9a-fA-F]{40}$"
-//var PattenHex = "^[0-9a-fA-F]+$"
+// var PattenAddr = "^0[xX][0-9a-fA-F]{40}$"
+// var PattenHex = "^[0-9a-fA-F]+$"
 func (w *Wormholes) CheckFormat() error {
 	//regHex, _ := regexp.Compile(PattenHex)
 	//regAddr, _ := regexp.Compile(PattenAddr)
@@ -250,7 +269,7 @@ func (w *Wormholes) CheckFormat() error {
 			w.Url = string([]byte(w.Url)[:128])
 		}
 
-	case 12:
+	//case 12:
 	case 13:
 	case 14:
 	case 15:
@@ -306,9 +325,19 @@ func (w *Wormholes) CheckFormat() error {
 		}
 
 	case 25:
+		recipient := strings.ToLower(w.ProxyAddress)
+		regAddr, err := regexp.Compile(PattenAddr)
+		if err != nil {
+			return err
+		}
+		match := regAddr.MatchString(recipient)
+		if !match {
+			return errors.New("invalid proxy address")
+		}
 	case 26:
 	case 27:
 	case 28:
+	case 29:
 	case 30:
 	case 31:
 	default:
@@ -346,8 +375,8 @@ func (w *Wormholes) TxGas() (uint64, error) {
 	case 11:
 		return params.WormholesTx11, nil
 
-	case 12:
-		return params.WormholesTx12, nil
+	//case 12:
+	//	return params.WormholesTx12, nil
 	//case 13:
 	//	return params.WormholesTx13, nil
 	case 14:
@@ -380,6 +409,8 @@ func (w *Wormholes) TxGas() (uint64, error) {
 		return params.WormholesTx27, nil
 	case 28:
 		return params.WormholesTx28, nil
+	case 29:
+		return params.WormholesTx29, nil
 	case 30:
 		return params.WormholesTx30, nil
 	case 31:

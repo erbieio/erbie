@@ -2,11 +2,12 @@ package types
 
 import (
 	"errors"
+	"math/big"
+	"sort"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"math/big"
-	"sort"
 )
 
 type Staker struct {
@@ -174,20 +175,36 @@ func (sl *StakerList) SelectRandom4Address(num int, hash []byte) ([]common.Addre
 	var random4Address []common.Address
 	tempStakers := sl.DeepCopy()
 	//hsh256 := sha256.New()
-	for i := 0; i < num; i++ {
-		total := tempStakers.TotalStakeBalance()
-		//hash = hsh256.Sum(hash)
-		hash = crypto.Keccak256(hash)
-		mod := new(big.Int).Mod(new(big.Int).SetBytes(hash), total)
-		address, err := tempStakers.selectAddress(mod)
-		if err != nil {
-			return nil, err
+
+	// if number of all stakers is less the selected staker number,
+	// return all stakers
+	if num > len(tempStakers.Stakers) {
+		for _, s := range tempStakers.Stakers {
+			random4Address = append(random4Address, s.Addr)
 		}
-		random4Address = append(random4Address, address)
-		tempStakers.RemoveStaker(address, new(big.Int).Set(tempStakers.StakeBalance(address)))
+	} else {
+		for i := 0; i < num; i++ {
+			total := tempStakers.TotalStakeBalance()
+			//hash = hsh256.Sum(hash)
+			hash = crypto.Keccak256(hash)
+			mod := new(big.Int).Mod(new(big.Int).SetBytes(hash), total)
+			address, err := tempStakers.selectAddress(mod)
+			if err != nil {
+				return nil, err
+			}
+			random4Address = append(random4Address, address)
+			tempStakers.RemoveStaker(address, new(big.Int).Set(tempStakers.StakeBalance(address)))
+		}
 	}
 
 	return random4Address, nil
+}
+
+func (sl *StakerList) GetByIndex(i uint64) *Staker {
+	if i >= uint64(sl.Len()) {
+		return &Staker{}
+	}
+	return sl.Stakers[i]
 }
 
 func rankByWordCount(wordFrequencies map[*big.Int]*big.Int) PairList {

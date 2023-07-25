@@ -94,9 +94,13 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		CancelNFTApproveAddress: CancelNFTApproveAddress,
 		ExchangeNFTToCurrency:   ExchangeNFTToCurrency,
 		PledgeToken:             PledgeToken,
+		StakerPledge:            StakerPledge,
 		GetPledgedTime:          GetPledgedTime,
+		GetStakerPledged:        GetStakerPledged,
 		MinerConsign:            MinerConsign,
+		MinerBecome:             MinerBecome,
 		CancelPledgedToken:      CancelPledgedToken,
+		CancelStakerPledge:      CancelStakerPledge,
 		OpenExchanger:           OpenExchanger,
 		CloseExchanger:          CloseExchanger,
 		GetExchangerFlag:        GetExchangerFlag,
@@ -119,6 +123,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		IsApprovedOne:                      IsApprovedOne,
 		IsApprovedForAll:                   IsApprovedForAll,
 		VerifyPledgedBalance:               VerifyPledgedBalance,
+		VerifyStakerPledgedBalance:         VerifyStakerPledgedBalance,
 		InjectOfficialNFT:                  InjectOfficialNFT,
 		BuyNFTBySellerOrExchanger:          BuyNFTBySellerOrExchanger,
 		BuyNFTByBuyer:                      BuyNFTByBuyer,
@@ -146,6 +151,9 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		//GetNFTPledgedBlockNumber:    GetNFTPledgedBlockNumber,
 		RecoverValidatorCoefficient:           RecoverValidatorCoefficient,
 		BatchForcedSaleSNFTByApproveExchanger: BatchForcedSaleSNFTByApproveExchanger,
+		ChangeSnftRecipient:                   ChangeSnftRecipient,
+		ChangeSNFTNoMerge:                     ChangeSNFTNoMerge,
+		GetDividend:                           GetDividend,
 	}
 }
 
@@ -272,8 +280,9 @@ func TransferNFT(db vm.StateDB, nftAddr string, newOwner common.Address, blocknu
 func CreateNFTByUser(db vm.StateDB, exchanger common.Address,
 	owner common.Address,
 	royalty uint16,
-	metaurl string) (common.Address, bool) {
-	return db.CreateNFTByUser(exchanger, owner, royalty, metaurl)
+	metaurl string,
+	blocknumber *big.Int) (common.Address, bool) {
+	return db.CreateNFTByUser(exchanger, owner, royalty, metaurl, blocknumber)
 }
 
 func ChangeApproveAddress(db vm.StateDB, addr common.Address, approveAddr common.Address) {
@@ -318,8 +327,16 @@ func PledgeToken(db vm.StateDB, address common.Address, amount *big.Int, wh *typ
 	return db.PledgeToken(address, amount, common.HexToAddress(wh.ProxyAddress), blocknumber)
 }
 
-func GetPledgedTime(db vm.StateDB, addr common.Address) *big.Int {
-	return db.GetPledgedTime(addr)
+func StakerPledge(db vm.StateDB, from, address common.Address, amount *big.Int, blocknumber *big.Int, wh *types.Wormholes) error {
+	log.Info("staker fee rate =", fmt.Sprint(wh.FeeRate), "&wormholes =", fmt.Sprint(wh))
+	return db.StakerPledge(from, address, amount, blocknumber, wh)
+}
+
+func GetPledgedTime(db vm.StateDB, from, addr common.Address) *big.Int {
+	return db.GetPledgedTime(from, addr)
+}
+func GetStakerPledged(db vm.StateDB, from, addr common.Address) *types.StakerExtension {
+	return db.GetStakerPledged(from, addr)
 }
 
 func MinerConsign(db vm.StateDB, address common.Address, wh *types.Wormholes) error {
@@ -332,17 +349,48 @@ func MinerConsign(db vm.StateDB, address common.Address, wh *types.Wormholes) er
 	}
 	return db.MinerConsign(address, common.HexToAddress(wh.ProxyAddress))
 }
+
+func MinerBecome(db vm.StateDB, address common.Address, proxy common.Address) error {
+	//msg := fmt.Sprintf("%v%v", wh.ProxyAddress, address.Hex())
+	//addr, err := RecoverAddress(msg, wh.ProxySign)
+	//log.Info("MinerBecome", "proxy", wh.ProxyAddress, "addr", addr, "sign", wh.ProxySign)
+	//if err != nil {
+	//	log.Error("MinerBecome()", "Get public key error", err)
+	//	return err
+	//}
+	//if wh.ProxyAddress != addr.Hex() {
+	//	log.Error("MinerBecome()", "Get public key error", err)
+	//	return errors.New("MinerBecome recover address proxy Address != address")
+	//}
+	return db.MinerBecome(address, proxy)
+}
+
 func CancelPledgedToken(db vm.StateDB, address common.Address, amount *big.Int) {
 	db.CancelPledgedToken(address, amount)
 }
+func CancelStakerPledge(db vm.StateDB, from common.Address, address common.Address, amount *big.Int, blocknumber *big.Int) {
+	db.CancelStakerPledge(from, address, amount, blocknumber)
+}
+
 func OpenExchanger(db vm.StateDB,
 	addr common.Address,
 	amount *big.Int,
 	blocknumber *big.Int,
 	feerate uint16,
 	exchangername string,
-	exchangerurl string) {
-	db.OpenExchanger(addr, amount, blocknumber, feerate, exchangername, exchangerurl)
+	exchangerurl string,
+	agentAddress string) {
+
+	emptyAddress := common.Address{}
+	var agentRecipient common.Address
+	if agentAddress == "" ||
+		common.HexToAddress(agentAddress) == emptyAddress {
+		agentRecipient = addr
+	} else {
+		agentRecipient = common.HexToAddress(agentAddress)
+	}
+
+	db.OpenExchanger(addr, amount, blocknumber, feerate, exchangername, exchangerurl, agentRecipient)
 }
 
 func CloseExchanger(db vm.StateDB,
@@ -387,9 +435,9 @@ func GetNFTSymbol(db vm.StateDB, addr common.Address) string {
 	return db.GetNFTSymbol(addr)
 }
 
-//func GetNFTApproveAddress(db vm.StateDB, addr common.Address) []common.Address {
-//	return db.GetNFTApproveAddress(addr)
-//}
+//	func GetNFTApproveAddress(db vm.StateDB, addr common.Address) []common.Address {
+//		return db.GetNFTApproveAddress(addr)
+//	}
 func GetNFTApproveAddress(db vm.StateDB, addr common.Address) common.Address {
 	return db.GetNFTApproveAddress(addr)
 }
@@ -433,6 +481,10 @@ func IsApprovedForAll(db vm.StateDB, ownerAddr common.Address, addr common.Addre
 // This does not take the necessary gas in to account to make the transfer valid.
 func VerifyPledgedBalance(db vm.StateDB, addr common.Address, amount *big.Int) bool {
 	return db.GetPledgedBalance(addr).Cmp(amount) >= 0
+}
+
+func VerifyStakerPledgedBalance(db vm.StateDB, from common.Address, addr common.Address, amount *big.Int) bool {
+	return db.GetStakerPledgedBalance(from, addr).Cmp(amount) >= 0
 }
 
 func InjectOfficialNFT(db vm.StateDB, dir string, startIndex *big.Int, number uint64, royalty uint16, creator string) {
@@ -629,11 +681,11 @@ func BuyNFTBySellerOrExchanger(
 	//db.AddVoteWeight(beneficiaryExchanger, amount)
 	db.ChangeNFTOwner(nftAddress, buyer, level, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(beneficiaryExchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -813,11 +865,11 @@ func BuyNFTByBuyer(
 	//db.AddVoteWeight(beneficiaryExchanger, amount)
 	db.ChangeNFTOwner(nftAddress, caller, level, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(beneficiaryExchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -916,13 +968,17 @@ func BuyAndMintNFTByBuyer(
 
 	var nftAddress common.Address
 	if exclusiveFlag == "1" {
-		nftAddress, ok = db.CreateNFTByUser(exchanger, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL)
+		if !db.GetExchangerFlag(exchanger) {
+			log.Error("BuyAndMintNFTByBuyer(), not a exchanger!", "exchanger", exchanger.String())
+			return errors.New("not a exchanger")
+		}
+		nftAddress, ok = db.CreateNFTByUser(exchanger, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL, blocknumber)
 		if !ok {
 			log.Error("BuyAndMintNFTByBuyer(), mint nft error!")
 			return errors.New("mint nft error!")
 		}
 	} else {
-		nftAddress, ok = db.CreateNFTByUser(common.Address{}, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL)
+		nftAddress, ok = db.CreateNFTByUser(common.Address{}, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL, blocknumber)
 		if !ok {
 			log.Error("BuyAndMintNFTByBuyer(), mint nft error!")
 			return errors.New("mint nft error!")
@@ -943,11 +999,11 @@ func BuyAndMintNFTByBuyer(
 	//db.AddVoteWeight(exchanger, amount)
 	db.ChangeNFTOwner(nftAddress, caller, 0, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(exchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -1119,13 +1175,13 @@ func BuyAndMintNFTByExchanger(
 
 	var nftAddress common.Address
 	if exclusiveFlag == "1" {
-		nftAddress, ok = db.CreateNFTByUser(caller, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL)
+		nftAddress, ok = db.CreateNFTByUser(caller, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL, blocknumber)
 		if !ok {
 			log.Error("BuyAndMintNFTByExchanger(), mint nft error!", "exclusiveFlag", exclusiveFlag)
 			return errors.New("mint nft error!")
 		}
 	} else {
-		nftAddress, ok = db.CreateNFTByUser(common.Address{}, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL)
+		nftAddress, ok = db.CreateNFTByUser(common.Address{}, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL, blocknumber)
 		if !ok {
 			log.Error("BuyAndMintNFTByExchanger(), mint nft error!", "exclusiveFlag", exclusiveFlag)
 			return errors.New("mint nft error!")
@@ -1146,11 +1202,11 @@ func BuyAndMintNFTByExchanger(
 	//db.AddVoteWeight(caller, amount)
 	db.ChangeNFTOwner(nftAddress, buyer, 0, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(caller, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -1332,6 +1388,12 @@ func BuyNFTByApproveExchanger(
 		return errors.New("no right to sell nft")
 	}
 
+	if !db.GetExchangerFlag(beneficiaryExchanger) {
+		log.Error("BuyNFTByApproveExchanger(), not a exchager",
+			"beneficiaryExchanger", beneficiaryExchanger.String())
+		return errors.New("not a exchanger")
+	}
+
 	unitAmount := new(big.Int).Div(amount, new(big.Int).SetInt64(10000))
 	feeRate := db.GetFeeRate(beneficiaryExchanger)
 	exchangerAmount := new(big.Int).Mul(unitAmount, new(big.Int).SetUint64(uint64(feeRate)))
@@ -1347,11 +1409,11 @@ func BuyNFTByApproveExchanger(
 	//db.AddVoteWeight(beneficiaryExchanger, amount)
 	db.ChangeNFTOwner(nftAddress, buyer, level, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(beneficiaryExchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -1576,14 +1638,14 @@ func BuyAndMintNFTByApprovedExchanger(
 
 	var nftAddress common.Address
 	if exclusiveFlag == "1" {
-		nftAddress, ok = db.CreateNFTByUser(originalExchanger, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL)
+		nftAddress, ok = db.CreateNFTByUser(originalExchanger, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL, blocknumber)
 		if !ok {
 			log.Error("BuyAndMintNFTByApprovedExchanger(), mint nft error!",
 				"exclusiveFlag", exclusiveFlag)
 			return errors.New("mint nft error!")
 		}
 	} else {
-		nftAddress, ok = db.CreateNFTByUser(common.Address{}, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL)
+		nftAddress, ok = db.CreateNFTByUser(common.Address{}, seller, uint16(sellerRoyalty.Uint64()), wormholes.Seller2.MetaURL, blocknumber)
 		if !ok {
 			log.Error("BuyAndMintNFTByApprovedExchanger(), mint nft error!",
 				"exclusiveFlag", exclusiveFlag)
@@ -1605,11 +1667,11 @@ func BuyAndMintNFTByApprovedExchanger(
 	//db.AddVoteWeight(originalExchanger, amount)
 	db.ChangeNFTOwner(nftAddress, buyer, 0, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(originalExchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -1815,6 +1877,11 @@ func BuyNFTByExchanger(
 		}
 		beneficiaryExchanger = caller
 	}
+	if !db.GetExchangerFlag(beneficiaryExchanger) {
+		log.Error("BuyNFTByExchanger(), not a exchager",
+			"beneficiaryExchanger", beneficiaryExchanger.String())
+		return errors.New("not a exchanger")
+	}
 
 	unitAmount := new(big.Int).Div(amount, new(big.Int).SetInt64(10000))
 	feeRate := db.GetFeeRate(beneficiaryExchanger)
@@ -1831,11 +1898,11 @@ func BuyNFTByExchanger(
 	//db.AddVoteWeight(beneficiaryExchanger, amount)
 	db.ChangeNFTOwner(sellerNftAddress, buyer, level, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(beneficiaryExchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -2267,6 +2334,11 @@ func BatchBuyNFTByApproveExchanger(
 		}
 	}
 	beneficiaryExchanger = originalExchanger
+	if !db.GetExchangerFlag(beneficiaryExchanger) {
+		log.Error("BatchBuyNFTByApproveExchanger(), not a exchager",
+			"beneficiaryExchanger", beneficiaryExchanger.String())
+		return errors.New("not a exchanger")
+	}
 
 	unitAmount := new(big.Int).Div(amount, new(big.Int).SetInt64(10000))
 	feeRate := db.GetFeeRate(beneficiaryExchanger)
@@ -2283,11 +2355,11 @@ func BatchBuyNFTByApproveExchanger(
 	//db.AddVoteWeight(beneficiaryExchanger, amount)
 	db.ChangeNFTOwner(nftAddress, buyer, level, blocknumber)
 
-	mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-	injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-	exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+	//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+	//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+	//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 	db.AddBalance(beneficiaryExchanger, exchangerAmount)
-	db.AddBalance(InjectRewardAddress, injectRewardAmount)
+	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
 }
@@ -2684,11 +2756,11 @@ func BatchForcedSaleSNFTByApproveExchanger(
 		//db.AddVoteWeight(beneficiaryExchanger, amount)
 		db.ChangeNFTOwner(nftAddr, buyer, level, blocknumber)
 
-		mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
-		injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
-		exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
+		//mulRewardRate := new(big.Int).Mul(exchangerAmount, new(big.Int).SetInt64(InjectRewardRate))
+		//injectRewardAmount := new(big.Int).Div(mulRewardRate, new(big.Int).SetInt64(10000))
+		//exchangerAmount = new(big.Int).Sub(exchangerAmount, injectRewardAmount)
 		db.AddBalance(beneficiaryExchanger, exchangerAmount)
-		db.AddBalance(InjectRewardAddress, injectRewardAmount)
+		//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 		log.Info("BatchForcedSaleSNFTByApproveExchanger()",
 			"nft address", nftAddr.String(),
 			"buyer amount", amount,
@@ -2696,7 +2768,8 @@ func BatchForcedSaleSNFTByApproveExchanger(
 			"creator amount", royaltyAmount,
 			"discard amount", discardAmount,
 			"exchanger amount", exchangerAmount,
-			"injectReward amount", injectRewardAmount)
+			//"injectReward amount", injectRewardAmount
+		)
 	}
 
 	return nil
@@ -2711,6 +2784,15 @@ func GetSnftAddrs(db vm.StateDB, nftParentAddress string, addr common.Address) [
 	}
 
 	if len(nftParentAddress) != 39 {
+		return nftAddrs
+	}
+
+	bigMaxAddress, ok := new(big.Int).SetString(nftParentAddress+"f", 16)
+	if !ok {
+		return nftAddrs
+	}
+	officialMint := db.GetOfficialMint()
+	if bigMaxAddress.Cmp(officialMint) > 0 {
 		return nftAddrs
 	}
 
@@ -2743,4 +2825,45 @@ func GetSnftAddrs(db vm.StateDB, nftParentAddress string, addr common.Address) [
 	}
 
 	return nftAddrs
+}
+
+func ChangeSnftRecipient(db vm.StateDB,
+	caller common.Address,
+	recipient string) {
+	db.ChangeSNFTAgentRecipient(caller, common.HexToAddress(recipient))
+}
+
+func ChangeSNFTNoMerge(db vm.StateDB, caller common.Address, noAutoMerge bool) {
+	db.ChangeSNFTNoMerge(caller, noAutoMerge)
+}
+
+func GetDividend(db vm.StateDB, caller common.Address) error {
+	dividendAddrs := make([]common.Address, 0)
+	NotDividendAddrs := make([]common.Address, 0)
+
+	snftAddrs := db.GetDividendAddrs(types.DividendAddressList)
+	if snftAddrs == nil {
+		return errors.New("no addresses of snft level 3")
+	}
+
+	for _, addr := range snftAddrs {
+		if db.GetNFTOwner16(addr) == caller {
+			dividendAddrs = append(dividendAddrs, addr)
+		} else {
+			NotDividendAddrs = append(NotDividendAddrs, addr)
+		}
+	}
+
+	if len(dividendAddrs) == 0 {
+		return errors.New("no right to get dividend")
+	}
+
+	dividendBalance := db.GetBalance(types.DividendAmountAddress)
+	averageDividend := new(big.Int).Div(dividendBalance, new(big.Int).SetUint64(uint64(len(snftAddrs))))
+	deservedDividend := new(big.Int).Mul(averageDividend, new(big.Int).SetUint64(uint64(len(dividendAddrs))))
+	db.AddBalance(caller, deservedDividend)
+	db.SubBalance(types.DividendAmountAddress, deservedDividend)
+	db.SetDividendAddrs(types.DividendAddressList, NotDividendAddrs)
+
+	return nil
 }
