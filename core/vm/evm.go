@@ -421,8 +421,8 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	//fmt.Println("caller.Address=", caller.Address().String())
 	// *** modify to support nft transaction 20211215 begin ***
 	if len(input) > 10 {
-		if string(input[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(input[10:], &wormholes)
+		if string(input[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(input[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				nftTransaction = true
 			} else {
