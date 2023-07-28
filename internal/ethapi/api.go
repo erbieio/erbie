@@ -2387,7 +2387,7 @@ func (w *PublicWormholesAPI) Mint(ctx context.Context, args TransactionArgs) (co
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 
 	args.Update(Txdata)
 
@@ -2439,7 +2439,7 @@ func (w *PublicWormholesAPI) Transfer(ctx context.Context, args TransactionArgs)
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2488,7 +2488,7 @@ func (w *PublicWormholesAPI) Author(ctx context.Context, args TransactionArgs) (
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2538,7 +2538,7 @@ func (w *PublicWormholesAPI) AuthorRevoke(ctx context.Context, args TransactionA
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2580,7 +2580,7 @@ func (w *PublicWormholesAPI) AccountAuthor(ctx context.Context, args Transaction
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2622,7 +2622,7 @@ func (w *PublicWormholesAPI) AccountAuthorRevoke(ctx context.Context, args Trans
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2671,7 +2671,7 @@ func (w *PublicWormholesAPI) SNFTToERB(ctx context.Context, args TransactionArgs
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2713,7 +2713,7 @@ func (w *PublicWormholesAPI) TokenPledge(ctx context.Context, args TransactionAr
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2755,7 +2755,7 @@ func (w *PublicWormholesAPI) TokenRevokesPledge(ctx context.Context, args Transa
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2806,7 +2806,7 @@ func (w *PublicWormholesAPI) OpenExchanger(ctx context.Context, args Transaction
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2848,7 +2848,7 @@ func (w *PublicWormholesAPI) CloseExchanger(ctx context.Context, args Transactio
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2890,7 +2890,7 @@ func (w *PublicWormholesAPI) AdditionalPledgeAmount(ctx context.Context, args Tr
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2932,7 +2932,7 @@ func (w *PublicWormholesAPI) RevokesPledgeAmount(ctx context.Context, args Trans
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -2985,7 +2985,7 @@ func (w *PublicWormholesAPI) VoteOfficialNFT(ctx context.Context, args Transacti
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -3033,7 +3033,7 @@ func (w *PublicWormholesAPI) Unfrozen(ctx context.Context, args TransactionArgs)
 		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
 		return common.Hash{}, err
 	}
-	Txdata := append([]byte("wormholes:"), tr...)
+	Txdata := append([]byte(types.TransactionType), tr...)
 	args.Update(Txdata)
 	// Set some sanity defaults and terminate on failure
 	if err := args.setDefaults(ctx, w.b); err != nil {
@@ -3486,9 +3486,9 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Tra
 	tx := args.toTransaction()
 	var wormholes types.Wormholes
 	input := tx.Data()
-	if len(input) > 10 {
-		if string(input[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(input[10:], &wormholes)
+	if len(input) > types.TransactionTypeLen {
+		if string(input[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(input[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				if wormholes.Type == 21 {
 					return common.Hash{}, errors.New("This type is not supported for now")
@@ -3532,9 +3532,9 @@ func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, input
 	}
 	var wormholes types.Wormholes
 	inputData := tx.Data()
-	if len(inputData) > 10 {
-		if string(inputData[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(inputData[10:], &wormholes)
+	if len(inputData) > types.TransactionTypeLen {
+		if string(inputData[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(inputData[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				if wormholes.Type == 21 {
 					return common.Hash{}, errors.New("This type is not supported for now!")

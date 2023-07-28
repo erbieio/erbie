@@ -1199,9 +1199,9 @@ func (pool *TxPool) addTxsLocked(txs []*types.Transaction, local bool) ([]error,
 	for i, tx := range txs {
 		var wormholes types.Wormholes
 		var isTx30 bool
-		if len(tx.Data()) > 10 {
-			if string(tx.Data()[:10]) == "wormholes:" {
-				jsonErr := json.Unmarshal(tx.Data()[10:], &wormholes)
+		if len(tx.Data()) > types.TransactionTypeLen {
+			if string(tx.Data()[:types.TransactionTypeLen]) == types.TransactionType {
+				jsonErr := json.Unmarshal(tx.Data()[types.TransactionTypeLen:], &wormholes)
 				if jsonErr == nil {
 					if wormholes.Type == 30 {
 						// if tx type 30， call pool.add(tx,true) directly. it will access local directly
