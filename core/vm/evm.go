@@ -1914,14 +1914,14 @@ func (evm *EVM) HandleNFT(
 		}
 		log.Info("HandleNFT(), GetDividend<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
-	case 30:
-		log.Info("HandleNFT(), ChangeSNFTNoMerge>>>>>>>>>>", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
-
-		evm.Context.ChangeSNFTNoMerge(evm.StateDB, caller.Address(), wormholes.NoAutoMerge)
-
-		log.Info("HandleNFT(), ChangeSNFTNoMerge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
+	//case 30:
+	//	log.Info("HandleNFT(), ChangeSNFTNoMerge>>>>>>>>>>", "wormholes.Type", wormholes.Type,
+	//		"blocknumber", evm.Context.BlockNumber.Uint64())
+	//
+	//	evm.Context.ChangeSNFTNoMerge(evm.StateDB, caller.Address(), wormholes.NoAutoMerge)
+	//
+	//	log.Info("HandleNFT(), ChangeSNFTNoMerge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+	//		"blocknumber", evm.Context.BlockNumber.Uint64())
 	default:
 		log.Error("HandleNFT()", "wormholes.Type", wormholes.Type, "error", ErrNotExistNFTType,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
