@@ -91,3 +91,8 @@ var DefaultRoyalty uint16 = 1000
 
 // default creator
 var DefaultCreator string = "0x0000000000000000000000000000000000000000"
+
+// Parse the input data of the transaction according to TransactionType and TransactionTypeLen
+// if TransactionType is erbie, the input data of the transaction is "type Wormholes struct".
+var TransactionType = "erbie:"
+var TransactionTypeLen = 6

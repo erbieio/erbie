@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/ethereum/go-ethereum/cmd/erbie/geth"
 	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/cmd/wormholes/geth"
 	"github.com/ethereum/go-ethereum/sgiccommon"
 	"os"
 	"syscall"

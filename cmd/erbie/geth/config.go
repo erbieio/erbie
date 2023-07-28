@@ -109,7 +109,7 @@ func defaultNodeConfig() node.Config {
 	cfg.Version = params.VersionWithCommit(gitCommit, gitDate)
 	cfg.HTTPModules = append(cfg.HTTPModules, "eth")
 	cfg.WSModules = append(cfg.WSModules, "eth")
-	cfg.IPCPath = "wormholes.ipc"
+	cfg.IPCPath = "erbie.ipc"
 	return cfg
 }
 
