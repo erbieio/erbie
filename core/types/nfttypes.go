@@ -338,7 +338,7 @@ func (w *Wormholes) CheckFormat() error {
 	case 27:
 	case 28:
 	case 29:
-	case 30:
+	//case 30:
 	case 31:
 	default:
 		return errors.New("not exist nft type")
@@ -411,8 +411,8 @@ func (w *Wormholes) TxGas() (uint64, error) {
 		return params.WormholesTx28, nil
 	case 29:
 		return params.WormholesTx29, nil
-	case 30:
-		return params.WormholesTx30, nil
+	//case 30:
+	//	return params.WormholesTx30, nil
 	case 31:
 		return params.WormholesTx31, nil
 	default:
