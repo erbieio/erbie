@@ -987,7 +987,7 @@ func (s *PublicBlockChainAPI) GetRealParticipantsByNumber(ctx context.Context, n
 }
 
 func (s *PublicBlockChainAPI) Version(ctx context.Context) string {
-	version := "wormholes v" + params.Version
+	version := "erbie v" + params.Version
 	return version
 }
 
@@ -2348,7 +2348,7 @@ func (w *PublicWormholesAPI) GetRealParticipantsByNumber(ctx context.Context, nu
 }
 
 func (w *PublicWormholesAPI) Version(ctx context.Context) string {
-	version := "wormholes v" + params.Version
+	version := "erbie v" + params.Version
 	return version
 }
 
