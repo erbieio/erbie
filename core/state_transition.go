@@ -130,9 +130,9 @@ func IntrinsicGas(data []byte, accessList types.AccessList, isContractCreation b
 
 	var wormholes types.Wormholes
 	var nftTransaction bool = false
-	if len(data) > 10 {
-		if string(data[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(data[10:], &wormholes)
+	if len(data) > types.TransactionTypeLen {
+		if string(data[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(data[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				nftTransaction = true
 			} else {
@@ -682,8 +682,8 @@ func (st *StateTransition) gasUsed() uint64 {
 }
 
 func (st *StateTransition) IsWormholesNFTTx() bool {
-	if len(st.data) > 10 {
-		if string(st.data[:10]) == "wormholes:" {
+	if len(st.data) > types.TransactionTypeLen {
+		if string(st.data[:types.TransactionTypeLen]) == types.TransactionType {
 			return true
 		}
 	}
@@ -692,9 +692,9 @@ func (st *StateTransition) IsWormholesNFTTx() bool {
 
 func (st *StateTransition) GetWormholesType() (uint8, error) {
 	var wormholes types.Wormholes
-	if len(st.data) > 10 {
-		if string(st.data[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(st.data[10:], &wormholes)
+	if len(st.data) > types.TransactionTypeLen {
+		if string(st.data[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(st.data[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				return wormholes.Type, nil
 			}
@@ -706,9 +706,9 @@ func (st *StateTransition) GetWormholesType() (uint8, error) {
 
 func (st *StateTransition) GetWormholes() (*types.Wormholes, error) {
 	var wormholes types.Wormholes
-	if len(st.data) > 10 {
-		if string(st.data[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(st.data[10:], &wormholes)
+	if len(st.data) > types.TransactionTypeLen {
+		if string(st.data[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(st.data[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				return &wormholes, nil
 			}

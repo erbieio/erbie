@@ -26,10 +26,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
@@ -297,8 +297,8 @@ func (tx *Transaction) To() *common.Address {
 
 func (tx *Transaction) IsWormholesNFTTx() bool {
 	data := tx.Data()
-	if len(data) > 10 {
-		if string(data[:10]) == "wormholes:" {
+	if len(data) > TransactionTypeLen {
+		if string(data[:TransactionTypeLen]) == TransactionType {
 			return true
 		}
 	}
@@ -309,7 +309,7 @@ func (tx *Transaction) GetWormholesType() (uint8, error) {
 	var wormholes Wormholes
 	data := tx.Data()
 	if tx.IsWormholesNFTTx() {
-		jsonErr := json.Unmarshal(data[10:], &wormholes)
+		jsonErr := json.Unmarshal(data[TransactionTypeLen:], &wormholes)
 		if jsonErr == nil {
 			return wormholes.Type, nil
 		} else {
@@ -323,9 +323,9 @@ func (tx *Transaction) GetWormholesType() (uint8, error) {
 func (tx *Transaction) GetWormholes() (*Wormholes, error) {
 	var wormholes Wormholes
 	data := tx.Data()
-	if len(data) > 10 {
-		if string(data[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(data[10:], &wormholes)
+	if len(data) > TransactionTypeLen {
+		if string(data[:TransactionTypeLen]) == TransactionType {
+			jsonErr := json.Unmarshal(data[TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				return &wormholes, nil
 			}

@@ -246,6 +246,7 @@ func (args *TransactionArgs) ToMessage(globalGasCap uint64, baseFee *big.Int) (t
 func (args *TransactionArgs) Update(data hexutil.Bytes) {
 	args.Data = &data
 }
+
 // toTransaction converts the arguments to a transaction.
 // This assumes that setDefaults has been called.
 func (args *TransactionArgs) toTransaction() *types.Transaction {
@@ -299,8 +300,8 @@ func (args *TransactionArgs) ToTransaction() *types.Transaction {
 
 func (args *TransactionArgs) IsWormholesNFTTx() bool {
 	data := args.data()
-	if len(data) > 10 {
-		if string(data[:10]) == "wormholes:" {
+	if len(data) > types.TransactionTypeLen {
+		if string(data[:types.TransactionTypeLen]) == types.TransactionType {
 			return true
 		}
 	}
@@ -311,7 +312,7 @@ func (args *TransactionArgs) GetWormholesType() (uint8, error) {
 	var wormholes types.Wormholes
 	data := args.data()
 	if args.IsWormholesNFTTx() {
-		jsonErr := json.Unmarshal(data[10:], &wormholes)
+		jsonErr := json.Unmarshal(data[types.TransactionTypeLen:], &wormholes)
 		if jsonErr == nil {
 			return wormholes.Type, nil
 		} else {
@@ -325,9 +326,9 @@ func (args *TransactionArgs) GetWormholesType() (uint8, error) {
 func (args *TransactionArgs) GetWormholes() (*types.Wormholes, error) {
 	var wormholes types.Wormholes
 	data := args.data()
-	if len(data) > 10 {
-		if string(data[:10]) == "wormholes:" {
-			jsonErr := json.Unmarshal(data[10:], &wormholes)
+	if len(data) > types.TransactionTypeLen {
+		if string(data[:types.TransactionTypeLen]) == types.TransactionType {
+			jsonErr := json.Unmarshal(data[types.TransactionTypeLen:], &wormholes)
 			if jsonErr == nil {
 				return &wormholes, nil
 			}
