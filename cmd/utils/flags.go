@@ -1228,8 +1228,8 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	} else if ctx.GlobalBool(DevNetFlag.Name) {
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 51895
-			cfg.ChainId = 51895
+			cfg.NetworkId = 51896
+			cfg.ChainId = 51896
 		}
 	}
 }
@@ -1704,7 +1704,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 		SetDNSDiscoveryDefaults(cfg, params.TestNetGenesisHash)
 	case ctx.GlobalBool(DevNetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 51895
+			cfg.NetworkId = 51896
 		}
 		cfg.Genesis = core.DefaultDevNetGenesisBlock()
 		SetDNSDiscoveryDefaults(cfg, params.DevNetGenesisHash)
