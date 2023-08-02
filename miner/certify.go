@@ -309,9 +309,9 @@ func (c *Certify) HandleMsg(addr common.Address, msg p2p.Msg) (bool, error) {
 			return true, err
 		}
 
-		if c.round != signature.Round {
-			return true, nil
-		}
+		//if c.round != signature.Round {
+		//	return true, nil
+		//}
 
 		if c.stakers == nil {
 			return true, nil
@@ -324,7 +324,8 @@ func (c *Certify) HandleMsg(addr common.Address, msg p2p.Msg) (bool, error) {
 			return true, nil
 		}
 
-		log.Info("azh|emptyMessage", "height", signature.Height, "from", sender, "vote", signature.Vote, "round", signature.Round)
+		log.Info("azh|emptyMessage", "height", signature.Height, "from", sender, "vote", signature.Vote,
+			"message round", signature.Round, "local round", c.round)
 		if c.self == signature.Vote {
 			emptyMsg := types.EmptyMessageEvent{
 				Sender:  sender,
@@ -334,7 +335,9 @@ func (c *Certify) HandleMsg(addr common.Address, msg p2p.Msg) (bool, error) {
 			go c.eventMux.Post(emptyMsg)
 			return true, nil
 		} else {
-			c.requestEmpty <- data
+			if c.round >= signature.Round {
+				c.requestEmpty <- data
+			}
 		}
 	}
 	return false, nil

@@ -583,7 +583,7 @@ func (w *worker) emptyLoop() {
 		case <-gossipTimer.C:
 			{
 				//log.Info("emptyLoop gossipTimer", "w.isEmpty", w.isEmpty)
-				gossipTimer.Reset(time.Second * 5)
+				gossipTimer.Reset(time.Second * w.voteTime())
 				if !w.isEmpty {
 					continue
 				}
@@ -615,6 +615,16 @@ func (w *worker) emptyLoop() {
 			}
 		}
 	}
+}
+
+func (w *worker) voteTime() time.Duration {
+	var t uint64
+	t = uint64(math.Pow(float64(2), float64(w.cerytify.round))) * 5
+	if t > 80 {
+		t = 80
+	}
+
+	return time.Duration(t)
 }
 
 // newWorkLoop is a standalone goroutine to submit new mining work upon received events.
