@@ -2652,12 +2652,12 @@ func BatchForcedSaleSNFTByApproveExchanger(
 	initAmount := db.CalculateExchangeAmount(1, 1)
 	amount = db.GetExchangAmount(nftAddress, initAmount)
 
-	nftAddrs := GetSnftAddrs(db, wormholes.Buyer.NFTAddress, buyer)
-	nftNum := len(nftAddrs)
-	if nftNum == 0 {
-		log.Error("BatchForcedSaleSNFTByApproveExchanger(), no snft to buy")
-		return errors.New("no snft to buy")
+	nftAddrs, err := GetSnftAddrs(db, wormholes.Buyer.NFTAddress, buyer)
+	if err != nil {
+		log.Error("BatchForcedSaleSNFTByApproveExchanger(), no snft to buy", err)
+		return err
 	}
+	nftNum := len(nftAddrs)
 	totalAmount := new(big.Int).Mul(big.NewInt(int64(nftNum)), amount)
 
 	buyerBalance := db.GetBalance(buyer)
@@ -2775,7 +2775,7 @@ func BatchForcedSaleSNFTByApproveExchanger(
 	return nil
 }
 
-func GetSnftAddrs(db vm.StateDB, nftParentAddress string, addr common.Address) []common.Address {
+func GetSnftAddrs(db vm.StateDB, nftParentAddress string, addr common.Address) ([]common.Address, error) {
 	var nftAddrs []common.Address
 	emptyAddress := common.Address{}
 	if strings.HasPrefix(nftParentAddress, "0x") ||
@@ -2784,21 +2784,34 @@ func GetSnftAddrs(db vm.StateDB, nftParentAddress string, addr common.Address) [
 	}
 
 	if len(nftParentAddress) != 39 {
-		return nftAddrs
+		return nftAddrs, errors.New("snft address error")
 	}
 
 	bigMaxAddress, ok := new(big.Int).SetString(nftParentAddress+"f", 16)
 	if !ok {
-		return nftAddrs
+		return nftAddrs, errors.New("snft address format error")
 	}
 	officialMint := db.GetOfficialMint()
 	if bigMaxAddress.Cmp(officialMint) > 0 {
-		return nftAddrs
+		return nftAddrs, errors.New("snft not minted")
 	}
 
 	addrInt := big.NewInt(0)
 	addrInt.SetString(nftParentAddress, 16)
 	addrInt.Lsh(addrInt, 4)
+
+	// Can't be forced to buy until after another issue
+	currentStage, err := GetStageNumber(db, common.BytesToAddress(officialMint.Bytes()))
+	if err != nil {
+		return nftAddrs, err
+	}
+	stage, err := GetStageNumber(db, common.BytesToAddress(addrInt.Bytes()))
+	if err != nil {
+		return nftAddrs, err
+	}
+	if currentStage-stage < 2 {
+		return nftAddrs, errors.New("can't be forced to buy the SNFTs")
+	}
 
 	// 3. retrieve all the sibling leaf nodes of nftAddr
 	siblingInt := big.NewInt(0)
@@ -2824,7 +2837,19 @@ func GetSnftAddrs(db vm.StateDB, nftParentAddress string, addr common.Address) [
 		}
 	}
 
-	return nftAddrs
+	return nftAddrs, nil
+}
+
+func GetStageNumber(db vm.StateDB, addr common.Address) (uint64, error) {
+	if !db.IsOfficialNFT(addr) {
+		return 0, errors.New("not a snft")
+	}
+
+	snftMask, _ := new(big.Int).SetString("8000000000000000000000000000000000000000", 16)
+	addrBig := new(big.Int).SetBytes(addr.Bytes())
+	seq := new(big.Int).Sub(addrBig, snftMask).Uint64()
+	stageNumber := seq / 4096
+	return stageNumber, nil
 }
 
 func ChangeSnftRecipient(db vm.StateDB,

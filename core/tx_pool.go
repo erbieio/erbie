@@ -859,7 +859,10 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 			initamount := pool.currentState.CalculateExchangeAmount(1, 1)
 			amount := pool.currentState.GetExchangAmount(nftAddress, initamount)
 
-			snftAddrs := GetSnftAddrs(pool.currentState, wormholes.Buyer.NFTAddress, buyer)
+			snftAddrs, err := GetSnftAddrs(pool.currentState, wormholes.Buyer.NFTAddress, buyer)
+			if err != nil {
+				return err
+			}
 			snftNum := len(snftAddrs)
 			value := new(big.Int).Mul(big.NewInt(int64(snftNum)), amount)
 			if pool.currentState.GetBalance(buyer).Cmp(value) < 0 {
