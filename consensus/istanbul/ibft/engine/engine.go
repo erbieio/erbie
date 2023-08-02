@@ -239,13 +239,13 @@ func (e *Engine) verifyCascadingFields(chain consensus.ChainHeaderReader, header
 		return istanbulcommon.ErrInvalidTimestamp
 	}
 
-	//if header.Coinbase == common.HexToAddress("0x0000000000000000000000000000000000000000") && header.Number.Cmp(common.Big0) > 0 {
-	//	err := e.verifyEmptyVote(chain, header, parents, validators)
-	//	if err != nil {
-	//		return fmt.Errorf("verify empty block %v", err)
-	//	}
-	//	return nil
-	//}
+	if header.Coinbase == common.HexToAddress("0x0000000000000000000000000000000000000000") && header.Number.Cmp(common.Big0) > 0 {
+		//err := e.verifyEmptyVote(chain, header, parents, validators)
+		//if err != nil {
+		//	return fmt.Errorf("verify empty block %v", err)
+		//}
+		return nil
+	}
 
 	// Verify signer
 	if err := e.verifySigner(chain, header, parents, validators); err != nil {
