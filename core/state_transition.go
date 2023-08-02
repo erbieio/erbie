@@ -561,7 +561,10 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 			initamount := st.state.CalculateExchangeAmount(1, 1)
 			amount := st.state.GetExchangAmount(nftAddress, initamount)
 
-			snftAddrs := GetSnftAddrs(st.state, wormholes.Buyer.NFTAddress, buyer)
+			snftAddrs, err := GetSnftAddrs(st.state, wormholes.Buyer.NFTAddress, buyer)
+			if err != nil {
+				return nil, err
+			}
 			snftNum := len(snftAddrs)
 			value := new(big.Int).Mul(big.NewInt(int64(snftNum)), amount)
 			if !st.evm.Context.CanTransfer(st.state, buyer, value) {
