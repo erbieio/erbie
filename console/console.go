@@ -34,7 +34,6 @@ import (
 	"github.com/ethereum/go-ethereum/internal/jsre/deps"
 	"github.com/ethereum/go-ethereum/internal/web3ext"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
 )
 
@@ -299,12 +298,12 @@ func (c *Console) AutoCompleteInput(line string, pos int) (string, []string, str
 // Welcome show summary of current Geth instance and some metadata about the
 // console's available modules.
 func (c *Console) Welcome() {
-	message := "Welcome to the Wormholes JavaScript console!\n\n"
+	message := "Welcome to the Erbie JavaScript console!\n\n"
 	message = message + PrintLogo()
 	// Print some generic Geth metadata
 	if res, err := c.jsre.Run(`
 		//var message = "instance: " + web3.version.node + "\n";
-		var message = "instance: " + "Wormholes" + "\n";
+		var message = "instance: " + "Erbie" + "\n";
 		try {
 			message += "coinbase: " + eth.coinbase + "\n";
 		} catch (err) {}
