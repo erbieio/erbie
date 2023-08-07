@@ -4,8 +4,6 @@ The ErbieChain solves the blockchain trilemma, which entails a necessary tradeof
 technology to achieve the ideal balance between these three metrics, creating a highly scalable and secure blockchain system that doesn’t sacrifice
 decentralization.
 
-[![Gitter](https://badges.gitter.im/wormholes-org/Internal-test-miner.svg)](https://gitter.im/wormholes-org/Internal-test-miner?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 ## The Approach
 
 The significant step before spinning up your node is choosing your approach. Based on requirements and many potential possibilities,
@@ -68,7 +66,7 @@ install it using the `apt-get install wget` command. If you are using MacOS syst
 #### Run the node
 
 When using the script to start the node, you must enter the private key of the account used for pledge prepared earlier. For details, see the
-documentation [Deploy Erbie Nodes Using Official Scripts](https://www.wormholes.com/docs/install/run/docker/docker_3/index.html).
+documentation [Deploy Erbie Nodes Using Official Scripts](https://www.erbie.io/docs/install/run/deploy/docker.html).
 
 ### Manual clients setup
 
@@ -84,7 +82,7 @@ avoiding processing the entire history of the Erbie Chain network, which is very
 
 - Start up ***Erbie's*** built-in interactive JavaScript,(via the trailing ***console*** subcommand) through which you can interact using ***web3***
   [methods](https://web3js.readthedocs.io/en/v1.2.9/)(note: the ***web3*** version bundled within ***Erbie*** is very old, and
-  not up to date with official docs), as well as ***Erbie's*** own [management APIs](https://www.wormholes.com/docs/management/) .
+  not up to date with official docs).
   This tool is optional and if you leave it out you can always attach to an already running ``Erbie`` instance with ***Erbie attach*** .
 
 #### Full nodes functions
@@ -121,7 +119,7 @@ avoiding processing the entire history of the Erbie Chain network, which is very
    3. Check that your private key is properly bound. 
 
       ````
-      ./build/bin/erbie attach ~/.erbie/erbie.ipc
+      ./build/bin/erbie attach ${ipc file path}/erbie.ipc
       eth.coinbase
       ```` 
       If the address returned is the same as yours, the binding is successful.
