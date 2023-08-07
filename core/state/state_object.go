@@ -1750,7 +1750,7 @@ func (s *stateObject) RemoveSNFTL3Addrs(snftAddr common.Address) {
 		}
 	}
 	newSNFTL3Addrs = append(newSNFTL3Addrs[:index], newSNFTL3Addrs[index+1:]...)
-	s.setSNFTL3Addrs(newSNFTL3Addrs)
+	s.SetSNFTL3Addrs(newSNFTL3Addrs)
 }
 
 func (s *stateObject) SetSNFTL3Addrs(snftAddrs []common.Address) {
