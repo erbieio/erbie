@@ -1788,6 +1788,10 @@ func (s *stateObject) AddDividendAddrs(snftAddrs []common.Address) {
 }
 
 func (s *stateObject) RemoveDividendAddrsOne(snftAddr common.Address) {
+	if s.data.Staker.DividendAddrs == nil || len(s.data.Staker.DividendAddrs) == 0 {
+		return
+	}
+
 	var index int
 	newDividendAddrs := make([]common.Address, 0)
 	newDividendAddrs = append(newDividendAddrs, s.data.Staker.DividendAddrs...)
