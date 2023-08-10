@@ -1,48 +1,29 @@
-# Wormholes Overview
+# Erbie Overview
 
-## Multi-Dimensional Chain-Wormholes
+## ErbieChain Multidimensional Blockchain
 
-The WormholesChain solves the blockchain trilemma, which entails a necessary tradeoff between scalability, security, and decentralization, by building the
-technology to achieve the ideal balance between these three metrics, creating a highly scalable and secure blockchain system that doesn’t sacrifice 
-decentralization. To realize these results, the Wormholes Blockchain utilizes several main novel technologies: 
+ErbieChain is the next-generation blockchain that will form the infrastructure to support the future of NFTs, GameFi, and Metaverse.
 
- - Multi-Dimensional Blockchain Architecture: The Wormholes multi-dimensional blockchain architecture allows the realization of a linear increase in 
- throughput with each additional chain and layer added to the system, allowing the Wormholes Blockchain to easily achieve high transactions per 
- second (TPS). Furthermore, each parallel blockchain must also couple the headers of other chains, creating a system where the security increases 
- exponentially as the system grows and additional parallel chains and blocks are added.
+ErbieChain solves the blockchain impossible triangle dilemma, which requires a necessary trade-off between scalability, security, and decentralization by building technologies to achieve a desirable balance between these three metrics and creating a highly scalable and secure blockchain system without sacrificing decentralization. To achieve these results, ErbieChain makes use of several major new technologies:
+
+ - Multi-dimensional blockchain architecture: ErbieChain’s multi-dimensional blockchain architecture allows for linear growth in throughput with each additional chain and layer added to the system, allowing ErbieChain to easily achieve high transaction per second (TPS). Additionally, each parallel blockchain must also be coupled with the headers of other chains, creating a system whose security grows exponentially with the growth of the system and the addition of extra parallel chains and blocks.
  
- - Dynamic Random Election (DRE)-based Consensus Mechanism: A set of practical Byzantine fault-tolerant protocols for completely asynchronous environments.
- Safety properties of DRE are post-quantum secure.
+ - Consensus mechanism based on dynamic random elections (DRE): A set of practical Byzantine fault-tolerant protocols for fully asynchronous environments. The security properties of DRE are post-quantum secure.
  
- - Multi-Level Blockchain System Structure: It consists of Transport, Blockchain, API, and Application levels, which make the Wormholes Blockchain network 
- secure and efficient.
- 
-## POS+DRE Consensus
+ - The Multi-Layered Blockchain Architecture: It is composed of the transport layer, blockchain layer, API layer, and application layer, making ErbieChain’s network secure and efficient.
 
-The PoS + DRE protocol integrates a Proof of Stake model into the DRE consensus protocol. It generates blocks asynchronously to build a weighted DAG from 
-validator blocks. The consensus on a block is computed from the gained validating power of validators on the block. Lamport timestamps, Related-to 
-relations between proposal blocks, graph layering, and hierarchical graphs on the weighted DAG are used to achieve deterministic topological ordering of 
-finalized proposal blocks in an asynchronous leaderless consensus.
+Additionally, the ErbieChain team recognizes the importance of creating user-friendly solutions that can reduce the technical barriers for developers seeking to build decentralized applications (DApps). ErbieChain achieves this through ErbieChain Link, which takes over blockchain-related functionalities; it provides developers with a simple way to integrate their DApp and projects with ErbieChain so that developers and creatives can focus on what they do best - creating the best new DApps and products, allowing them to tap into the limitless potential of the blockchain to enhance the user experience.
 
-The PoS + DRE consensus protocol consists of nodes with their varied amount of stake. Based on the PoS + DRE protocol, any participant can join the 
-blockchain network. Participants can increase their impact as well as their contributions over the Wormholes Blockchain Network by staking more ERBs. 
-Likewise, validating power is based on the number of ERBs staked and used for online validation of new proposal blocks to maintain the validity of blocks.
+## WPOS+DRE+BFT Consensus
 
-## Wormholes Ecosystem
+ErbieChain’s consensus mechanism is based on the Dynamic Random Election Algorithm (DRE). This mechanism employs the Byzantine Fault Tolerance (BFT) algorithm for consensus in ordinary blocks and the DRE algorithm to elect validators of the BFT algorithm for consensus. Apart from ordinary blocks, ErbieChain introduces the concept of the ‘blackhole block’ to address scenarios in which there are too many malicious validators of the BFT algorithm, thus inhibiting the production of ordinary blocks. In these instances, the ErbieChain uses the Weighted Proof of Stake (WPoS) consensus algorithm for consensus on these ‘blackhole’ blocks.
 
-The Wormholes Blockchain economy is backed by a two-tier token model consisting of the Wormholes fungible token ERB and non-fungible token S-NFT.
+## ErbieChain Economic Model
 
-The principal cryptocurrency of the Wormholes Blockchain is the Wormholes ERB. ERB is used to pay transaction fees on the Wormholes Internal Exchange and 
-other NFT marketplaces, gas fees, and persistent storage payments. It is also used as a stake to open NFT marketplaces and increase mining revenue. 
-Finally, ERB plays a crucial role in voting and participating in governance throughout the community, ranging from frequent tasks such as voting on the 
-theme of each issue of S-NFT to major decisions such as the disbursement of funds from the Wormholes Community fund.
+ErbieChain’s blockchain economic model is supported by a two-tiered token model consisting of the ErbieChain fungible token ERB and the non-fungible token SNFT.
 
-Wormholes S-NFTs is the second native token of the Wormholes Blockchain. S-NFTs serve as the direct reward to the miners and NFT marketplace creators who 
-secure the Wormholes Blockchain through their stakes and actions. S-NFTs also have an additional utility function, granting holders the privilege of 
-increasing their S-NFT to ERB exchange rate. S-NFTs are burned or destroyed after they are exchanged for ERBs.
+- The main cryptocurrency for ErbieChain is ERB. ERB is used to pay for internal transactions on ErbieChain and transactions on the SNFT markets, gas fees, and storage fees. It is also used as collateral to become a Validator and Staker. Lastly, ERB plays a crucial role in voting and participating in governance across the community, from regular tasks such as voting on the theme of each SNFT period, to major decisions such as disbursing funds from the ErbieChain Community Fund.
+- SNFT is the second native token for ErbieChain, serving as a direct reward for stakers to incentivize members of the community.
 
-The theme of each issue of S-NFT is decided on by the community through voting, giving S-NFTs a collectible value separate from their pure exchange to ERB 
-value and allowing community members to participate in creating the assets that make up the Wormholes Blockchain. All S-NFTs are tradable on the Wormholes 
-Internal Exchange.
+![图片](https://github.com/erbieio/erbie/assets/107660058/2660a0f1-8215-47bf-bb90-ea2a23e736cc)
 
-<img width="1087" alt="图片" src="https://user-images.githubusercontent.com/107660058/189814507-3ab369d6-24a2-4e7c-90d5-91a0027c0aab.png">
