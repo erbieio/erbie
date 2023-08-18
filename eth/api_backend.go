@@ -382,3 +382,7 @@ func (b *EthAPIBackend) Random11ValidatorFromPool(ctx context.Context, header *t
 func (b *EthAPIBackend) Random11ValidatorFromPoolWithProxy(ctx context.Context, header *types.Header) (*types.ValidatorList, error) {
 	return b.eth.blockchain.Random11ValidatorFromPool(header)
 }
+
+func (b *EthAPIBackend) GetRandomDrop(ctx context.Context, header *types.Header) (common.Hash, error) {
+	return b.eth.blockchain.GetRandomDrop(header)
+}

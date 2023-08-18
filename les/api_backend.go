@@ -58,6 +58,10 @@ func (b *LesApiBackend) Random11ValidatorFromPoolWithProxy(ctx context.Context, 
 	return nil, nil
 }
 
+func (b *LesApiBackend) GetRandomDrop(ctx context.Context, header *types.Header) (common.Hash, error) {
+	return common.Hash{}, nil
+}
+
 func (b *LesApiBackend) ChainConfig() *params.ChainConfig {
 	return b.eth.chainConfig
 }
