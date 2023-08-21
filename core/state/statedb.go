@@ -2797,7 +2797,8 @@ func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address)
 	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
 	if stateObject != nil {
-		validatorStateObject.AddValidator(address, stateObject.PledgedBalance(), proxy)
+		validatorStateObject.ResetemoveValidator(address)
+		validatorStateObject.SetValidatorAmount(address, stateObject.PledgedBalance(), proxy)
 	}
 	return nil
 }
