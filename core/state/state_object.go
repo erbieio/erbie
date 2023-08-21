@@ -1579,6 +1579,28 @@ func (s *stateObject) RemoveValidator(addr common.Address, balance *big.Int) boo
 	return true
 }
 
+func (s *stateObject) SetValidatorAmount(addr common.Address, balance *big.Int, proxy common.Address) bool {
+	newValidators := s.data.Staker.Validators.DeepCopy()
+	ok := newValidators.SetValidatorAmount(addr, balance, proxy)
+	if !ok {
+		return false
+	}
+
+	s.SetValidators(newValidators)
+	return true
+}
+
+func (s *stateObject) ResetemoveValidator(addr common.Address) bool {
+	newValidators := s.data.Staker.Validators.DeepCopy()
+	ok := newValidators.ResetRemoveValidator(addr)
+	if !ok {
+		return false
+	}
+
+	s.SetValidators(newValidators)
+	return true
+}
+
 func (s *stateObject) SetValidators(varlidators *types.ValidatorList) {
 	s.db.journal.append(validatorsChange{
 		account:       &s.address,

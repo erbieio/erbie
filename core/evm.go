@@ -99,6 +99,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		GetStakerPledged:        GetStakerPledged,
 		MinerConsign:            MinerConsign,
 		MinerBecome:             MinerBecome,
+		ResetMinerBecome:        ResetMinerBecome,
 		CancelPledgedToken:      CancelPledgedToken,
 		CancelStakerPledge:      CancelStakerPledge,
 		OpenExchanger:           OpenExchanger,
@@ -363,6 +364,11 @@ func MinerBecome(db vm.StateDB, address common.Address, proxy common.Address) er
 	//	return errors.New("MinerBecome recover address proxy Address != address")
 	//}
 	return db.MinerBecome(address, proxy)
+}
+
+func ResetMinerBecome(db vm.StateDB, address common.Address, proxy common.Address) error {
+
+	return db.ResetMinerBecome(address, proxy)
 }
 
 func CancelPledgedToken(db vm.StateDB, address common.Address, amount *big.Int) {

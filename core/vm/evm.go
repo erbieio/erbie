@@ -69,6 +69,7 @@ type (
 	GetStakerPledgedFunc        func(StateDB, common.Address, common.Address) *types.StakerExtension
 	MinerConsignFunc            func(StateDB, common.Address, *types.Wormholes) error
 	MinerBecomeFunc             func(StateDB, common.Address, common.Address) error
+	ResetMinerBecomeFunc        func(StateDB, common.Address, common.Address) error
 	CancelPledgedTokenFunc      func(StateDB, common.Address, *big.Int)
 	CancelStakerPledgeFunc      func(StateDB, common.Address, common.Address, *big.Int, *big.Int)
 	OpenExchangerFunc           func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string, string)
@@ -173,6 +174,7 @@ type BlockContext struct {
 	GetStakerPledged        GetStakerPledgedFunc
 	MinerConsign            MinerConsignFunc
 	MinerBecome             MinerBecomeFunc
+	ResetMinerBecome        ResetMinerBecomeFunc
 	CancelPledgedToken      CancelPledgedTokenFunc
 	CancelStakerPledge      CancelStakerPledgeFunc
 	OpenExchanger           OpenExchangerFunc
@@ -1369,14 +1371,25 @@ func (evm *EVM) HandleNFT(
 		Erb100000 := big.NewInt(70000)
 		Erb100000.Mul(Erb100000, baseErb)
 		if evm.Context.VerifyPledgedBalance(evm.StateDB, addr, Erb100000) {
-			empty := common.Address{}
-			err := evm.Context.MinerBecome(evm.StateDB, addr, empty)
-			if err != nil {
-				log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-					"blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, err
+			if evm.Context.BlockNumber.Uint64() < uint64(types.SwitchBranchBlock) {
+				empty := common.Address{}
+				err := evm.Context.MinerBecome(evm.StateDB, addr, empty)
+				if err != nil {
+					log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+						"blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, err
+				}
+				evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
+			} else {
+				empty := common.Address{}
+				err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
+				if err != nil {
+					log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+						"blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, err
+				}
+				evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
 			}
-			evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
 		}
 		log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())

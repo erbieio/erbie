@@ -2790,6 +2790,18 @@ func (s *StateDB) MinerBecome(address common.Address, proxy common.Address) erro
 	return nil
 }
 
+func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address) error {
+	stateObject := s.GetOrNewAccountStateObject(address)
+	//empty := common.Address{}
+
+	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+
+	if stateObject != nil {
+		validatorStateObject.AddValidator(address, stateObject.PledgedBalance(), proxy)
+	}
+	return nil
+}
+
 // - cancel pledged token
 // ````
 // {
