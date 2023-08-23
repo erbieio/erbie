@@ -29,7 +29,7 @@ import (
 
 func (c *core) sendCommit() {
 	sub := c.current.Subject()
-	if c.commitHeight > sub.View.Sequence.Uint64() {
+	if c.commitHeight >= sub.View.Sequence.Uint64() {
 		log.Info("ibftConsensus: sendCommit fail height > sequence",
 			"no", sub.View.Sequence.Uint64(),
 			"round", sub.View.Round.String(),
