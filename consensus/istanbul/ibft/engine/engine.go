@@ -599,6 +599,12 @@ func (e *Engine) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 		if header.Number.Uint64() > 7 {
 			ea, err := c.ReadEvilAction(header.Number.Uint64() - 7)
 			if err == nil && ea != nil && !ea.Handled {
+				if len(ea.EvilHeaders) > 0 {
+					for _, v := range ea.EvilHeaders {
+						log.Info("prepare to punish evil action", "mining-block-no", header.Number.Uint64(),
+							"evil-no", v.Number.Uint64(), "evil-hash", v.Hash())
+					}
+				}
 				evilAction = ea
 				evilAction.Handled = true
 			}
@@ -1041,6 +1047,7 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 		return
 	}
 
+	log.Info("enter punishEvilValidators", "curNo", header.Number.Uint64())
 	// Pick out the evil validators
 	evilValidators := e.pickEvilValidators(ea)
 	for i := 0; i < len(ea.EvilHeaders); i++ {
@@ -1061,12 +1068,12 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 
 	var noProxyValidators []common.Address
 	for _, v := range evilValidators {
-		log.Info("PunishEvilValidators", "addr", v.Hex(), "no", e.backend.CurrentNumber())
 		evilAddr := valset.GetValidatorAddr(v)
 		if evilAddr == (common.Address{}) {
 			continue
 		}
 		noProxyValidators = append(noProxyValidators, evilAddr)
+		log.Info("final punishEvilValidators", "addr", evilAddr, "curNo", header.Number.Uint64())
 		//log.Info("balance info", "addr", delegateAddr, "balance", state.GetBalance(delegateAddr).String(),
 		//	"zerobalance", state.GetBalance(common.HexToAddress("0x0000000000000000000000000000000000000000")).String())
 	}
@@ -1077,7 +1084,7 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 func (e *Engine) pickEvilValidators(ea *types.EvilAction) []common.Address {
 	var totalSigners []common.Address
 	for _, header := range ea.EvilHeaders {
-		log.Info("pickEvilValidators", "no", header.Number.Uint64(), "hash", header.Hash().Hex())
+		log.Info("pickEvilValidators", "evil-no", header.Number.Uint64(), "evil-hash", header.Hash().Hex())
 		signers, err := e.Signers(header)
 		if err != nil {
 			break
