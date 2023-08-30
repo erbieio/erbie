@@ -2867,15 +2867,16 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 	fromObject := s.GetOrNewAccountStateObject(from)
 
 	if fromObject != nil && toObject != nil {
+		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+		Erb100 := big.NewInt(700)
+		Erb100.Mul(Erb100, baseErb)
 		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
 		if toObject.Coefficient() < VALIDATOR_COEFFICIENT && toObject.Coefficient() > 0 {
 			coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
 			punishErb := big.NewInt(70 - int64(toObject.Coefficient()))
 			punishErb.Mul(punishErb, coebaseErb)
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
+
 			if toObject.Balance().Cmp(punishErb) >= 0 {
 				toObject.SubBalance(punishErb)
 
@@ -2900,7 +2901,8 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 		fromObject.RemoveStakerPledge(address, amount)
 		toObject.SubPledgedBalance(amount)
 		fromObject.AddBalance(amount)
-		if fromObject.StakerPledgeLength() == 0 {
+
+		if s.GetStakerPledged(address, address).Balance.Cmp(Erb100) < 0 {
 			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
 		}
 
