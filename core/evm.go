@@ -102,7 +102,6 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		ResetMinerBecome:        ResetMinerBecome,
 		CancelPledgedToken:      CancelPledgedToken,
 		CancelStakerPledge:      CancelStakerPledge,
-		NewCancelStakerPledge:   NewCancelStakerPledge,
 		OpenExchanger:           OpenExchanger,
 		CloseExchanger:          CloseExchanger,
 		GetExchangerFlag:        GetExchangerFlag,
@@ -377,10 +376,6 @@ func CancelPledgedToken(db vm.StateDB, address common.Address, amount *big.Int) 
 }
 func CancelStakerPledge(db vm.StateDB, from common.Address, address common.Address, amount *big.Int, blocknumber *big.Int) {
 	db.CancelStakerPledge(from, address, amount, blocknumber)
-}
-
-func NewCancelStakerPledge(db vm.StateDB, from common.Address, address common.Address, amount *big.Int, blocknumber *big.Int) {
-	db.NewCancelStakerPledge(from, address, amount, blocknumber)
 }
 
 func OpenExchanger(db vm.StateDB,
