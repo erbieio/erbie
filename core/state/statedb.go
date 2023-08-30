@@ -2797,6 +2797,16 @@ func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address)
 	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
 	if stateObject != nil {
+		validator := validatorStateObject.GetValidators()
+		for _, value := range validator.Validators {
+			if value.Addr == address {
+				proxy = value.Proxy
+			}
+		}
+		coefficient := s.GetValidatorCoefficient(address)
+		if coefficient == 0 {
+			s.AddValidatorCoefficient(address, VALIDATOR_COEFFICIENT)
+		}
 		validatorStateObject.ResetemoveValidator(address)
 		validatorStateObject.SetValidatorAmount(address, stateObject.PledgedBalance(), proxy)
 	}
@@ -2847,6 +2857,53 @@ func (s *StateDB) CancelStakerPledge(from, address common.Address, amount *big.I
 			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
 			//fromObject.SetExchangerInfoflag(false, blocknumber, "", 0)
 		}
+	}
+
+}
+
+func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *big.Int, blocknumber *big.Int) {
+
+	toObject := s.GetOrNewAccountStateObject(address)
+	fromObject := s.GetOrNewAccountStateObject(from)
+
+	if fromObject != nil && toObject != nil {
+		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+		if toObject.Coefficient() < VALIDATOR_COEFFICIENT && toObject.Coefficient() > 0 {
+			coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
+			punishErb := big.NewInt(70 - int64(toObject.Coefficient()))
+			punishErb.Mul(punishErb, coebaseErb)
+			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+			Erb100 := big.NewInt(700)
+			Erb100.Mul(Erb100, baseErb)
+			if toObject.Balance().Cmp(punishErb) >= 0 {
+				toObject.SubBalance(punishErb)
+
+			} else {
+				toObject.SubBalance(toObject.Balance())
+				punishErb = punishErb.Sub(punishErb, toObject.Balance())
+				toObject.RemoveStakerPledge(address, punishErb)
+				stakerStateObject.RemoveStaker(address, punishErb)
+				for _, value := range stakerStateObject.GetStakers().Stakers {
+					if value.Addr == address {
+						if value.Balance.Cmp(Erb100) < 0 {
+							stakerStateObject.CancelStaker(address)
+						}
+					}
+				}
+			}
+		}
+
+		validatorStateObject.RemoveValidator(address, amount)
+		stakerStateObject.RemoveStaker(from, amount)
+
+		fromObject.RemoveStakerPledge(address, amount)
+		toObject.SubPledgedBalance(amount)
+		fromObject.AddBalance(amount)
+		if fromObject.StakerPledgeLength() == 0 {
+			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
+		}
+
 	}
 
 }

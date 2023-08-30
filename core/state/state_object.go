@@ -1634,6 +1634,12 @@ func (s *stateObject) RemoveStaker(addr common.Address, balance *big.Int) {
 	s.SetStakers(newStakers)
 }
 
+func (s *stateObject) CancelStaker(addr common.Address) {
+	newStakers := s.data.Staker.Stakers.DeepCopy()
+	newStakers.CancelStaker(addr)
+	s.SetStakers(newStakers)
+}
+
 func (s *stateObject) SetStakers(stakers *types.StakerList) {
 	s.db.journal.append(stakersChange{
 		account:    &s.address,

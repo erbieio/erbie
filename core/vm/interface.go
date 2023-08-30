@@ -96,6 +96,7 @@ type StateDB interface {
 	ResetMinerBecome(common.Address, common.Address) error
 	CancelPledgedToken(common.Address, *big.Int)
 	CancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int)
+	NewCancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int)
 	OpenExchanger(common.Address, *big.Int, *big.Int, uint16, string, string, common.Address)
 	CloseExchanger(common.Address, *big.Int)
 	GetExchangerFlag(common.Address) bool
