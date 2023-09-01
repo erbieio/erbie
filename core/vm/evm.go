@@ -1486,7 +1486,7 @@ func (evm *EVM) HandleNFT(
 			if caller.Address() == addr {
 				if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
 					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-						"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
+						"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
 					return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
 				}
 			}
