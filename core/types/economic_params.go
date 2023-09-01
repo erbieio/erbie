@@ -54,7 +54,7 @@ var DeflationRate = 0.85
 // reduce 15% block reward in per period
 var ReduceRewardPeriod = uint64(365 * 720 * 24)
 
-var SwitchBranchBlock = 30
+var SwitchBranchBlock = 200
 
 // Deflation time of staker's reward
 var ExchangePeriod = uint64(6160) // 365 * 720 * 24 * 4 / 4096
@@ -66,7 +66,7 @@ var SNFTL2 = "180000000000000000"
 var SNFTL3 = "1000000000000000000"
 
 // Redemption staking time
-var CancelDayPledgedInterval int64 = 720 * 24 // blockNumber of per hour * 24h
+var CancelDayPledgedInterval int64 = 5 // blockNumber of per hour * 24h
 // for test
 // var CancelDayPledgedInterval int64 = 5 // blockNumber of per hour * 24h
 
