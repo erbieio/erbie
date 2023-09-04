@@ -2801,13 +2801,19 @@ func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address)
 		for _, value := range validator.Validators {
 			if value.Addr == address {
 				proxy = value.Proxy
+				validatorStateObject.ResetemoveValidator(address)
 			}
+		}
+		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+		Erb10000 := big.NewInt(70000)
+		Erb10000.Mul(Erb10000, baseErb)
+		if stateObject.PledgedBalance().Cmp(Erb10000) < 0 {
+			return nil
 		}
 		coefficient := s.GetValidatorCoefficient(address)
 		if coefficient == 0 {
 			s.AddValidatorCoefficient(address, VALIDATOR_COEFFICIENT)
 		}
-		validatorStateObject.ResetemoveValidator(address)
 		validatorStateObject.SetValidatorAmount(address, stateObject.PledgedBalance(), proxy)
 	}
 	return nil

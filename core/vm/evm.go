@@ -1372,9 +1372,9 @@ func (evm *EVM) HandleNFT(
 
 		Erb100000 := big.NewInt(70000)
 		Erb100000.Mul(Erb100000, baseErb)
-		if evm.Context.VerifyPledgedBalance(evm.StateDB, addr, Erb100000) {
-			empty := common.Address{}
-			if evm.Context.BlockNumber.Uint64() < uint64(types.SwitchBranchBlock) {
+		empty := common.Address{}
+		if evm.Context.BlockNumber.Uint64() < uint64(types.SwitchBranchBlock) {
+			if evm.Context.VerifyPledgedBalance(evm.StateDB, addr, Erb100000) {
 				err := evm.Context.MinerBecome(evm.StateDB, addr, empty)
 				if err != nil {
 					log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
@@ -1382,14 +1382,13 @@ func (evm *EVM) HandleNFT(
 					return nil, gas, err
 				}
 				evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
-
-			} else {
-				err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
-				if err != nil {
-					log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-						"blocknumber", evm.Context.BlockNumber.Uint64())
-					return nil, gas, err
-				}
+			}
+		} else {
+			err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
+			if err != nil {
+				log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+					"blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, err
 			}
 		}
 		log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
