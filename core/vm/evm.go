@@ -69,6 +69,7 @@ type (
 	GetStakerPledgedFunc        func(StateDB, common.Address, common.Address) *types.StakerExtension
 	MinerConsignFunc            func(StateDB, common.Address, *types.Wormholes) error
 	MinerBecomeFunc             func(StateDB, common.Address, common.Address) error
+	ResetMinerBecomeFunc        func(StateDB, common.Address, common.Address) error
 	CancelPledgedTokenFunc      func(StateDB, common.Address, *big.Int)
 	CancelStakerPledgeFunc      func(StateDB, common.Address, common.Address, *big.Int, *big.Int)
 	OpenExchangerFunc           func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string, string)
@@ -83,37 +84,38 @@ type (
 	GetNFTNameFunc   func(StateDB, common.Address) string
 	GetNFTSymbolFunc func(StateDB, common.Address) string
 	//GetNFTApproveAddressFunc func(StateDB, common.Address) []common.Address
-	GetNFTApproveAddressFunc               func(StateDB, common.Address) common.Address
-	GetNFTMergeLevelFunc                   func(StateDB, common.Address) uint8
-	GetNFTCreatorFunc                      func(StateDB, common.Address) common.Address
-	GetNFTRoyaltyFunc                      func(StateDB, common.Address) uint16
-	GetNFTExchangerFunc                    func(StateDB, common.Address) common.Address
-	GetNFTMetaURLFunc                      func(StateDB, common.Address) string
-	IsExistNFTFunc                         func(StateDB, common.Address) bool
-	IsApprovedFunc                         func(StateDB, common.Address, common.Address) bool
-	IsApprovedOneFunc                      func(StateDB, common.Address, common.Address) bool
-	IsApprovedForAllFunc                   func(StateDB, common.Address, common.Address) bool
-	VerifyPledgedBalanceFunc               func(StateDB, common.Address, *big.Int) bool
-	VerifyStakerPledgedBalanceFunc         func(StateDB, common.Address, common.Address, *big.Int) bool
-	InjectOfficialNFTFunc                  func(StateDB, string, *big.Int, uint64, uint16, string)
-	BuyNFTBySellerOrExchangerFunc          func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BuyNFTByBuyerFunc                      func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BuyAndMintNFTByBuyerFunc               func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BuyAndMintNFTByExchangerFunc           func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BuyNFTByApproveExchangerFunc           func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BatchBuyNFTByApproveExchangerFunc      func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BuyAndMintNFTByApprovedExchangerFunc   func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	BuyNFTByExchangerFunc                  func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	AddExchangerTokenFunc                  func(StateDB, common.Address, *big.Int)
-	ModifyOpenExchangerTimeFunc            func(StateDB, common.Address, *big.Int)
-	SubExchangerTokenFunc                  func(StateDB, common.Address, *big.Int)
-	SubExchangerBalanceFunc                func(StateDB, common.Address, *big.Int)
-	VerifyExchangerBalanceFunc             func(StateDB, common.Address, *big.Int) bool
-	GetNftAddressAndLevelFunc              func(string) (common.Address, int, error)
-	VoteOfficialNFTFunc                    func(StateDB, *types.NominatedOfficialNFT, *big.Int) error
-	ElectNominatedOfficialNFTFunc          func(StateDB, *big.Int)
-	NextIndexFunc                          func(db StateDB) *big.Int
-	VoteOfficialNFTByApprovedExchangerFunc func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	GetNFTApproveAddressFunc                func(StateDB, common.Address) common.Address
+	GetNFTMergeLevelFunc                    func(StateDB, common.Address) uint8
+	GetNFTCreatorFunc                       func(StateDB, common.Address) common.Address
+	GetNFTRoyaltyFunc                       func(StateDB, common.Address) uint16
+	GetNFTExchangerFunc                     func(StateDB, common.Address) common.Address
+	GetNFTMetaURLFunc                       func(StateDB, common.Address) string
+	IsExistNFTFunc                          func(StateDB, common.Address) bool
+	IsApprovedFunc                          func(StateDB, common.Address, common.Address) bool
+	IsApprovedOneFunc                       func(StateDB, common.Address, common.Address) bool
+	IsApprovedForAllFunc                    func(StateDB, common.Address, common.Address) bool
+	VerifyPledgedBalanceFunc                func(StateDB, common.Address, *big.Int) bool
+	VerifyStakerPledgedBalanceFunc          func(StateDB, common.Address, common.Address, *big.Int) bool
+	VerifyCancelValidatorPledgedBalanceFunc func(StateDB, common.Address, *big.Int) bool
+	InjectOfficialNFTFunc                   func(StateDB, string, *big.Int, uint64, uint16, string)
+	BuyNFTBySellerOrExchangerFunc           func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BuyNFTByBuyerFunc                       func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BuyAndMintNFTByBuyerFunc                func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BuyAndMintNFTByExchangerFunc            func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BuyNFTByApproveExchangerFunc            func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BatchBuyNFTByApproveExchangerFunc       func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BuyAndMintNFTByApprovedExchangerFunc    func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	BuyNFTByExchangerFunc                   func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
+	AddExchangerTokenFunc                   func(StateDB, common.Address, *big.Int)
+	ModifyOpenExchangerTimeFunc             func(StateDB, common.Address, *big.Int)
+	SubExchangerTokenFunc                   func(StateDB, common.Address, *big.Int)
+	SubExchangerBalanceFunc                 func(StateDB, common.Address, *big.Int)
+	VerifyExchangerBalanceFunc              func(StateDB, common.Address, *big.Int) bool
+	GetNftAddressAndLevelFunc               func(string) (common.Address, int, error)
+	VoteOfficialNFTFunc                     func(StateDB, *types.NominatedOfficialNFT, *big.Int) error
+	ElectNominatedOfficialNFTFunc           func(StateDB, *big.Int)
+	NextIndexFunc                           func(db StateDB) *big.Int
+	VoteOfficialNFTByApprovedExchangerFunc  func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
 	//ChangeRewardFlagFunc                   func(StateDB, common.Address, uint8)
 	//PledgeNFTFunc                   func(StateDB, common.Address, *big.Int)
 	//CancelPledgedNFTFunc            func(StateDB, common.Address)
@@ -173,6 +175,7 @@ type BlockContext struct {
 	GetStakerPledged        GetStakerPledgedFunc
 	MinerConsign            MinerConsignFunc
 	MinerBecome             MinerBecomeFunc
+	ResetMinerBecome        ResetMinerBecomeFunc
 	CancelPledgedToken      CancelPledgedTokenFunc
 	CancelStakerPledge      CancelStakerPledgeFunc
 	OpenExchanger           OpenExchangerFunc
@@ -184,39 +187,40 @@ type BlockContext struct {
 	GetExchangerURL         GetExchangerURLFunc
 	GetApproveAddress       GetApproveAddressFunc
 	//GetNFTBalance                      GetNFTBalanceFunc
-	GetNFTName                         GetNFTNameFunc
-	GetNFTSymbol                       GetNFTSymbolFunc
-	GetNFTApproveAddress               GetNFTApproveAddressFunc
-	GetNFTMergeLevel                   GetNFTMergeLevelFunc
-	GetNFTCreator                      GetNFTCreatorFunc
-	GetNFTRoyalty                      GetNFTRoyaltyFunc
-	GetNFTExchanger                    GetNFTExchangerFunc
-	GetNFTMetaURL                      GetNFTMetaURLFunc
-	IsExistNFT                         IsExistNFTFunc
-	IsApproved                         IsApprovedFunc
-	IsApprovedOne                      IsApprovedOneFunc
-	IsApprovedForAll                   IsApprovedForAllFunc
-	VerifyPledgedBalance               VerifyPledgedBalanceFunc
-	VerifyStakerPledgedBalance         VerifyStakerPledgedBalanceFunc
-	InjectOfficialNFT                  InjectOfficialNFTFunc
-	BuyNFTBySellerOrExchanger          BuyNFTBySellerOrExchangerFunc
-	BuyNFTByBuyer                      BuyNFTByBuyerFunc
-	BuyAndMintNFTByBuyer               BuyAndMintNFTByBuyerFunc
-	BuyAndMintNFTByExchanger           BuyAndMintNFTByExchangerFunc
-	BuyNFTByApproveExchanger           BuyNFTByApproveExchangerFunc
-	BatchBuyNFTByApproveExchanger      BatchBuyNFTByApproveExchangerFunc
-	BuyAndMintNFTByApprovedExchanger   BuyAndMintNFTByApprovedExchangerFunc
-	BuyNFTByExchanger                  BuyNFTByExchangerFunc
-	AddExchangerToken                  AddExchangerTokenFunc
-	ModifyOpenExchangerTime            ModifyOpenExchangerTimeFunc
-	SubExchangerToken                  SubExchangerTokenFunc
-	SubExchangerBalance                SubExchangerBalanceFunc
-	VerifyExchangerBalance             VerifyExchangerBalanceFunc
-	GetNftAddressAndLevel              GetNftAddressAndLevelFunc
-	VoteOfficialNFT                    VoteOfficialNFTFunc
-	ElectNominatedOfficialNFT          ElectNominatedOfficialNFTFunc
-	NextIndex                          NextIndexFunc
-	VoteOfficialNFTByApprovedExchanger VoteOfficialNFTByApprovedExchangerFunc
+	GetNFTName                          GetNFTNameFunc
+	GetNFTSymbol                        GetNFTSymbolFunc
+	GetNFTApproveAddress                GetNFTApproveAddressFunc
+	GetNFTMergeLevel                    GetNFTMergeLevelFunc
+	GetNFTCreator                       GetNFTCreatorFunc
+	GetNFTRoyalty                       GetNFTRoyaltyFunc
+	GetNFTExchanger                     GetNFTExchangerFunc
+	GetNFTMetaURL                       GetNFTMetaURLFunc
+	IsExistNFT                          IsExistNFTFunc
+	IsApproved                          IsApprovedFunc
+	IsApprovedOne                       IsApprovedOneFunc
+	IsApprovedForAll                    IsApprovedForAllFunc
+	VerifyPledgedBalance                VerifyPledgedBalanceFunc
+	VerifyStakerPledgedBalance          VerifyStakerPledgedBalanceFunc
+	VerifyCancelValidatorPledgedBalance VerifyCancelValidatorPledgedBalanceFunc
+	InjectOfficialNFT                   InjectOfficialNFTFunc
+	BuyNFTBySellerOrExchanger           BuyNFTBySellerOrExchangerFunc
+	BuyNFTByBuyer                       BuyNFTByBuyerFunc
+	BuyAndMintNFTByBuyer                BuyAndMintNFTByBuyerFunc
+	BuyAndMintNFTByExchanger            BuyAndMintNFTByExchangerFunc
+	BuyNFTByApproveExchanger            BuyNFTByApproveExchangerFunc
+	BatchBuyNFTByApproveExchanger       BatchBuyNFTByApproveExchangerFunc
+	BuyAndMintNFTByApprovedExchanger    BuyAndMintNFTByApprovedExchangerFunc
+	BuyNFTByExchanger                   BuyNFTByExchangerFunc
+	AddExchangerToken                   AddExchangerTokenFunc
+	ModifyOpenExchangerTime             ModifyOpenExchangerTimeFunc
+	SubExchangerToken                   SubExchangerTokenFunc
+	SubExchangerBalance                 SubExchangerBalanceFunc
+	VerifyExchangerBalance              VerifyExchangerBalanceFunc
+	GetNftAddressAndLevel               GetNftAddressAndLevelFunc
+	VoteOfficialNFT                     VoteOfficialNFTFunc
+	ElectNominatedOfficialNFT           ElectNominatedOfficialNFTFunc
+	NextIndex                           NextIndexFunc
+	VoteOfficialNFTByApprovedExchanger  VoteOfficialNFTByApprovedExchangerFunc
 	//ChangeRewardFlag                   ChangeRewardFlagFunc
 	//PledgeNFT                   PledgeNFTFunc
 	//CancelPledgedNFT            CancelPledgedNFTFunc
@@ -1355,7 +1359,7 @@ func (evm *EVM) HandleNFT(
 
 			err := evm.Context.StakerPledge(evm.StateDB, caller.Address(), addr, value, currentBlockNumber, &wormholes)
 			if err != nil {
-				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type,
+				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type, "error", err,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
@@ -1368,15 +1372,24 @@ func (evm *EVM) HandleNFT(
 
 		Erb100000 := big.NewInt(70000)
 		Erb100000.Mul(Erb100000, baseErb)
-		if evm.Context.VerifyPledgedBalance(evm.StateDB, addr, Erb100000) {
-			empty := common.Address{}
-			err := evm.Context.MinerBecome(evm.StateDB, addr, empty)
+		empty := common.Address{}
+		if evm.Context.BlockNumber.Uint64() < uint64(types.SwitchBranchBlock) {
+			if evm.Context.VerifyPledgedBalance(evm.StateDB, addr, Erb100000) {
+				err := evm.Context.MinerBecome(evm.StateDB, addr, empty)
+				if err != nil {
+					log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+						"blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, err
+				}
+				evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
+			}
+		} else {
+			err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
 			if err != nil {
 				log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
-			evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
 		}
 		log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
@@ -1421,42 +1434,73 @@ func (evm *EVM) HandleNFT(
 	case 10: // cancel pledge of token
 		log.Info("HandleNFT(), CancelPledgedToken>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
-		stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
-		//pledgedTime := stakerpledged.BlockNumber
-		//if big.NewInt(CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, pledgedTime)) > 0 {
-		//	log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-		//		"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
-		//	return nil, gas, ErrTooCloseToCancel
-		//}
+		if evm.Context.BlockNumber.Uint64() < uint64(types.SwitchBranchBlock) {
+			stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
 
-		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-		Erb100 := big.NewInt(700)
-		Erb100.Mul(Erb100, baseErb)
-		pledgedBalance := stakerpledged.Balance
+			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+			Erb100 := big.NewInt(700)
+			Erb100.Mul(Erb100, baseErb)
+			pledgedBalance := stakerpledged.Balance
 
-		if pledgedBalance.Cmp(value) != 0 {
-			if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
-				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-					"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, errors.New("the after revocation is less than 700ERB")
+			if pledgedBalance.Cmp(value) != 0 {
+				if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
+					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+						"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, errors.New("the after revocation is less than 700ERB")
+				}
 			}
-		}
-		if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
-			log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
-				"blocknumber", evm.Context.BlockNumber.Uint64())
-			Erb100000 := big.NewInt(70000)
-			Erb100000.Mul(Erb100000, baseErb)
-			if !evm.Context.VerifyPledgedBalance(evm.StateDB, addr, new(big.Int).Add(Erb100000, value)) {
-				log.Info("HandleNFT(), CancelPledgedToken, cancel partial", "wormholes.Type", wormholes.Type,
+			if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
+				log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
-				//coe := evm.StateDB.GetValidatorCoefficient(addr)
-				evm.StateDB.RemoveValidatorCoefficient(addr)
+				Erb100000 := big.NewInt(70000)
+				Erb100000.Mul(Erb100000, baseErb)
+				if !evm.Context.VerifyPledgedBalance(evm.StateDB, addr, new(big.Int).Add(Erb100000, value)) {
+					log.Info("HandleNFT(), CancelPledgedToken, cancel partial", "wormholes.Type", wormholes.Type,
+						"blocknumber", evm.Context.BlockNumber.Uint64())
+					//coe := evm.StateDB.GetValidatorCoefficient(addr)
+					evm.StateDB.RemoveValidatorCoefficient(addr)
+				}
+				evm.Context.CancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
+			} else {
+				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+					"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, ErrTooCloseToCancel
 			}
-			evm.Context.CancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
+
 		} else {
-			log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-				"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, ErrTooCloseToCancel
+			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+			Erb100 := big.NewInt(700)
+			Erb100.Mul(Erb100, baseErb)
+			stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
+			pledgedBalance := stakerpledged.Balance
+
+			if pledgedBalance.Cmp(value) != 0 {
+				if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
+					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+						"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, errors.New("the after revocation is less than 700ERB")
+				}
+			}
+
+			if caller.Address() == addr {
+				if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
+					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+						"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
+				}
+			}
+
+			if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
+				log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
+					"blocknumber", evm.Context.BlockNumber.Uint64())
+
+				evm.Context.CancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
+			} else {
+				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+					"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, ErrTooCloseToCancel
+			}
+
 		}
 		log.Info("HandleNFT(), CancelPledgedToken<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())

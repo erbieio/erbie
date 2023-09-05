@@ -93,6 +93,7 @@ type StateDB interface {
 	GetStakerPledged(common.Address, common.Address) *types.StakerExtension
 	MinerConsign(common.Address, common.Address) error
 	MinerBecome(common.Address, common.Address) error
+	ResetMinerBecome(common.Address, common.Address) error
 	CancelPledgedToken(common.Address, *big.Int)
 	CancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int)
 	OpenExchanger(common.Address, *big.Int, *big.Int, uint16, string, string, common.Address)

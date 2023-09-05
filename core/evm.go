@@ -99,6 +99,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		GetStakerPledged:        GetStakerPledged,
 		MinerConsign:            MinerConsign,
 		MinerBecome:             MinerBecome,
+		ResetMinerBecome:        ResetMinerBecome,
 		CancelPledgedToken:      CancelPledgedToken,
 		CancelStakerPledge:      CancelStakerPledge,
 		OpenExchanger:           OpenExchanger,
@@ -110,39 +111,40 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		GetExchangerURL:         GetExchangerURL,
 		GetApproveAddress:       GetApproveAddress,
 		//GetNFTBalance:                      GetNFTBalance,
-		GetNFTName:                         GetNFTName,
-		GetNFTSymbol:                       GetNFTSymbol,
-		GetNFTApproveAddress:               GetNFTApproveAddress,
-		GetNFTMergeLevel:                   GetNFTMergeLevel,
-		GetNFTCreator:                      GetNFTCreator,
-		GetNFTRoyalty:                      GetNFTRoyalty,
-		GetNFTExchanger:                    GetNFTExchanger,
-		GetNFTMetaURL:                      GetNFTMetaURL,
-		IsExistNFT:                         IsExistNFT,
-		IsApproved:                         IsApproved,
-		IsApprovedOne:                      IsApprovedOne,
-		IsApprovedForAll:                   IsApprovedForAll,
-		VerifyPledgedBalance:               VerifyPledgedBalance,
-		VerifyStakerPledgedBalance:         VerifyStakerPledgedBalance,
-		InjectOfficialNFT:                  InjectOfficialNFT,
-		BuyNFTBySellerOrExchanger:          BuyNFTBySellerOrExchanger,
-		BuyNFTByBuyer:                      BuyNFTByBuyer,
-		BuyAndMintNFTByBuyer:               BuyAndMintNFTByBuyer,
-		BuyAndMintNFTByExchanger:           BuyAndMintNFTByExchanger,
-		BuyNFTByApproveExchanger:           BuyNFTByApproveExchanger,
-		BatchBuyNFTByApproveExchanger:      BatchBuyNFTByApproveExchanger,
-		BuyAndMintNFTByApprovedExchanger:   BuyAndMintNFTByApprovedExchanger,
-		BuyNFTByExchanger:                  BuyNFTByExchanger,
-		AddExchangerToken:                  AddExchangerToken,
-		ModifyOpenExchangerTime:            ModifyOpenExchangerTime,
-		SubExchangerToken:                  SubExchangerToken,
-		SubExchangerBalance:                SubExchangerBalance,
-		VerifyExchangerBalance:             VerifyExchangerBalance,
-		GetNftAddressAndLevel:              GetNftAddressAndLevel,
-		VoteOfficialNFT:                    VoteOfficialNFT,
-		ElectNominatedOfficialNFT:          ElectNominatedOfficialNFT,
-		NextIndex:                          NextIndex,
-		VoteOfficialNFTByApprovedExchanger: VoteOfficialNFTByApprovedExchanger,
+		GetNFTName:                          GetNFTName,
+		GetNFTSymbol:                        GetNFTSymbol,
+		GetNFTApproveAddress:                GetNFTApproveAddress,
+		GetNFTMergeLevel:                    GetNFTMergeLevel,
+		GetNFTCreator:                       GetNFTCreator,
+		GetNFTRoyalty:                       GetNFTRoyalty,
+		GetNFTExchanger:                     GetNFTExchanger,
+		GetNFTMetaURL:                       GetNFTMetaURL,
+		IsExistNFT:                          IsExistNFT,
+		IsApproved:                          IsApproved,
+		IsApprovedOne:                       IsApprovedOne,
+		IsApprovedForAll:                    IsApprovedForAll,
+		VerifyPledgedBalance:                VerifyPledgedBalance,
+		VerifyStakerPledgedBalance:          VerifyStakerPledgedBalance,
+		VerifyCancelValidatorPledgedBalance: VerifyCancelValidatorPledgedBalance,
+		InjectOfficialNFT:                   InjectOfficialNFT,
+		BuyNFTBySellerOrExchanger:           BuyNFTBySellerOrExchanger,
+		BuyNFTByBuyer:                       BuyNFTByBuyer,
+		BuyAndMintNFTByBuyer:                BuyAndMintNFTByBuyer,
+		BuyAndMintNFTByExchanger:            BuyAndMintNFTByExchanger,
+		BuyNFTByApproveExchanger:            BuyNFTByApproveExchanger,
+		BatchBuyNFTByApproveExchanger:       BatchBuyNFTByApproveExchanger,
+		BuyAndMintNFTByApprovedExchanger:    BuyAndMintNFTByApprovedExchanger,
+		BuyNFTByExchanger:                   BuyNFTByExchanger,
+		AddExchangerToken:                   AddExchangerToken,
+		ModifyOpenExchangerTime:             ModifyOpenExchangerTime,
+		SubExchangerToken:                   SubExchangerToken,
+		SubExchangerBalance:                 SubExchangerBalance,
+		VerifyExchangerBalance:              VerifyExchangerBalance,
+		GetNftAddressAndLevel:               GetNftAddressAndLevel,
+		VoteOfficialNFT:                     VoteOfficialNFT,
+		ElectNominatedOfficialNFT:           ElectNominatedOfficialNFT,
+		NextIndex:                           NextIndex,
+		VoteOfficialNFTByApprovedExchanger:  VoteOfficialNFTByApprovedExchanger,
 		//ChangeRewardFlag:                   ChangeRewardFlag,
 		//PledgeNFT:                   PledgeNFT,
 		//CancelPledgedNFT:            CancelPledgedNFT,
@@ -365,6 +367,10 @@ func MinerBecome(db vm.StateDB, address common.Address, proxy common.Address) er
 	return db.MinerBecome(address, proxy)
 }
 
+func ResetMinerBecome(db vm.StateDB, address common.Address, proxy common.Address) error {
+	return db.ResetMinerBecome(address, proxy)
+}
+
 func CancelPledgedToken(db vm.StateDB, address common.Address, amount *big.Int) {
 	db.CancelPledgedToken(address, amount)
 }
@@ -485,6 +491,12 @@ func VerifyPledgedBalance(db vm.StateDB, addr common.Address, amount *big.Int) b
 
 func VerifyStakerPledgedBalance(db vm.StateDB, from common.Address, addr common.Address, amount *big.Int) bool {
 	return db.GetStakerPledgedBalance(from, addr).Cmp(amount) >= 0
+}
+
+func VerifyCancelValidatorPledgedBalance(db vm.StateDB, addr common.Address, amount *big.Int) bool {
+	return new(big.Int).Sub(db.GetStakerPledged(addr, addr).Balance, amount).
+		Cmp(new(big.Int).Sub(db.GetPledgedBalance(addr), db.GetStakerPledged(addr, addr).Balance)) >= 0
+
 }
 
 func InjectOfficialNFT(db vm.StateDB, dir string, startIndex *big.Int, number uint64, royalty uint16, creator string) {

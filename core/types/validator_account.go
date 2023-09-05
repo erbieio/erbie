@@ -137,6 +137,37 @@ func (vl *ValidatorList) RemoveValidator(addr common.Address, balance *big.Int) 
 	return false
 }
 
+func (vl *ValidatorList) SetValidatorAmount(addr common.Address, balance *big.Int, proxy common.Address) bool {
+	empty := common.Address{}
+	for _, v := range vl.Validators {
+		if v.Address() == addr {
+			v.Balance = balance
+			if proxy != empty {
+				v.Proxy = proxy
+			}
+			sort.Sort(vl)
+			return true
+		}
+	}
+	vl.Validators = append(vl.Validators, NewValidator(addr, balance, proxy))
+	sort.Sort(vl)
+
+	return true
+}
+
+func (vl *ValidatorList) ResetRemoveValidator(addr common.Address) bool {
+	for i, v := range vl.Validators {
+		if v.Address() == addr {
+			log.Info("", "ResetRemoveValidator", "validator reset remove")
+			vl.Validators = append(vl.Validators[:i], vl.Validators[i+1:]...)
+			sort.Sort(vl)
+			return true
+		}
+	}
+
+	return false
+}
+
 func (vl *ValidatorList) CalculateAddressRange(address common.Address, stakeAmt *big.Int) {
 	addrNo := address.Hash().Big()
 	totalAmt := vl.TotalStakeBalance()
