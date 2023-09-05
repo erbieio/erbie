@@ -26,6 +26,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBytesConversion(t *testing.T) {
@@ -542,4 +544,46 @@ func TestHash_Format(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFindDup(t *testing.T) {
+	target := []Address{
+		HexToAddress("0x01"),
+		HexToAddress("0x02"),
+		HexToAddress("0x03"),
+		HexToAddress("0x04"),
+		HexToAddress("0x05"),
+		HexToAddress("0x06"),
+		HexToAddress("0x07"),
+
+		HexToAddress("0x01"),
+		HexToAddress("0x03"),
+		HexToAddress("0x05"),
+		HexToAddress("0x07"),
+		HexToAddress("0x09"),
+		HexToAddress("0x10"),
+		HexToAddress("0x11"),
+
+		HexToAddress("0x02"),
+		HexToAddress("0x04"),
+		HexToAddress("0x06"),
+		HexToAddress("0x08"),
+		HexToAddress("0x13"),
+		HexToAddress("0x14"),
+		HexToAddress("0x15"),
+	}
+
+	dupExpected := []Address{
+		HexToAddress("0x01"),
+		HexToAddress("0x03"),
+		HexToAddress("0x05"),
+		HexToAddress("0x07"),
+		HexToAddress("0x02"),
+		HexToAddress("0x04"),
+		HexToAddress("0x06"),
+	}
+
+	dupAfter := FindDup(target)
+
+	assert.Equal(t, dupExpected, dupAfter, "Duplicate element mismatch")
 }
