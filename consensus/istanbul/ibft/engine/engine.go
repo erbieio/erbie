@@ -599,15 +599,10 @@ func (e *Engine) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 			}
 		}
 
-		if header.Number.Uint64() > 7 {
-			ea, err := c.ReadEvilAction(header.Number.Uint64() - 7)
+		// Record the evil behavior of 7 blocks ago
+		if header.Number.Uint64() > staleThreshold {
+			ea, err := c.ReadEvilAction(header.Number.Uint64() - staleThreshold)
 			if err == nil && ea != nil && !ea.Handled {
-				if len(ea.EvilHeaders) > 0 {
-					for _, v := range ea.EvilHeaders {
-						log.Info("prepare to punish evil action", "mining-block-no", header.Number.Uint64(),
-							"evil-no", v.Number.Uint64(), "evil-hash", v.Hash())
-					}
-				}
 				evilAction = ea
 				evilAction.Handled = true
 			}

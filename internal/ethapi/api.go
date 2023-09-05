@@ -1307,6 +1307,78 @@ func (s *PublicBlockChainAPI) GetStorageAt(ctx context.Context, address common.A
 	return res[:], state.Error()
 }
 
+type PunishedInfo struct {
+	PunishedHash       []common.Hash    `json:"punishedHash"`
+	PunishedValidators []common.Address `json:"punishedValidators"`
+}
+
+// @return punished uncles hash and punished validators list
+func (s *PublicBlockChainAPI) GetPunishedInfo(ctx context.Context, number rpc.BlockNumber) (*PunishedInfo, error) {
+	block, err := s.b.BlockByNumber(ctx, number)
+	if block == nil || err != nil {
+		return nil, err
+	}
+
+	extra, err := types.ExtractIstanbulExtra(block.Header())
+	if err != nil {
+		return nil, err
+	}
+
+	evilAction := extra.EvilAction
+	if evilAction == nil || len(evilAction.EvilHeaders) == 0 {
+		return nil, nil
+	}
+
+	engine := s.b.Engine()
+	if engine == nil {
+		return nil, errors.New("engine is nil when getting")
+	}
+
+	if _, ok := engine.(consensus.Istanbul); !ok {
+		return nil, errors.New("invalid consensus engine")
+	}
+	engine = engine.(consensus.Istanbul)
+
+	// get canonical block signers
+	canonicalNo := evilAction.EvilHeaders[0].Number.Uint64()
+	canonicalHeader, err := s.b.HeaderByNumber(ctx, rpc.BlockNumber(canonicalNo))
+	if canonicalHeader == nil || err != nil {
+		return nil, errors.New("invalid block number")
+	}
+
+	return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
+}
+
+func pickEvilValidatorsV2(ctx context.Context, canonicalHeader *types.Header, ea *types.EvilAction, engine consensus.Engine) (*PunishedInfo, error) {
+	var (
+		punishedHeaders []common.Hash
+		totalSigners    []common.Address
+	)
+
+	canonicalSigners, err := engine.Signers(canonicalHeader)
+	if err != nil {
+		return nil, errors.New("failed to recover block signers")
+	}
+
+	totalSigners = append(totalSigners, canonicalSigners...)
+
+	for _, header := range ea.EvilHeaders {
+		evilSigners, err := engine.Signers(header)
+		if err != nil {
+			break
+		}
+		totalSigners = append(totalSigners, evilSigners...)
+		punishedHeaders = append(punishedHeaders, header.Hash())
+	}
+
+	duplicateElements := common.FindDup(totalSigners)
+
+	return &PunishedInfo{
+		PunishedHash:       punishedHeaders,
+		PunishedValidators: duplicateElements,
+	}, nil
+}
+
 // OverrideAccount indicates the overriding fields of account during the execution
 // of a message call.
 // Note, state and stateDiff can't be specified at the same time. If state is
