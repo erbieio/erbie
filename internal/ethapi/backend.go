@@ -71,6 +71,7 @@ type Backend interface {
 	QueryMinerProxy(ctx context.Context, number int64, addr *common.Address) (*types.ValidatorList, error)
 	Random11ValidatorFromPool(ctx context.Context, header *types.Header) (*types.ValidatorList, error)
 	Random11ValidatorFromPoolWithProxy(ctx context.Context, header *types.Header) (*types.ValidatorList, error)
+	GetRandomDrop(ctx context.Context, header *types.Header) (common.Hash, error)
 	GetAllStakers(ctx context.Context) *types.StakerList
 	GetAllValidators(ctx context.Context, header *types.Header) (*types.ValidatorList, error)
 

@@ -719,6 +719,20 @@ func (w *PublicBlockChainAPI) GetValidators(ctx context.Context, number rpc.Bloc
 	return values, nil
 }
 
+func (w *PublicBlockChainAPI) GetRandomDrop(ctx context.Context, number rpc.BlockNumber) (common.Hash, error) {
+	block, err := w.b.BlockByNumber(ctx, number)
+	if err != nil || block == nil {
+		return common.Hash{}, err
+	}
+
+	randomDrop, err := w.b.GetRandomDrop(ctx, block.Header())
+	if err != nil {
+		return common.Hash{}, err
+	}
+
+	return randomDrop, nil
+}
+
 type BeneficiaryAddress struct {
 	Address      common.Address
 	NftAddress   common.Address

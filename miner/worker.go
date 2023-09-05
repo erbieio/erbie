@@ -771,7 +771,7 @@ func (w *worker) mainLoop() {
 			w.commitNewWork(req.interrupt, req.noempty, req.timestamp)
 
 		case ev := <-w.chainSideCh:
-			log.Info("w.chainSideCh", "height", ev.Block.NumberU64())
+			log.Info("w.chainSideCh", "height", ev.Block.NumberU64(), "hash", ev.Block.Hash())
 			// Short circuit for duplicate side blocks
 			if _, exist := w.localUncles[ev.Block.Hash()]; exist {
 				continue
@@ -1103,6 +1103,7 @@ func (w *worker) RecordEvilAction(uncle *types.Header) {
 	}
 
 	if evilAction == nil {
+		log.Info("prepare to record evil action", "uncle-height", uncle.Number.Uint64(), "uncle-hash", uncle.Hash())
 		evilAction = types.NewEvilAction(uncle)
 	}
 
