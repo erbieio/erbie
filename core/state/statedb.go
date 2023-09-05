@@ -2755,8 +2755,10 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 			toObject.AddPledgedBalance(amount)
 			fromObject.SetPledgedBlockNumber(blocknumber)
 
+		} else {
+			return errors.New("from Object or to Object null")
 		}
-		return errors.New("from Object or to Object null")
+		return nil
 	}
 
 }

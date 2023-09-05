@@ -1359,7 +1359,7 @@ func (evm *EVM) HandleNFT(
 
 			err := evm.Context.StakerPledge(evm.StateDB, caller.Address(), addr, value, currentBlockNumber, &wormholes)
 			if err != nil {
-				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type,
+				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type, "error", err,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
