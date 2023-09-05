@@ -2709,28 +2709,56 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 	//Resolving duplicates is delegated
 	//validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
-	if fromObject != nil && toObject != nil {
-		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-		validatorStateObject.AddValidatorAmount(address, amount)
+	if blocknumber.Uint64() < uint64(types.SwitchBranchBlock) {
+		if fromObject != nil && toObject != nil {
+			validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+			validatorStateObject.AddValidatorAmount(address, amount)
 
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.AddStaker(from, amount)
-		fromObject.SubBalance(amount)
-		emptyAddress := common.Address{}
-		var agentRecipient common.Address
-		if wh.ProxyAddress == "" && fromObject.GetSNFTAgentRecipient() == emptyAddress {
-			agentRecipient = fromObject.address
-		} else {
-			agentRecipient = common.HexToAddress(wh.ProxyAddress)
+			stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+			stakerStateObject.AddStaker(from, amount)
+			fromObject.SubBalance(amount)
+			emptyAddress := common.Address{}
+			var agentRecipient common.Address
+			if wh.ProxyAddress == "" && fromObject.GetSNFTAgentRecipient() == emptyAddress {
+				agentRecipient = fromObject.address
+			} else {
+				agentRecipient = common.HexToAddress(wh.ProxyAddress)
+			}
+			//fromObject.SetExchangerInfoflag(true, blocknumber, proxy, feerate)
+			fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
+			fromObject.StakerPledge(address, amount, blocknumber)
+			toObject.AddPledgedBalance(amount)
+			fromObject.SetPledgedBlockNumber(blocknumber)
+
 		}
-		//fromObject.SetExchangerInfoflag(true, blocknumber, proxy, feerate)
-		fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
-		fromObject.StakerPledge(address, amount, blocknumber)
-		toObject.AddPledgedBalance(amount)
-		fromObject.SetPledgedBlockNumber(blocknumber)
+		return nil
+	} else {
+		if fromObject != nil && toObject != nil {
 
+			stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+			stakerStateObject.AddStaker(from, amount)
+			fromObject.SubBalance(amount)
+			emptyAddress := common.Address{}
+			var agentRecipient common.Address
+			if wh.ProxyAddress == "" {
+				if fromObject.GetSNFTAgentRecipient() == emptyAddress {
+					agentRecipient = fromObject.address
+				} else {
+					agentRecipient = fromObject.GetSNFTAgentRecipient()
+				}
+			} else {
+				agentRecipient = common.HexToAddress(wh.ProxyAddress)
+			}
+
+			fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
+			fromObject.StakerPledge(address, amount, blocknumber)
+			toObject.AddPledgedBalance(amount)
+			fromObject.SetPledgedBlockNumber(blocknumber)
+
+		}
+		return errors.New("from Object or to Object null")
 	}
-	return nil
+
 }
 
 func (s *StateDB) MinerConsign(address common.Address, proxy common.Address) error {
