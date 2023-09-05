@@ -2832,6 +2832,7 @@ func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address)
 			if value.Addr == address {
 				proxy = value.Proxy
 				validatorStateObject.ResetemoveValidator(address)
+				break
 			}
 		}
 		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
