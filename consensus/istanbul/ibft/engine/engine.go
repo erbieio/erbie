@@ -1058,7 +1058,12 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 
 	log.Info("enter punishEvilValidators", "curNo", header.Number.Uint64())
 
-	evilValidators := e.pickEvilValidators(ea)
+	var evilValidators []common.Address
+	if header.Number.Uint64() < types.SwitchBranchBlock {
+		evilValidators = e.pickEvilValidators(ea)
+	} else {
+		evilValidators = e.pickEvilValidatorsV2(bc, ea)
+	}
 
 	var noProxyValidators []common.Address
 	for _, v := range evilValidators {
@@ -1088,7 +1093,7 @@ func (e *Engine) pickEvilValidators(ea *types.EvilAction) []common.Address {
 	return duplicateElements
 }
 
-func (e *Engine) PickEvilValidatorsV2(bc *core.BlockChain, ea *types.EvilAction) []common.Address {
+func (e *Engine) pickEvilValidatorsV2(bc *core.BlockChain, ea *types.EvilAction) []common.Address {
 	var (
 		totalSigners []common.Address // All signatures at the same height for both canonical and uncles blocks
 		canonicalNo  = ea.EvilHeaders[0].Number.Uint64()
