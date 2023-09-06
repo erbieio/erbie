@@ -2709,28 +2709,58 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 	//Resolving duplicates is delegated
 	//validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
-	if fromObject != nil && toObject != nil {
-		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-		validatorStateObject.AddValidatorAmount(address, amount)
+	if blocknumber.Uint64() < uint64(types.SwitchBranchBlock) {
+		if fromObject != nil && toObject != nil {
+			validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+			validatorStateObject.AddValidatorAmount(address, amount)
 
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.AddStaker(from, amount)
-		fromObject.SubBalance(amount)
-		emptyAddress := common.Address{}
-		var agentRecipient common.Address
-		if wh.ProxyAddress == "" && fromObject.GetSNFTAgentRecipient() == emptyAddress {
-			agentRecipient = fromObject.address
-		} else {
-			agentRecipient = common.HexToAddress(wh.ProxyAddress)
+			stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+			stakerStateObject.AddStaker(from, amount)
+			fromObject.SubBalance(amount)
+			emptyAddress := common.Address{}
+			var agentRecipient common.Address
+			if wh.ProxyAddress == "" && fromObject.GetSNFTAgentRecipient() == emptyAddress {
+				agentRecipient = fromObject.address
+			} else {
+				agentRecipient = common.HexToAddress(wh.ProxyAddress)
+			}
+			//fromObject.SetExchangerInfoflag(true, blocknumber, proxy, feerate)
+			fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
+			fromObject.StakerPledge(address, amount, blocknumber)
+			toObject.AddPledgedBalance(amount)
+			fromObject.SetPledgedBlockNumber(blocknumber)
+
 		}
-		//fromObject.SetExchangerInfoflag(true, blocknumber, proxy, feerate)
-		fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
-		fromObject.StakerPledge(address, amount, blocknumber)
-		toObject.AddPledgedBalance(amount)
-		fromObject.SetPledgedBlockNumber(blocknumber)
+		return nil
+	} else {
+		if fromObject != nil && toObject != nil {
 
+			stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+			stakerStateObject.AddStaker(from, amount)
+			fromObject.SubBalance(amount)
+			emptyAddress := common.Address{}
+			var agentRecipient common.Address
+			if wh.ProxyAddress == "" {
+				if fromObject.GetSNFTAgentRecipient() == emptyAddress {
+					agentRecipient = fromObject.address
+				} else {
+					agentRecipient = fromObject.GetSNFTAgentRecipient()
+				}
+			} else {
+				agentRecipient = common.HexToAddress(wh.ProxyAddress)
+			}
+
+			fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
+			fromObject.StakerPledge(address, amount, blocknumber)
+			toObject.AddPledgedBalance(amount)
+			fromObject.SetPledgedBlockNumber(blocknumber)
+
+		} else {
+			return errors.New("from Object or to Object null")
+		}
+		return nil
 	}
-	return nil
+
 }
 
 func (s *StateDB) MinerConsign(address common.Address, proxy common.Address) error {
@@ -2786,6 +2816,36 @@ func (s *StateDB) MinerBecome(address common.Address, proxy common.Address) erro
 	//}
 	if stateObject != nil {
 		validatorStateObject.AddValidator(address, stateObject.PledgedBalance(), proxy)
+	}
+	return nil
+}
+
+func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address) error {
+	stateObject := s.GetOrNewAccountStateObject(address)
+	//empty := common.Address{}
+
+	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+
+	if stateObject != nil {
+		validator := validatorStateObject.GetValidators()
+		for _, value := range validator.Validators {
+			if value.Addr == address {
+				proxy = value.Proxy
+				validatorStateObject.ResetemoveValidator(address)
+				break
+			}
+		}
+		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+		Erb10000 := big.NewInt(70000)
+		Erb10000.Mul(Erb10000, baseErb)
+		if stateObject.PledgedBalance().Cmp(Erb10000) < 0 {
+			return nil
+		}
+		coefficient := s.GetValidatorCoefficient(address)
+		if coefficient == 0 {
+			s.AddValidatorCoefficient(address, VALIDATOR_COEFFICIENT)
+		}
+		validatorStateObject.SetValidatorAmount(address, stateObject.PledgedBalance(), proxy)
 	}
 	return nil
 }

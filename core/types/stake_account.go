@@ -80,6 +80,18 @@ func (sl *StakerList) RemoveStaker(addr common.Address, balance *big.Int) bool {
 	return false
 }
 
+func (sl *StakerList) CancelStaker(addr common.Address) bool {
+	for i, v := range sl.Stakers {
+		if v.Address() == addr {
+			sl.Stakers = append(sl.Stakers[:i], sl.Stakers[i+1:]...)
+			sort.Sort(sl)
+			return true
+		}
+	}
+	log.Warn("stake_account|CancelStaker:address not exist", "addr", addr)
+	return false
+}
+
 // Query K validators closest to random numbers based on distance and pledge amount
 func (sl *StakerList) ValidatorByDistanceAndWeight(addr []*big.Int, k int, randomHash common.Hash) []common.Address {
 
