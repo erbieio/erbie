@@ -2709,7 +2709,7 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 	//Resolving duplicates is delegated
 	//validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
-	if blocknumber.Uint64() < uint64(types.SwitchBranchBlock) {
+	if blocknumber.Uint64() < types.SwitchBranchBlock {
 		if fromObject != nil && toObject != nil {
 			validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 			validatorStateObject.AddValidatorAmount(address, amount)

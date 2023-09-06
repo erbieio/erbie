@@ -1,4 +1,4 @@
 package types
 
 // Erbie fork block number
-var SwitchBranchBlock = 200
+const SwitchBranchBlock uint64 = 200
