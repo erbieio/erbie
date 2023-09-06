@@ -433,16 +433,21 @@ func (ma *MixedcaseAddress) Original() string {
 
 // @dev FindDup Filter out duplicate elements from the target
 func FindDup(target []Address) []Address {
-	duplicate := make([]Address, 0)
+	res := make([]Address, 0)
+	duplicate := make(map[Address]bool)
 	existed := make(map[Address]bool)
 
 	for _, v := range target {
 		if existed[v] {
-			duplicate = append(duplicate, v)
+			duplicate[v] = true
 		} else {
 			existed[v] = true
 		}
 	}
 
-	return duplicate
+	for addr := range duplicate {
+		res = append(res, addr)
+	}
+
+	return res
 }
