@@ -31,6 +31,9 @@ var (
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a validator.
 )
 
+// staleThreshold is the maximum depth of the acceptable stale block.
+const staleThreshold = 7
+
 type SignerFn func(data []byte) ([]byte, error)
 
 type Option func(*types.IstanbulExtra)
@@ -596,15 +599,10 @@ func (e *Engine) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 			}
 		}
 
-		if header.Number.Uint64() > 7 {
-			ea, err := c.ReadEvilAction(header.Number.Uint64() - 7)
+		// Record the evil behavior of 7 blocks ago
+		if header.Number.Uint64() > staleThreshold {
+			ea, err := c.ReadEvilAction(header.Number.Uint64() - staleThreshold)
 			if err == nil && ea != nil && !ea.Handled {
-				if len(ea.EvilHeaders) > 0 {
-					for _, v := range ea.EvilHeaders {
-						log.Info("prepare to punish evil action", "mining-block-no", header.Number.Uint64(),
-							"evil-no", v.Number.Uint64(), "evil-hash", v.Hash())
-					}
-				}
 				evilAction = ea
 				evilAction.Handled = true
 			}
@@ -1043,16 +1041,8 @@ func (e *Engine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 // @dev Punish the verifier who signs more
 func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB, extra *types.IstanbulExtra, header *types.Header) {
 	ea := extra.EvilAction
-	if header.Number.Uint64() <= 7 || ea == nil || len(ea.EvilHeaders) == 0 {
+	if header.Number.Uint64() <= staleThreshold || ea == nil || len(ea.EvilHeaders) == 0 {
 		return
-	}
-
-	log.Info("enter punishEvilValidators", "curNo", header.Number.Uint64())
-	// Pick out the evil validators
-	evilValidators := e.pickEvilValidators(ea)
-	for i := 0; i < len(ea.EvilHeaders); i++ {
-		log.Info("PunishEvilValidators", "i", i, "no", ea.EvilHeaders[i].Number.Uint64(),
-			"hash", ea.EvilHeaders[i].Hash().Hex(), "curNo", header.Number.Uint64())
 	}
 
 	parent := bc.GetHeaderByHash(header.ParentHash)
@@ -1066,6 +1056,15 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 		return
 	}
 
+	log.Info("enter punishEvilValidators", "curNo", header.Number.Uint64())
+
+	var evilValidators []common.Address
+	if header.Number.Uint64() < types.SwitchBranchBlock {
+		evilValidators = e.pickEvilValidators(ea)
+	} else {
+		evilValidators = e.pickEvilValidatorsV2(bc, ea)
+	}
+
 	var noProxyValidators []common.Address
 	for _, v := range evilValidators {
 		evilAddr := valset.GetValidatorAddr(v)
@@ -1074,13 +1073,12 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 		}
 		noProxyValidators = append(noProxyValidators, evilAddr)
 		log.Info("final punishEvilValidators", "addr", evilAddr, "curNo", header.Number.Uint64())
-		//log.Info("balance info", "addr", delegateAddr, "balance", state.GetBalance(delegateAddr).String(),
-		//	"zerobalance", state.GetBalance(common.HexToAddress("0x0000000000000000000000000000000000000000")).String())
 	}
 
 	state.PunishEvilValidators(noProxyValidators, header.Number)
 }
 
+// @dev pickEvilValidators pick out  evil validators
 func (e *Engine) pickEvilValidators(ea *types.EvilAction) []common.Address {
 	var totalSigners []common.Address
 	for _, header := range ea.EvilHeaders {
@@ -1092,6 +1090,40 @@ func (e *Engine) pickEvilValidators(ea *types.EvilAction) []common.Address {
 		totalSigners = append(totalSigners, signers...)
 	}
 	duplicateElements := duplicateRemoval(totalSigners)
+	return duplicateElements
+}
+
+func (e *Engine) pickEvilValidatorsV2(bc *core.BlockChain, ea *types.EvilAction) []common.Address {
+	var (
+		totalSigners []common.Address // All signatures at the same height for both canonical and uncles blocks
+		canonicalNo  = ea.EvilHeaders[0].Number.Uint64()
+	)
+
+	// get canonical block signers
+	canonicalHeader := bc.GetHeaderByNumber(canonicalNo)
+	if canonicalHeader == nil {
+		log.Crit("we shouldn't be unable to find the block at this height", "height", canonicalNo)
+		return totalSigners
+	}
+
+	canonicalSigners, err := e.Signers(canonicalHeader)
+	if err != nil {
+		log.Error("failed to recover block signers", "height", canonicalNo)
+		return totalSigners
+	}
+
+	totalSigners = append(totalSigners, canonicalSigners...)
+
+	for _, header := range ea.EvilHeaders {
+		log.Info("pickEvilValidators", "evil-no", header.Number.Uint64(), "evil-hash", header.Hash().Hex())
+		signers, err := e.Signers(header)
+		if err != nil {
+			break
+		}
+		totalSigners = append(totalSigners, signers...)
+	}
+
+	duplicateElements := common.FindDup(totalSigners)
 	return duplicateElements
 }
 
@@ -1120,8 +1152,6 @@ func duplicateRemoval(target []common.Address) (duplicateElements []common.Addre
 
 	return evilValidators
 }
-
-// remove duplication address from evil validators
 
 // Seal generates a new block for the given input block with the local miner's
 // seal place on top.

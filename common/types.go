@@ -430,3 +430,24 @@ func (ma *MixedcaseAddress) ValidChecksum() bool {
 func (ma *MixedcaseAddress) Original() string {
 	return ma.original
 }
+
+// @dev FindDup Filter out duplicate elements from the target
+func FindDup(target []Address) []Address {
+	res := make([]Address, 0)
+	duplicate := make(map[Address]bool)
+	existed := make(map[Address]bool)
+
+	for _, v := range target {
+		if existed[v] {
+			duplicate[v] = true
+		} else {
+			existed[v] = true
+		}
+	}
+
+	for addr := range duplicate {
+		res = append(res, addr)
+	}
+
+	return res
+}

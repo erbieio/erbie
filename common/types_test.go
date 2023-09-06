@@ -24,8 +24,11 @@ import (
 	"log"
 	"math/big"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBytesConversion(t *testing.T) {
@@ -542,4 +545,54 @@ func TestHash_Format(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFindDup(t *testing.T) {
+	target := []Address{
+		HexToAddress("0x01"),
+		HexToAddress("0x02"),
+		HexToAddress("0x03"),
+		HexToAddress("0x04"),
+		HexToAddress("0x05"),
+		HexToAddress("0x06"),
+		HexToAddress("0x07"),
+
+		HexToAddress("0x01"),
+		HexToAddress("0x03"),
+		HexToAddress("0x05"),
+		HexToAddress("0x07"),
+		HexToAddress("0x09"),
+		HexToAddress("0x10"),
+		HexToAddress("0x11"),
+
+		HexToAddress("0x02"),
+		HexToAddress("0x04"),
+		HexToAddress("0x06"),
+		HexToAddress("0x08"),
+		HexToAddress("0x13"),
+		HexToAddress("0x14"),
+		HexToAddress("0x15"),
+		HexToAddress("0x1"),
+	}
+
+	dupExpected := []string{
+		HexToAddress("0x01").Hex(),
+		HexToAddress("0x03").Hex(),
+		HexToAddress("0x05").Hex(),
+		HexToAddress("0x07").Hex(),
+		HexToAddress("0x02").Hex(),
+		HexToAddress("0x04").Hex(),
+		HexToAddress("0x06").Hex(),
+	}
+
+	dupAfter := make([]string, 0)
+	for _, v := range FindDup(target) {
+		dupAfter = append(dupAfter, v.Hex())
+	}
+
+	sort.Strings(dupExpected)
+	sort.Strings(dupAfter)
+
+	assert.Equal(t, len(dupExpected), len(dupAfter), "Duplicate element length mismatch")
+	assert.Equal(t, dupExpected, dupAfter, "Duplicate element  mismatch")
 }
