@@ -10,6 +10,11 @@ import (
 
 func main() {
 
+	if len(os.Args) == 2 && os.Args[1] == "newkey" {
+		geth.CreatePrivateKey()
+		return
+	}
+
 	//sigs := make(chan os.Signal, 1)
 	stopWormhles := make(chan struct{})
 	//done := make(chan bool, 1)
