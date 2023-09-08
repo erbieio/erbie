@@ -2898,6 +2898,41 @@ func (s *StateDB) CancelStakerPledge(from, address common.Address, amount *big.I
 
 }
 
+func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *big.Int, blocknumber *big.Int) error {
+
+	toObject := s.GetOrNewAccountStateObject(address)
+	fromObject := s.GetOrNewAccountStateObject(from)
+
+	if fromObject != nil && toObject != nil {
+		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+		coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
+		punishErb := big.NewInt(70 - int64(toObject.Coefficient()))
+		punishErb.Mul(punishErb, coebaseErb)
+		if from == address {
+			if amount.Cmp(punishErb) < 0 {
+				return errors.New("cancel pledge for insufficient punish amount")
+			}
+			fromObject.AddBalance(new(big.Int).Sub(amount, punishErb))
+			Zeroaddress := s.GetOrNewAccountStateObject(common.HexToAddress("0x0000000000000000000000000000000000000000"))
+			Zeroaddress.AddBalance(punishErb)
+
+		} else {
+			fromObject.AddBalance(amount)
+		}
+		validatorStateObject.RemoveValidator(address, amount)
+		stakerStateObject.RemoveStaker(from, amount)
+
+		fromObject.RemoveStakerPledge(address, amount)
+		toObject.SubPledgedBalance(amount)
+		if fromObject.StakerPledgeLength() == 0 {
+			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
+		}
+	}
+
+	return nil
+}
+
 func (s *StateDB) CancelStakerPledged(address common.Address, amount *big.Int) {
 	stateObject := s.GetOrNewAccountStateObject(address)
 	if stateObject != nil {
