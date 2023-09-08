@@ -2909,7 +2909,8 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 		coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
 		punishErb := big.NewInt(70 - int64(toObject.Coefficient()))
 		punishErb.Mul(punishErb, coebaseErb)
-		if from == address {
+
+		if from == address && fromObject.Coefficient() > 0 {
 			if amount.Cmp(punishErb) < 0 {
 				return errors.New("cancel pledge for insufficient punish amount")
 			}
