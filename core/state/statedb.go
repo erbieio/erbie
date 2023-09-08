@@ -2916,6 +2916,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 			fromObject.AddBalance(new(big.Int).Sub(amount, punishErb))
 			Zeroaddress := s.GetOrNewAccountStateObject(common.HexToAddress("0x0000000000000000000000000000000000000000"))
 			Zeroaddress.AddBalance(punishErb)
+			fromObject.SetCoefficient(VALIDATOR_COEFFICIENT)
 
 		} else {
 			fromObject.AddBalance(amount)
