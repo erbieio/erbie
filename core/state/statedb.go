@@ -2907,7 +2907,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
 		coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
-		punishErb := big.NewInt(70 - int64(toObject.Coefficient()))
+		punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
 		punishErb.Mul(punishErb, coebaseErb)
 
 		if from == address && fromObject.Coefficient() > 0 {
