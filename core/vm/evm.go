@@ -72,6 +72,7 @@ type (
 	ResetMinerBecomeFunc        func(StateDB, common.Address, common.Address) error
 	CancelPledgedTokenFunc      func(StateDB, common.Address, *big.Int)
 	CancelStakerPledgeFunc      func(StateDB, common.Address, common.Address, *big.Int, *big.Int)
+	NewCancelStakerPledgeFunc   func(StateDB, common.Address, common.Address, *big.Int, *big.Int) error
 	OpenExchangerFunc           func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string, string)
 	CloseExchangerFunc          func(StateDB, common.Address, *big.Int)
 	GetExchangerFlagFunc        func(StateDB, common.Address) bool
@@ -178,6 +179,7 @@ type BlockContext struct {
 	ResetMinerBecome        ResetMinerBecomeFunc
 	CancelPledgedToken      CancelPledgedTokenFunc
 	CancelStakerPledge      CancelStakerPledgeFunc
+	NewCancelStakerPledge   NewCancelStakerPledgeFunc
 	OpenExchanger           OpenExchangerFunc
 	CloseExchanger          CloseExchangerFunc
 	GetExchangerFlag        GetExchangerFlagFunc
@@ -1494,7 +1496,12 @@ func (evm *EVM) HandleNFT(
 				log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 
-				evm.Context.CancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
+				err := evm.Context.NewCancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
+				if err != nil {
+					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+						"error", err, "blocknumber", evm.Context.BlockNumber.Uint64())
+					return nil, gas, err
+				}
 			} else {
 				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
 					"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
