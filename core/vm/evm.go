@@ -1363,13 +1363,13 @@ func (evm *EVM) HandleNFT(
 
 			err := evm.Context.StakerPledge(evm.StateDB, caller.Address(), addr, value, currentBlockNumber, &wormholes)
 			if err != nil {
-				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type, "error", err,
+				log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type, "error", err,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
 
 		} else {
-			log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type,
+			log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 				"error", ErrInsufficientBalance, "blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrInsufficientBalance
 		}
@@ -1390,7 +1390,7 @@ func (evm *EVM) HandleNFT(
 		} else {
 			err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
 			if err != nil {
-				log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+				log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
@@ -1843,7 +1843,7 @@ func (evm *EVM) HandleNFT(
 			isBool := evm.Context.IsExistOtherPledged(evm.StateDB, caller.Address())
 			if !isBool {
 				log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-					"error", " exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
+					"error", "exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, errors.New("exist pledge by others,unable to set proxy")
 			}
 		}
