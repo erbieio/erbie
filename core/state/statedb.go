@@ -2734,11 +2734,20 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 		return nil
 	} else {
 		if fromObject != nil && toObject != nil {
+			emptyAddress := common.Address{}
 
 			stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+			validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+			validators := validatorStateObject.GetValidators()
+
+			if validators.Exist(address) {
+				toValidator := validators.GetValidatorByAddr(address)
+				if toValidator.Proxy != emptyAddress && address != from {
+					return errors.New("exist agent, cannot be pledged by others")
+				}
+			}
 			stakerStateObject.AddStaker(from, amount)
 			fromObject.SubBalance(amount)
-			emptyAddress := common.Address{}
 			var agentRecipient common.Address
 			if wh.ProxyAddress == "" {
 				if fromObject.GetSNFTAgentRecipient() == emptyAddress {

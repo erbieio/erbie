@@ -69,6 +69,7 @@ type (
 	GetStakerPledgedFunc        func(StateDB, common.Address, common.Address) *types.StakerExtension
 	MinerConsignFunc            func(StateDB, common.Address, *types.Wormholes) error
 	MinerBecomeFunc             func(StateDB, common.Address, common.Address) error
+	IsExistOtherPledgedFunc     func(StateDB, common.Address) bool
 	ResetMinerBecomeFunc        func(StateDB, common.Address, common.Address) error
 	CancelPledgedTokenFunc      func(StateDB, common.Address, *big.Int)
 	CancelStakerPledgeFunc      func(StateDB, common.Address, common.Address, *big.Int, *big.Int)
@@ -176,6 +177,7 @@ type BlockContext struct {
 	GetStakerPledged        GetStakerPledgedFunc
 	MinerConsign            MinerConsignFunc
 	MinerBecome             MinerBecomeFunc
+	IsExistOtherPledged     IsExistOtherPledgedFunc
 	ResetMinerBecome        ResetMinerBecomeFunc
 	CancelPledgedToken      CancelPledgedTokenFunc
 	CancelStakerPledge      CancelStakerPledgeFunc
@@ -1836,6 +1838,15 @@ func (evm *EVM) HandleNFT(
 		//if evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
 		log.Info("HandleNFT(), Start|MinerConsign>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
+
+		if !(evm.Context.BlockNumber.Uint64() < types.SwitchBranchBlock) {
+			isBool := evm.Context.IsExistOtherPledged(evm.StateDB, caller.Address())
+			if !isBool {
+				log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+					"error", " exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, errors.New("exist pledge by others,unable to set proxy")
+			}
+		}
 		err := evm.Context.MinerConsign(evm.StateDB, caller.Address(), &wormholes)
 		if err != nil {
 			log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
