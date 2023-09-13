@@ -1841,7 +1841,7 @@ func (evm *EVM) HandleNFT(
 
 		if !(evm.Context.BlockNumber.Uint64() < types.SwitchBranchBlock) {
 			isBool := evm.Context.IsExistOtherPledged(evm.StateDB, caller.Address())
-			if !isBool {
+			if isBool {
 				log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 					"error", "exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, errors.New("exist pledge by others,unable to set proxy")

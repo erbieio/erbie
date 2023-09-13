@@ -373,10 +373,13 @@ func IsExistOtherPledged(db vm.StateDB, address common.Address) bool {
 
 	pledgeBalance := db.GetPledgedBalance(address)
 	stakerBalance := db.GetStakerPledgedBalance(address, address)
-	if pledgeBalance.Cmp(stakerBalance) != 0 {
+	if pledgeBalance.Cmp(common.Big0) == 0 {
 		return false
 	}
-	return true
+	if pledgeBalance.Cmp(stakerBalance) != 0 {
+		return true
+	}
+	return false
 }
 
 func ResetMinerBecome(db vm.StateDB, address common.Address, proxy common.Address) error {
