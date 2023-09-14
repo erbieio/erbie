@@ -1346,6 +1346,10 @@ func (s *PublicBlockChainAPI) GetPunishedInfo(ctx context.Context, number rpc.Bl
 		return nil, errors.New("invalid block number")
 	}
 
+	if canonicalHeader.Coinbase == (common.Address{}) {
+		return nil, nil
+	}
+
 	return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
 }
 
@@ -1372,6 +1376,10 @@ func pickEvilValidatorsV2(ctx context.Context, canonicalHeader *types.Header, ea
 	}
 
 	duplicateElements := common.FindDup(totalSigners)
+
+	if len(punishedHeaders) == 0 || len(duplicateElements) == 0 {
+		return nil, nil
+	}
 
 	return &PunishedInfo{
 		PunishedHash:       punishedHeaders,
