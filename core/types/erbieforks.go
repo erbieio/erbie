@@ -1,4 +1,4 @@
 package types
 
 // Erbie fork block number
-const SwitchBranchBlock uint64 = 516000
+const SwitchBranchBlock uint64 = 650000
