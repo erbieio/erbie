@@ -1346,10 +1346,6 @@ func (s *PublicBlockChainAPI) GetPunishedInfo(ctx context.Context, number rpc.Bl
 		return nil, errors.New("invalid block number")
 	}
 
-	if canonicalHeader.Coinbase == (common.Address{}) {
-		return nil, nil
-	}
-
 	return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
 }
 
