@@ -1106,18 +1106,14 @@ func (e *Engine) pickEvilValidatorsV2(bc *core.BlockChain, ea *types.EvilAction)
 		return totalSigners
 	}
 
-	if canonicalHeader.Coinbase == (common.Address{}) {
-		log.Info("the standard block is an empty block and will not be processed", "height", canonicalNo)
-		return totalSigners
+	if canonicalHeader.Coinbase != (common.Address{}) {
+		canonicalSigners, err := e.Signers(canonicalHeader)
+		if err != nil {
+			log.Error("failed to recover block signers", "height", canonicalNo)
+			return totalSigners
+		}
+		totalSigners = append(totalSigners, canonicalSigners...)
 	}
-
-	canonicalSigners, err := e.Signers(canonicalHeader)
-	if err != nil {
-		log.Error("failed to recover block signers", "height", canonicalNo)
-		return totalSigners
-	}
-
-	totalSigners = append(totalSigners, canonicalSigners...)
 
 	for _, header := range ea.EvilHeaders {
 		log.Info("pickEvilValidators", "evil-no", header.Number.Uint64(), "evil-hash", header.Hash().Hex())
