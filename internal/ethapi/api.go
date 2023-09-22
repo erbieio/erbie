@@ -45,6 +45,7 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
@@ -1819,6 +1820,8 @@ func RPCMarshalBlock(block *types.Block, inclTx bool, fullTx bool, engine consen
 		}
 		fields["transactions"] = transactions
 	}
+	msgs := block.Msgs()
+	fields["messages"] = msgs
 	uncles := block.Uncles()
 	uncleHashes := make([]common.Hash, len(uncles))
 	for i, uncle := range uncles {
@@ -3383,6 +3386,23 @@ func (w *PublicWormholesAPI) pickEvilValidatorsV2(ctx context.Context, number rp
 
 	duplicateElements := common.FindDup(totalSigners)
 	return punishedHeaders, duplicateElements, nil
+}
+
+func (w *PublicWormholesAPI) SendWeb2Msg(ctx context.Context, params map[string]interface{}) error {
+	jsonString, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
+	app, _ := params["app"].(string)
+	msg, err := web2msg.NewAdapter(app, jsonString)
+	if err != nil {
+		return err
+	}
+	err = msg.CheckValid()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // PublicTransactionPoolAPI exposes methods for the RPC interface

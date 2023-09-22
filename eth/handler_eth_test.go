@@ -18,12 +18,13 @@ package eth
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
 	"math/rand"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
@@ -774,7 +775,7 @@ func testBroadcastMalformedBlock(t *testing.T, protocol uint) {
 
 	// Try to broadcast all malformations and ensure they all get discarded
 	for _, header := range []*types.Header{malformedUncles, malformedTransactions, malformedEverything} {
-		block := types.NewBlockWithHeader(header).WithBody(head.Transactions(), head.Uncles())
+		block := types.NewBlockWithHeader(header).WithBody(head.Transactions(), head.Uncles(), head.Msgs())
 		if err := src.SendNewBlock(block, big.NewInt(131136)); err != nil {
 			t.Fatalf("failed to broadcast block: %v", err)
 		}

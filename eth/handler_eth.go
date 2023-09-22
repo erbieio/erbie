@@ -29,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/eth/protocols/eth"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p/enode"
@@ -71,8 +72,8 @@ func (h *ethHandler) Handle(peer *eth.Peer, packet eth.Packet) error {
 		return h.handleHeaders(peer, *packet)
 
 	case *eth.BlockBodiesPacket:
-		txset, uncleset := packet.Unpack()
-		return h.handleBodies(peer, txset, uncleset)
+		txset, uncleset, msgs := packet.Unpack()
+		return h.handleBodies(peer, txset, uncleset, msgs)
 
 	case *eth.NodeDataPacket:
 		if err := h.downloader.DeliverNodeData(peer.ID(), *packet); err != nil {
@@ -165,14 +166,14 @@ func (h *ethHandler) handleHeaders(peer *eth.Peer, headers []*types.Header) erro
 
 // handleBodies is invoked from a peer's message handler when it transmits a batch
 // of block bodies for the local node to process.
-func (h *ethHandler) handleBodies(peer *eth.Peer, txs [][]*types.Transaction, uncles [][]*types.Header) error {
+func (h *ethHandler) handleBodies(peer *eth.Peer, txs [][]*types.Transaction, uncles [][]*types.Header, msgs [][]*web2msg.ProtocolMsg) error {
 	// Filter out any explicitly requested bodies, deliver the rest to the downloader
 	filter := len(txs) > 0 || len(uncles) > 0
 	if filter {
-		txs, uncles = h.blockFetcher.FilterBodies(peer.ID(), txs, uncles, time.Now())
+		txs, uncles, msgs = h.blockFetcher.FilterBodies(peer.ID(), txs, uncles, msgs, time.Now())
 	}
 	if len(txs) > 0 || len(uncles) > 0 || !filter {
-		err := h.downloader.DeliverBodies(peer.ID(), txs, uncles)
+		err := h.downloader.DeliverBodies(peer.ID(), txs, uncles, msgs)
 		if err != nil {
 			log.Debug("Failed to deliver bodies", "err", err)
 		}

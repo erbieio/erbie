@@ -30,6 +30,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/istanbul/validator"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -263,8 +264,8 @@ func (sb *Backend) Finalize(chain consensus.ChainHeaderReader, header *types.Hea
 
 // FinalizeAndAssemble implements consensus.Engine, ensuring no uncles are set,
 // nor block rewards given, and returns the final block.
-func (sb *Backend) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	return sb.EngineForBlockNumber(header.Number).FinalizeAndAssemble(chain, header, state, txs, uncles, receipts)
+func (sb *Backend) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, msgs []*web2msg.ProtocolMsg) (*types.Block, error) {
+	return sb.EngineForBlockNumber(header.Number).FinalizeAndAssemble(chain, header, state, txs, uncles, receipts, msgs)
 
 }
 

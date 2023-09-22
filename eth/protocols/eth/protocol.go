@@ -25,6 +25,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/forkid"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
@@ -231,21 +232,23 @@ type BlockBodiesRLPPacket66 struct {
 
 // BlockBody represents the data content of a single block.
 type BlockBody struct {
-	Transactions []*types.Transaction // Transactions contained within a block
-	Uncles       []*types.Header      // Uncles contained within a block
+	Transactions []*types.Transaction   // Transactions contained within a block
+	Uncles       []*types.Header        // Uncles contained within a block
+	Msgs         []*web2msg.ProtocolMsg // common message
 }
 
 // Unpack retrieves the transactions and uncles from the range packet and returns
 // them in a split flat format that's more consistent with the internal data structures.
-func (p *BlockBodiesPacket) Unpack() ([][]*types.Transaction, [][]*types.Header) {
+func (p *BlockBodiesPacket) Unpack() ([][]*types.Transaction, [][]*types.Header, [][]*web2msg.ProtocolMsg) {
 	var (
 		txset    = make([][]*types.Transaction, len(*p))
 		uncleset = make([][]*types.Header, len(*p))
+		msgs     = make([][]*web2msg.ProtocolMsg, len(*p))
 	)
 	for i, body := range *p {
-		txset[i], uncleset[i] = body.Transactions, body.Uncles
+		txset[i], uncleset[i], msgs[i] = body.Transactions, body.Uncles, body.Msgs
 	}
-	return txset, uncleset
+	return txset, uncleset, msgs
 }
 
 // GetNodeDataPacket represents a trie node data query.

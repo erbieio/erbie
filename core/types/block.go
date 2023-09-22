@@ -28,6 +28,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
@@ -173,6 +174,7 @@ func (h *Header) EmptyBlock() bool {
 type Body struct {
 	Transactions []*Transaction
 	Uncles       []*Header
+	Msgs         []*web2msg.ProtocolMsg
 }
 
 // Block represents an entire block in the Ethereum blockchain.
@@ -180,6 +182,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
+	messages     web2msg.Web2Msgs
 
 	// caches
 	hash atomic.Value
@@ -200,6 +203,7 @@ type extblock struct {
 	Header *Header
 	Txs    []*Transaction
 	Uncles []*Header
+	Msgs   []*web2msg.ProtocolMsg
 }
 
 // NewBlock creates a new block. The input data is copied,
@@ -209,7 +213,7 @@ type extblock struct {
 // The values of TxHash, UncleHash, ReceiptHash and Bloom in header
 // are ignored and set to values derived from the given txs, uncles
 // and receipts.
-func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, hasher TrieHasher) *Block {
+func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, msgs []*web2msg.ProtocolMsg, hasher TrieHasher) *Block {
 	b := &Block{header: CopyHeader(header), td: new(big.Int)}
 
 	// TODO: panic if len(txs) != len(receipts)
@@ -236,6 +240,11 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		for i := range uncles {
 			b.uncles[i] = CopyHeader(uncles[i])
 		}
+	}
+
+	if len(msgs) > 0 {
+		b.messages = make(web2msg.Web2Msgs, len(msgs))
+		copy(b.messages, msgs)
 	}
 
 	return b
@@ -275,7 +284,7 @@ func (b *Block) DecodeRLP(s *rlp.Stream) error {
 	if err := s.Decode(&eb); err != nil {
 		return err
 	}
-	b.header, b.uncles, b.transactions = eb.Header, eb.Uncles, eb.Txs
+	b.header, b.uncles, b.transactions, b.messages = eb.Header, eb.Uncles, eb.Txs, eb.Msgs
 	b.size.Store(common.StorageSize(rlp.ListSize(size)))
 	return nil
 }
@@ -286,6 +295,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 		Header: b.header,
 		Txs:    b.transactions,
 		Uncles: b.uncles,
+		Msgs:   b.messages,
 	})
 }
 
@@ -293,6 +303,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 
 func (b *Block) Uncles() []*Header          { return b.uncles }
 func (b *Block) Transactions() Transactions { return b.transactions }
+func (b *Block) Msgs() web2msg.Web2Msgs     { return b.messages }
 
 func (b *Block) Transaction(hash common.Hash) *Transaction {
 	for _, transaction := range b.transactions {
@@ -331,7 +342,7 @@ func (b *Block) BaseFee() *big.Int {
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
 // Body returns the non-header content of the block.
-func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles} }
+func (b *Block) Body() *Body { return &Body{b.transactions, b.uncles, b.messages} }
 
 // Size returns the true RLP encoded storage size of the block, either by encoding
 // and returning it, or returning a previsouly cached value.
@@ -374,20 +385,23 @@ func (b *Block) WithSeal(header *Header) *Block {
 		header:       &cpy,
 		transactions: b.transactions,
 		uncles:       b.uncles,
+		messages:     b.messages,
 	}
 }
 
 // WithBody returns a new block with the given transaction and uncle contents.
-func (b *Block) WithBody(transactions []*Transaction, uncles []*Header) *Block {
+func (b *Block) WithBody(transactions []*Transaction, uncles []*Header, msgs []*web2msg.ProtocolMsg) *Block {
 	block := &Block{
 		header:       CopyHeader(b.header),
 		transactions: make([]*Transaction, len(transactions)),
 		uncles:       make([]*Header, len(uncles)),
+		messages:     make(web2msg.Web2Msgs, len(msgs)),
 	}
 	copy(block.transactions, transactions)
 	for i := range uncles {
 		block.uncles[i] = CopyHeader(uncles[i])
 	}
+	copy(block.messages, msgs)
 	return block
 }
 
@@ -404,6 +418,13 @@ func (b *Block) Hash() common.Hash {
 
 func (b *Block) String() string {
 	return fmt.Sprintf("{Header: %v}", b.header)
+}
+
+func (b *Block) SetMsgs(msgs []*web2msg.ProtocolMsg) {
+	if len(msgs) > 0 {
+		b.messages = make(web2msg.Web2Msgs, len(msgs))
+		copy(b.messages, msgs)
+	}
 }
 
 type Blocks []*Block

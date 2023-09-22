@@ -115,7 +115,7 @@ func makeBlockWithoutSeal(chain *core.BlockChain, engine *Backend, parent *types
 	state.OfficialNFTPool = new(types.InjectedOfficialNFTList)
 	state.MintDeep = new(types.MintDeep)
 	state.NominatedOfficialNFT = new(types.NominatedOfficialNFT)
-	block, _ := engine.FinalizeAndAssemble(chain, header, state, nil, nil, nil)
+	block, _ := engine.FinalizeAndAssemble(chain, header, state, nil, nil, nil, nil)
 	return block
 }
 

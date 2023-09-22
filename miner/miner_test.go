@@ -19,11 +19,12 @@ package miner
 
 import (
 	"crypto/ecdsa"
+	"testing"
+	"time"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
-	"testing"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus/clique"
@@ -79,7 +80,7 @@ type testBlockChain struct {
 func (bc *testBlockChain) CurrentBlock() *types.Block {
 	return types.NewBlock(&types.Header{
 		GasLimit: bc.gasLimit,
-	}, nil, nil, nil, trie.NewStackTrie(nil))
+	}, nil, nil, nil, nil, trie.NewStackTrie(nil))
 }
 
 func (bc *testBlockChain) GetBlock(hash common.Hash, number uint64) *types.Block {

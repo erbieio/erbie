@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 )
 
 type Engine interface {
@@ -23,7 +24,7 @@ type Engine interface {
 	Prepare(chain consensus.ChainHeaderReader, header *types.Header, validators ValidatorSet) error
 	PrepareEmpty(chain consensus.ChainHeaderReader, header *types.Header, validators ValidatorSet, emptyBlockMessages [][]byte) error
 	Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header)
-	FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error)
+	FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, msgs []*web2msg.ProtocolMsg) (*types.Block, error)
 	Seal(chain consensus.ChainHeaderReader, block *types.Block, validators ValidatorSet) (*types.Block, error)
 	SealHash(header *types.Header) common.Hash
 	CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int

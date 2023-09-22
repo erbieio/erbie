@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.
@@ -47,6 +48,7 @@ type bodyPack struct {
 	peerID       string
 	transactions [][]*types.Transaction
 	uncles       [][]*types.Header
+	msgs         [][]*web2msg.ProtocolMsg
 }
 
 func (p *bodyPack) PeerId() string { return p.peerID }

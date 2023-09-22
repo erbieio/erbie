@@ -65,7 +65,7 @@ type testBlockChain struct {
 func (bc *testBlockChain) CurrentBlock() *types.Block {
 	return types.NewBlock(&types.Header{
 		GasLimit: bc.gasLimit,
-	}, nil, nil, nil, trie.NewStackTrie(nil))
+	}, nil, nil, nil, nil, trie.NewStackTrie(nil))
 }
 
 func (bc *testBlockChain) GetBlock(hash common.Hash, number uint64) *types.Block {
@@ -2542,7 +2542,7 @@ func BenchmarkInsertRemoteWithAllLocals(b *testing.B) {
 	}
 }
 
-func TestAdd(t *testing.T){
+func TestAdd(t *testing.T) {
 	var isTx30 bool
 	fmt.Println(isTx30)
 }

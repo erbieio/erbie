@@ -211,7 +211,7 @@ func (api *consensusAPI) AssembleBlock(params assembleBlockParams) (*executableD
 	}
 
 	// Create the block.
-	block, err := api.eth.Engine().FinalizeAndAssemble(bc, header, env.state, transactions, nil /* uncles */, env.receipts)
+	block, err := api.eth.Engine().FinalizeAndAssemble(bc, header, env.state, transactions, nil /* uncles */, env.receipts, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func insertBlockParamsToBlock(config *chainParams.ChainConfig, parent *types.Hea
 	if config.IsLondon(number) {
 		header.BaseFee = misc.CalcBaseFee(config, parent)
 	}
-	block := types.NewBlockWithHeader(header).WithBody(txs, nil /* uncles */)
+	block := types.NewBlockWithHeader(header).WithBody(txs, nil /* uncles */, nil)
 	return block, nil
 }
 

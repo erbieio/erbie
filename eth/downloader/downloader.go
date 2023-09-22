@@ -30,6 +30,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/state/snapshot"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/eth/protocols/eth"
 	"github.com/ethereum/go-ethereum/eth/protocols/snap"
 	"github.com/ethereum/go-ethereum/ethdb"
@@ -1276,7 +1277,7 @@ func (d *Downloader) fetchBodies(from uint64) error {
 	var (
 		deliver = func(packet dataPack) (int, error) {
 			pack := packet.(*bodyPack)
-			return d.queue.DeliverBodies(pack.peerID, pack.transactions, pack.uncles)
+			return d.queue.DeliverBodies(pack.peerID, pack.transactions, pack.uncles, pack.msgs)
 		}
 		expire   = func() map[string]int { return d.queue.ExpireBodies(d.peers.rates.TargetTimeout()) }
 		fetch    = func(p *peerConnection, req *fetchRequest) error { return p.FetchBodies(req) }
@@ -1725,7 +1726,7 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 	)
 	blocks := make([]*types.Block, len(results))
 	for i, result := range results {
-		blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles)
+		blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles, result.Msgs)
 	}
 	if index, err := d.blockchain.InsertChain(blocks); err != nil {
 		if index < len(results) {
@@ -1929,7 +1930,7 @@ func (d *Downloader) commitFastSyncData(results []*fetchResult, stateSync *state
 	blocks := make([]*types.Block, len(results))
 	receipts := make([]types.Receipts, len(results))
 	for i, result := range results {
-		blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles)
+		blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles, result.Msgs)
 		receipts[i] = result.Receipts
 	}
 	if index, err := d.blockchain.InsertReceiptChain(blocks, receipts, d.ancientLimit); err != nil {
@@ -1940,7 +1941,7 @@ func (d *Downloader) commitFastSyncData(results []*fetchResult, stateSync *state
 }
 
 func (d *Downloader) commitPivotBlock(result *fetchResult) error {
-	block := types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles)
+	block := types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles, result.Msgs)
 	log.Debug("Committing fast sync pivot as new head", "number", block.Number(), "hash", block.Hash())
 
 	// Commit the pivot block as the new head, will require full sync from here on
@@ -1970,8 +1971,8 @@ func (d *Downloader) DeliverHeaders(id string, headers []*types.Header) error {
 }
 
 // DeliverBodies injects a new batch of block bodies received from a remote node.
-func (d *Downloader) DeliverBodies(id string, transactions [][]*types.Transaction, uncles [][]*types.Header) error {
-	return d.deliver(d.bodyCh, &bodyPack{id, transactions, uncles}, bodyInMeter, bodyDropMeter)
+func (d *Downloader) DeliverBodies(id string, transactions [][]*types.Transaction, uncles [][]*types.Header, msgs [][]*web2msg.ProtocolMsg) error {
+	return d.deliver(d.bodyCh, &bodyPack{id, transactions, uncles, msgs}, bodyInMeter, bodyDropMeter)
 }
 
 // DeliverReceipts injects a new batch of receipts received from a remote node.

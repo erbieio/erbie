@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/trie"
 
 	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/ethereum/go-ethereum/common"
@@ -103,6 +104,7 @@ type environment struct {
 	header   *types.Header
 	txs      []*types.Transaction
 	receipts []*types.Receipt
+	msgs     []*web2msg.ProtocolMsg
 }
 
 // task contains all information for consensus engine sealing and result submitting.
@@ -1138,6 +1140,7 @@ func (w *worker) updateSnapshot() {
 		w.current.txs,
 		uncles,
 		w.current.receipts,
+		w.current.msgs,
 		trie.NewStackTrie(nil),
 	)
 	w.snapshotReceipts = copyReceipts(w.current.receipts)
@@ -1170,6 +1173,7 @@ func (w *worker) updateEmptySnapshot() {
 		w.emptycurrent.txs,
 		uncles,
 		w.emptycurrent.receipts,
+		w.emptycurrent.msgs,
 		trie.NewStackTrie(nil),
 	)
 	w.snapshotReceipts = copyReceipts(w.emptycurrent.receipts)
@@ -1522,7 +1526,7 @@ func (w *worker) commitEmptyWork(interrupt *int32, noempty bool, timestamp int64
 	receipts := copyReceipts(w.emptycurrent.receipts)
 	s := w.emptycurrent.state.Copy()
 
-	block, err := w.engine.FinalizeAndAssemble(w.chain, w.emptycurrent.header, s, w.emptycurrent.txs, nil, receipts)
+	block, err := w.engine.FinalizeAndAssemble(w.chain, w.emptycurrent.header, s, w.emptycurrent.txs, nil, receipts, w.emptycurrent.msgs)
 	//block, err := w.engine.FinalizeAndAssemble(w.chain, w.emptycurrent.header, s, w.emptycurrent.txs, nil, receipts
 	if err != nil {
 		log.Info("caver|commit|w.engine.FinalizeAndAssemble", "no", w.emptycurrent.header.Number.Uint64(), "err", err.Error())
@@ -1665,7 +1669,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	// Prefer to locally generated uncle
 	commitUncles(w.localUncles)
 	commitUncles(w.remoteUncles)
-
+	w.current.msgs = w.eth.MsgPool().Pending()
 	// Create an empty block based on temporary copied state for
 	// sealing in advance without waiting block execution finished.
 	if !noempty && atomic.LoadUint32(&w.noempty) == 0 {
@@ -1710,6 +1714,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			return
 		}
 	}
+
 	//deep, err := w.chain.ReadMintDeep(w.chain.CurrentHeader())
 	//fmt.Println("deep", deep, "err", err)
 	w.commit(uncles, w.fullTaskHook, true, tstart)
@@ -1723,7 +1728,7 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 	//to avoid interaction between different tasks.
 	receipts := copyReceipts(w.current.receipts)
 	s := w.current.state.Copy()
-	block, err := w.engine.FinalizeAndAssemble(w.chain, w.current.header, s, w.current.txs, uncles, receipts)
+	block, err := w.engine.FinalizeAndAssemble(w.chain, w.current.header, s, w.current.txs, uncles, receipts, w.current.msgs)
 	if err != nil {
 		log.Info("caver|commit|w.engine.FinalizeAndAssemble", "no", w.current.header.Number.Uint64(), "err", err.Error())
 		return err

@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/istanbul/validator"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	"golang.org/x/crypto/sha3"
@@ -355,13 +356,14 @@ func (e *Engine) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 
 // FinalizeAndAssemble implements consensus.Engine, ensuring no uncles are set,
 // nor block rewards given, and returns the final block.
-func (e *Engine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+func (e *Engine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, msgs []*web2msg.ProtocolMsg) (*types.Block, error) {
 	/// No block rewards in Istanbul, so the state remains as is and uncles are dropped
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = nilUncleHash
 
 	// Assemble and return the final block for sealing
-	return types.NewBlock(header, txs, nil, receipts, new(trie.Trie)), nil
+	block := types.NewBlock(header, txs, nil, receipts, msgs, new(trie.Trie))
+	return block, nil
 }
 
 // Seal generates a new block for the given input block with the local miner's

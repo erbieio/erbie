@@ -34,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/misc"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/types/web2msg"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
@@ -580,12 +581,12 @@ func (c *Clique) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 
 // FinalizeAndAssemble implements consensus.Engine, ensuring no uncles are set,
 // nor block rewards given, and returns the final block.
-func (c *Clique) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+func (c *Clique) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, msgs []*web2msg.ProtocolMsg) (*types.Block, error) {
 	// Finalize block
 	c.Finalize(chain, header, state, txs, uncles)
 
 	// Assemble and return the final block for sealing
-	return types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil)), nil
+	return types.NewBlock(header, txs, nil, receipts, msgs, trie.NewStackTrie(nil)), nil
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks

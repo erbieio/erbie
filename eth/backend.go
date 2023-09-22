@@ -21,12 +21,13 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
@@ -99,6 +100,8 @@ type Ethereum struct {
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 
 	nodekey *ecdsa.PrivateKey
+
+	msgPool *core.MsgPool
 }
 
 // New creates a new Ethereum object (including the
@@ -232,6 +235,7 @@ func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
 	}
 	eth.txPool = core.NewTxPool(config.TxPool, chainConfig, eth.blockchain)
 
+	eth.msgPool = core.NewMsgPool()
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := cacheConfig.TrieCleanLimit + cacheConfig.TrieDirtyLimit + cacheConfig.SnapshotLimit
 	checkpoint := config.Checkpoint
@@ -539,6 +543,7 @@ func (s *Ethereum) Downloader() *downloader.Downloader { return s.handler.downlo
 func (s *Ethereum) Synced() bool                       { return atomic.LoadUint32(&s.handler.acceptTxs) == 1 }
 func (s *Ethereum) ArchiveMode() bool                  { return s.config.NoPruning }
 func (s *Ethereum) BloomIndexer() *core.ChainIndexer   { return s.bloomIndexer }
+func (s *Ethereum) MsgPool() *core.MsgPool             { return s.msgPool }
 
 // Protocols returns all the currently configured
 // network protocols to start.
