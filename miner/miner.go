@@ -45,6 +45,7 @@ type Backend interface {
 	AccountManager() *accounts.Manager
 	GetNodeKey() *ecdsa.PrivateKey
 	FindPeers() map[common.Address]Peer
+	MsgPool() *core.MsgPool
 }
 
 // Config is the configuration parameters of mining.
