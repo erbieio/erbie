@@ -1345,8 +1345,38 @@ func (s *PublicBlockChainAPI) GetPunishedInfo(ctx context.Context, number rpc.Bl
 	if canonicalHeader == nil || err != nil {
 		return nil, errors.New("invalid block number")
 	}
+	if uint64(number.Int64()) < types.SwitchBranchBlock {
+		return pickEvilValidatorsV1(ctx, canonicalHeader, evilAction, engine)
+	} else {
+		return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
+	}
+}
 
-	return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
+func pickEvilValidatorsV1(ctx context.Context, canonicalHeader *types.Header, ea *types.EvilAction, engine consensus.Engine) (*PunishedInfo, error) {
+	var (
+		punishedHeaders []common.Hash
+		totalSigners    []common.Address
+	)
+
+	for _, header := range ea.EvilHeaders {
+		evilSigners, err := engine.Signers(header)
+		if err != nil {
+			break
+		}
+		totalSigners = append(totalSigners, evilSigners...)
+		punishedHeaders = append(punishedHeaders, header.Hash())
+	}
+
+	duplicateElements := common.FindDup(totalSigners)
+
+	if len(punishedHeaders) == 0 || len(duplicateElements) == 0 {
+		return nil, nil
+	}
+
+	return &PunishedInfo{
+		PunishedHash:       punishedHeaders,
+		PunishedValidators: duplicateElements,
+	}, nil
 }
 
 func pickEvilValidatorsV2(ctx context.Context, canonicalHeader *types.Header, ea *types.EvilAction, engine consensus.Engine) (*PunishedInfo, error) {
@@ -3364,6 +3394,7 @@ func (w *PublicWormholesAPI) pickEvilValidatorsV1(ctx context.Context, number rp
 	engine = engine.(consensus.Istanbul)
 
 	for _, header := range ea.EvilHeaders {
+		log.Info("PublicWormholesAPI:pickEvilValidatorsV1", "header", header.Hash(), "number", header.Number.Uint64())
 		evilSigners, err := engine.Signers(header)
 		if err != nil {
 			break
@@ -3373,6 +3404,7 @@ func (w *PublicWormholesAPI) pickEvilValidatorsV1(ctx context.Context, number rp
 	}
 
 	duplicateElements := common.FindDup(totalSigners)
+
 	return punishedHeaders, duplicateElements, nil
 }
 
