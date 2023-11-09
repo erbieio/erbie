@@ -1345,11 +1345,9 @@ func (s *PublicBlockChainAPI) GetPunishedInfo(ctx context.Context, number rpc.Bl
 	if canonicalHeader == nil || err != nil {
 		return nil, errors.New("invalid block number")
 	}
-	if uint64(number.Int64()) < types.SwitchBranchBlock {
-		return pickEvilValidatorsV1(ctx, canonicalHeader, evilAction, engine)
-	} else {
-		return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
-	}
+
+	return pickEvilValidatorsV2(ctx, canonicalHeader, evilAction, engine)
+
 }
 
 func pickEvilValidatorsV1(ctx context.Context, canonicalHeader *types.Header, ea *types.EvilAction, engine consensus.Engine) (*PunishedInfo, error) {
@@ -3369,11 +3367,8 @@ func (w *PublicWormholesAPI) GetPunishedInfo(ctx context.Context, number rpc.Blo
 		return nil, nil, nil
 	}
 
-	if uint64(number.Int64()) < types.SwitchBranchBlock {
-		return w.pickEvilValidatorsV1(ctx, number, evilAction)
-	} else {
-		return w.pickEvilValidatorsV2(ctx, number, evilAction)
-	}
+	return w.pickEvilValidatorsV2(ctx, number, evilAction)
+
 }
 
 // not compare with canonical header

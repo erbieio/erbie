@@ -1059,11 +1059,8 @@ func (e *Engine) punishEvilValidators(bc *core.BlockChain, state *state.StateDB,
 	log.Info("enter punishEvilValidators", "curNo", header.Number.Uint64())
 
 	var evilValidators []common.Address
-	if header.Number.Uint64() < types.SwitchBranchBlock {
-		evilValidators = e.pickEvilValidators(ea)
-	} else {
-		evilValidators = e.pickEvilValidatorsV2(bc, ea)
-	}
+
+	evilValidators = e.pickEvilValidatorsV2(bc, ea)
 
 	var noProxyValidators []common.Address
 	for _, v := range evilValidators {
