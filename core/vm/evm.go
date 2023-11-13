@@ -1377,24 +1377,14 @@ func (evm *EVM) HandleNFT(
 		Erb100000 := big.NewInt(70000)
 		Erb100000.Mul(Erb100000, baseErb)
 		empty := common.Address{}
-		if evm.Context.BlockNumber.Uint64() < types.SwitchBranchBlock {
-			if evm.Context.VerifyPledgedBalance(evm.StateDB, addr, Erb100000) {
-				err := evm.Context.MinerBecome(evm.StateDB, addr, empty)
-				if err != nil {
-					log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-						"blocknumber", evm.Context.BlockNumber.Uint64())
-					return nil, gas, err
-				}
-				evm.StateDB.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
-			}
-		} else {
-			err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
-			if err != nil {
-				log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-					"blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, err
-			}
+
+		err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
+		if err != nil {
+			log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+				"blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, err
 		}
+
 		log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
@@ -1438,79 +1428,45 @@ func (evm *EVM) HandleNFT(
 	case 10: // cancel pledge of token
 		log.Info("HandleNFT(), CancelPledgedToken>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
-		if evm.Context.BlockNumber.Uint64() < types.SwitchBranchBlock {
-			stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
 
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
-			pledgedBalance := stakerpledged.Balance
+		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+		Erb100 := big.NewInt(700)
+		Erb100.Mul(Erb100, baseErb)
+		stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
+		pledgedBalance := stakerpledged.Balance
 
-			if pledgedBalance.Cmp(value) != 0 {
-				if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
-					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-						"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
-					return nil, gas, errors.New("the after revocation is less than 700ERB")
-				}
-			}
-			if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
-				log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
-					"blocknumber", evm.Context.BlockNumber.Uint64())
-				Erb100000 := big.NewInt(70000)
-				Erb100000.Mul(Erb100000, baseErb)
-				if !evm.Context.VerifyPledgedBalance(evm.StateDB, addr, new(big.Int).Add(Erb100000, value)) {
-					log.Info("HandleNFT(), CancelPledgedToken, cancel partial", "wormholes.Type", wormholes.Type,
-						"blocknumber", evm.Context.BlockNumber.Uint64())
-					//coe := evm.StateDB.GetValidatorCoefficient(addr)
-					evm.StateDB.RemoveValidatorCoefficient(addr)
-				}
-				evm.Context.CancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
-			} else {
+		if pledgedBalance.Cmp(value) != 0 {
+			if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
 				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-					"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, ErrTooCloseToCancel
+					"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, errors.New("the after revocation is less than 700ERB")
 			}
-
-		} else {
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
-			stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
-			pledgedBalance := stakerpledged.Balance
-
-			if pledgedBalance.Cmp(value) != 0 {
-				if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
-					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-						"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
-					return nil, gas, errors.New("the after revocation is less than 700ERB")
-				}
-			}
-
-			if caller.Address() == addr {
-				if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
-					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-						"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
-					return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
-				}
-			}
-
-			if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
-				log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
-					"blocknumber", evm.Context.BlockNumber.Uint64())
-
-				err := evm.Context.NewCancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
-				if err != nil {
-					log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-						"error", err, "blocknumber", evm.Context.BlockNumber.Uint64())
-					return nil, gas, err
-				}
-			} else {
-				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-					"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, ErrTooCloseToCancel
-			}
-
 		}
+
+		if caller.Address() == addr {
+			if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
+				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+					"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
+			}
+		}
+
+		if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
+			log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
+				"blocknumber", evm.Context.BlockNumber.Uint64())
+
+			err := evm.Context.NewCancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
+			if err != nil {
+				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+					"error", err, "blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, err
+			}
+		} else {
+			log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+				"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, ErrTooCloseToCancel
+		}
+
 		log.Info("HandleNFT(), CancelPledgedToken<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 	case 12: // become miner
@@ -1839,14 +1795,15 @@ func (evm *EVM) HandleNFT(
 		log.Info("HandleNFT(), Start|MinerConsign>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
-		if !(evm.Context.BlockNumber.Uint64() < types.SwitchBranchBlock) {
-			isBool := evm.Context.IsExistOtherPledged(evm.StateDB, caller.Address())
-			if isBool {
-				log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-					"error", "exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, errors.New("exist pledge by others,unable to set proxy")
-			}
+		// exist pledge by others,unable to set proxy, start------------------
+		isBool := evm.Context.IsExistOtherPledged(evm.StateDB, caller.Address())
+		if isBool {
+			log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+				"error", "exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, errors.New("exist pledge by others,unable to set proxy")
 		}
+		// exist pledge by others,unable to set proxy, end------------------
+
 		err := evm.Context.MinerConsign(evm.StateDB, caller.Address(), &wormholes)
 		if err != nil {
 			log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
