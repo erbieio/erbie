@@ -159,13 +159,17 @@ var (
 		Name:  "dev",
 		Usage: "Ephemeral proof-of-authority network with a pre-funded developer account, mining enabled",
 	}
+	PublicNetFlag = cli.BoolFlag{
+		Name:  "publicnet",
+		Usage: "network: pre-configured erbie test network, mining enabled",
+	}
 	TestNetFlag = cli.BoolFlag{
 		Name:  "testnet",
-		Usage: "Testnet network: pre-configured proof-of-work test network",
+		Usage: "Testnet network: pre-configured erbie test network",
 	}
 	DevNetFlag = cli.BoolFlag{
 		Name:  "devnet",
-		Usage: "network: pre-configured proof-of-work test network, mining enabled",
+		Usage: "network: pre-configured erbie test network, mining enabled",
 	}
 	DeveloperPeriodFlag = cli.IntFlag{
 		Name:  "dev.period",
@@ -853,6 +857,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.RinkebyBootnodes
 	case ctx.GlobalBool(GoerliFlag.Name):
 		urls = params.GoerliBootnodes
+	case ctx.GlobalBool(PublicNetFlag.Name):
+		urls = params.PublicnetBootnodes
 	case ctx.GlobalBool(TestNetFlag.Name):
 		urls = params.TestnetBootnodes
 	case ctx.GlobalBool(DevNetFlag.Name):
@@ -1230,6 +1236,11 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 51896
 			cfg.ChainId = 51896
+		}
+	} else if ctx.GlobalBool(PublicNetFlag.Name) {
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 50888
+			cfg.ChainId = 50888
 		}
 	}
 }
@@ -1696,6 +1707,12 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 		if !ctx.GlobalIsSet(MinerGasPriceFlag.Name) {
 			cfg.Miner.GasPrice = big.NewInt(1)
 		}
+	case ctx.GlobalBool(PublicNetFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 50888
+		}
+		cfg.Genesis = core.DefaultPublicNetGenesisBlock()
+		SetDNSDiscoveryDefaults(cfg, params.PublicNetGenesisHash)
 	case ctx.GlobalBool(TestNetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 51888

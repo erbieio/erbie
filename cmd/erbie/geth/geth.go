@@ -138,6 +138,7 @@ var (
 		utils.RopstenFlag,
 		utils.RinkebyFlag,
 		utils.GoerliFlag,
+		utils.PublicNetFlag,
 		utils.TestNetFlag,
 		utils.DevNetFlag,
 		utils.VMEnableDebugFlag,
@@ -290,6 +291,8 @@ func prepare(ctx *cli.Context) {
 
 	case ctx.GlobalIsSet(utils.DeveloperFlag.Name):
 		log.Info("Starting Geth in ephemeral dev mode...")
+	case ctx.GlobalIsSet(utils.PublicNetFlag.Name):
+		log.Info("Starting erbie in ephemeral public mode...")
 	case ctx.GlobalIsSet(utils.TestNetFlag.Name):
 		log.Info("Starting erbie in ephemeral test mode...")
 	case ctx.GlobalIsSet(utils.DevNetFlag.Name):
