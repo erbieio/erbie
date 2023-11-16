@@ -141,7 +141,7 @@ var (
 	}
 	MainnetFlag = cli.BoolFlag{
 		Name:  "mainnet",
-		Usage: "wormholes mainnet",
+		Usage: "erbie mainnet",
 	}
 	GoerliFlag = cli.BoolFlag{
 		Name:  "goerli",
@@ -161,7 +161,7 @@ var (
 	}
 	PublicNetFlag = cli.BoolFlag{
 		Name:  "publicnet",
-		Usage: "network: pre-configured erbie test network, mining enabled",
+		Usage: "network: pre-configured erbie public network, mining enabled",
 	}
 	TestNetFlag = cli.BoolFlag{
 		Name:  "testnet",
@@ -169,7 +169,7 @@ var (
 	}
 	DevNetFlag = cli.BoolFlag{
 		Name:  "devnet",
-		Usage: "network: pre-configured erbie test network, mining enabled",
+		Usage: "network: pre-configured erbie develop network, mining enabled",
 	}
 	DeveloperPeriodFlag = cli.IntFlag{
 		Name:  "dev.period",
