@@ -299,7 +299,7 @@ func prepare(ctx *cli.Context) {
 		log.Info("Starting erbie in ephemeral dev mode...")
 
 	case !ctx.GlobalIsSet(utils.NetworkIdFlag.Name):
-		log.Info("Starting Geth on Ethereum mainnet...")
+		log.Info("Starting Erbie on erbie mainnet...")
 	}
 
 	PrintLogo()

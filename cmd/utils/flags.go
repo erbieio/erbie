@@ -1237,7 +1237,7 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 			cfg.NetworkId = 51896
 			cfg.ChainId = 51896
 		}
-	} else if ctx.GlobalBool(PublicNetFlag.Name) {
+	} else { // The default network is mainnet(publicnet)
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 50888
 			cfg.ChainId = 50888
@@ -1727,9 +1727,11 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 		SetDNSDiscoveryDefaults(cfg, params.DevNetGenesisHash)
 
 	default:
-		if cfg.NetworkId == 1 {
-			SetDNSDiscoveryDefaults(cfg, params.MainnetGenesisHash)
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 50888
 		}
+		cfg.Genesis = core.DefaultPublicNetGenesisBlock()
+		SetDNSDiscoveryDefaults(cfg, params.PublicNetGenesisHash)
 	}
 }
 
