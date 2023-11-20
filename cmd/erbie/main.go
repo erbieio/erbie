@@ -15,6 +15,9 @@ func main() {
 		return
 	}
 
+	// change "--mainnet" to "--publicnet"
+	changeArgs()
+
 	//sigs := make(chan os.Signal, 1)
 	stopWormhles := make(chan struct{})
 	//done := make(chan bool, 1)
@@ -35,4 +38,20 @@ func main() {
 		}
 	}
 
+}
+
+func changeArgs() {
+	for k, arg := range os.Args {
+		if isMainNet(arg) {
+			os.Args[k] = "--publicnet"
+		}
+	}
+}
+
+func isMainNet(arg string) bool {
+	if arg == "--mainnet" {
+		return true
+	}
+
+	return false
 }
