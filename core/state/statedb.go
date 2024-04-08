@@ -3008,14 +3008,14 @@ func (s *StateDB) SubExchangerBalance(address common.Address, amount *big.Int) {
 func (s *StateDB) GetNFTInfo(nftAddr common.Address) (
 	string,
 	string,
-	//*big.Int,
-	//uint8,
+//*big.Int,
+//uint8,
 	common.Address,
 	common.Address,
 	uint8,
 	uint32,
-	//bool,
-	//*big.Int,
+//bool,
+//*big.Int,
 	common.Address,
 	uint16,
 	common.Address,
@@ -3412,38 +3412,8 @@ func (s *StateDB) ElectNominatedOfficialNFT(blocknumber *big.Int) {
 
 // select nft to be snfts
 func (s *StateDB) ElectNominatedOfficialNFT2(blocknumber *big.Int, hash []byte) {
-	emptyAddress := common.Address{}
-	mod := big.NewInt(0)
+
 	snftStateObject := s.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
-	userMint := s.GetUserMint()
-
-	if userMint.Cmp(big.NewInt(1)) > 0 {
-		for {
-			hash = crypto.Keccak256(hash)
-			mod = new(big.Int).Mod(new(big.Int).SetBytes(hash), userMint)
-			if mod.Cmp(big.NewInt(0)) != 0 {
-				break
-			}
-		}
-
-		nftAddress := common.BytesToAddress(mod.Bytes())
-		nftStateObject := s.GetOrNewNFTStateObject(nftAddress)
-		if nftStateObject != nil {
-			if nftStateObject.NFTOwner() != emptyAddress {
-				injectNFT := &types.InjectedOfficialNFT{
-					Dir:        nftStateObject.GetMetaURL(),
-					StartIndex: new(big.Int).Set(snftStateObject.GetSnfts().MaxIndex()),
-					Number:     types.DefaultNumber,
-					Royalty:    types.DefaultRoyalty,
-					Creator:    nftStateObject.GetCreator().Hex(),
-					Address:    nftAddress,
-				}
-				snftStateObject.AddInjectedSnfts(injectNFT)
-
-				return
-			}
-		}
-	}
 
 	injectNFT := &types.InjectedOfficialNFT{
 		Dir:        types.DefaultDir,
