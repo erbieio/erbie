@@ -91,7 +91,6 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		CancelApproveAddress:    CancelApproveAddress,
 		ChangeNFTApproveAddress: ChangeNFTApproveAddress,
 		CancelNFTApproveAddress: CancelNFTApproveAddress,
-		ExchangeNFTToCurrency:   ExchangeNFTToCurrency,
 		PledgeToken:             PledgeToken,
 		StakerPledge:            StakerPledge,
 		GetPledgedTime:          GetPledgedTime,
@@ -300,16 +299,6 @@ func ChangeNFTApproveAddress(db vm.StateDB, nftAddr common.Address, approveAddr 
 
 func CancelNFTApproveAddress(db vm.StateDB, nftAddr common.Address, approveAddr common.Address) {
 	db.CancelNFTApproveAddress(nftAddr, approveAddr)
-}
-
-func ExchangeNFTToCurrency(db vm.StateDB, address common.Address, nftaddress string, blocknumber *big.Int) error {
-	nftAddr, level, err := GetNftAddressAndLevel(nftaddress)
-	if err != nil {
-		return err
-	}
-
-	db.ExchangeNFTToCurrency(address, nftAddr, blocknumber, level)
-	return nil
 }
 
 func PledgeToken(db vm.StateDB, address common.Address, amount *big.Int, wh *types.Wormholes, blocknumber *big.Int) error {

@@ -170,7 +170,6 @@ type BlockContext struct {
 	CancelApproveAddress    CancelApproveAddressFunc
 	ChangeNFTApproveAddress ChangeNFTApproveAddressFunc
 	CancelNFTApproveAddress CancelNFTApproveAddressFunc
-	ExchangeNFTToCurrency   ExchangeNFTToCurrencyFunc
 	PledgeToken             PledgeTokenFunc
 	StakerPledge            StakerPledgeFunc
 	GetPledgedTime          GetPledgedTimeFunc
@@ -1134,41 +1133,7 @@ func (evm *EVM) HandleNFT(
 			addr)
 		log.Info("HandleNFT(), CancelApproveAddress<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
-	case 6: //NFT exchange
-		log.Info("HandleNFT(), ExchangeNFTToCurrency>>>>>>>>>>", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
-		nftAddress, level1, err := evm.Context.GetNftAddressAndLevel(wormholes.NFTAddress)
-		if err != nil {
-			return nil, gas, err
-		}
-		if !IsOfficialNFT(nftAddress) {
-			log.Error("HandleNFT(), ExchangeNFTToCurrency", "wormholes.Type", wormholes.Type,
-				"nft address", wormholes.NFTAddress, "error", ErrNotMintByOfficial, "blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, ErrNotMintByOfficial
-		}
-		nftOwner := evm.StateDB.GetNFTOwner16(nftAddress)
-		if nftOwner != caller.Address() {
-			log.Error("HandleNFT(), ExchangeNFTToCurrency", "wormholes.Type", wormholes.Type, "nft address", wormholes.NFTAddress,
-				"nft owner", nftOwner, "error", ErrNotOwner, "blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, ErrNotOwner
-		}
-		level2 := evm.StateDB.GetNFTMergeLevel(nftAddress)
-		if int(level2) != level1 {
-			log.Error("HandleNFT(), ExchangeNFTToCurrency", "wormholes.Type", wormholes.Type, "nft address", wormholes.NFTAddress,
-				"input nft level", level1, "real nft level", level2, "error", ErrNotOwner, "blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, ErrNotExistNft
-		}
-		//pledgedFlag := evm.Context.GetPledgedFlag(evm.StateDB, nftAddress)
-		//if pledgedFlag {
-		//	return nil, gas, ErrHasBeenPledged
-		//}
-		evm.Context.ExchangeNFTToCurrency(
-			evm.StateDB,
-			caller.Address(),
-			wormholes.NFTAddress,
-			evm.Context.BlockNumber)
-		log.Info("HandleNFT(), ExchangeNFTToCurrency<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
+
 	case 7: //NFT pledge
 		//log.Info("HandleNFT(), PledgeNFT>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 		//	"blocknumber", evm.Context.BlockNumber.Uint64())
