@@ -336,7 +336,6 @@ func (w *Wormholes) CheckFormat() error {
 		}
 	case 26:
 	case 27:
-	case 28:
 	case 29:
 	//case 30:
 	case 31:
@@ -407,8 +406,6 @@ func (w *Wormholes) TxGas() (uint64, error) {
 		return params.WormholesTx26, nil
 	case 27:
 		return params.WormholesTx27, nil
-	case 28:
-		return params.WormholesTx28, nil
 	case 29:
 		return params.WormholesTx29, nil
 	//case 30:
