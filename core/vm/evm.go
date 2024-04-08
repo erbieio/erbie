@@ -234,7 +234,6 @@ type BlockContext struct {
 	RecoverValidatorCoefficient RecoverValidatorCoefficientFunc
 	ChangeSnftRecipient         ChangeSnftRecipientFunc
 	ChangeSNFTNoMerge           ChangeSNFTNoMergeFunc
-	GetDividend                 GetDividendFunc
 	// Block information
 
 	ParentHeader *types.Header
@@ -1867,17 +1866,6 @@ func (evm *EVM) HandleNFT(
 		log.Info("HandleNFT(), BatchBuyNFTByApproveExchanger<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
-	case 29:
-		log.Info("HandleNFT(), GetDividend>>>>>>>>>>", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
-		err := evm.Context.GetDividend(evm.StateDB, caller.Address())
-		if err != nil {
-			log.Error("HandleNFT(), GetDividend", "wormholes.Type", wormholes.Type,
-				"error", err, "blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, err
-		}
-		log.Info("HandleNFT(), GetDividend<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
 	//case 30:
 	//	log.Info("HandleNFT(), ChangeSNFTNoMerge>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 	//		"blocknumber", evm.Context.BlockNumber.Uint64())

@@ -2014,10 +2014,6 @@ func (s *StateDB) MergeNFT16(nftAddr common.Address, blocknumber *big.Int) (*big
 		mergedNFTs)
 	s.AddLog(log)
 
-	if newMergeStateObject.data.Nft.MergeLevel >= 3 {
-		s.AddSNFTL3Addrs(types.SNFTLevel3AddressList, newMergedAddr)
-	}
-
 	tempValue, _ := s.MergeNFT16(newMergedAddr, blocknumber)
 
 	totalIncreaseValue := new(big.Int).Add(increaseValue, tempValue)
@@ -2508,12 +2504,6 @@ func (s *StateDB) ExchangeNFTToCurrency(address common.Address,
 		initAmount := s.calculateExchangeAmount(nftStateObject.GetNFTMergeLevel(), nftStateObject.GetMergeNumber())
 		amount := s.GetExchangAmount(nftaddress, initAmount)
 		mergeLevel := nftStateObject.GetNFTMergeLevel()
-
-		//remove snft address from dividend list
-		if mergeLevel >= 3 {
-			s.RemoveSNFTL3Addrs(types.SNFTLevel3AddressList, nftStateObject.Address())
-			s.RemoveDividendAddrsOne(types.DividendAddressList, nftStateObject.Address())
-		}
 
 		nftStateObject.CleanNFT()
 		stateObject.AddBalance(amount)

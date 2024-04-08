@@ -20,24 +20,6 @@ var SnftInjectedStorageAddress = common.HexToAddress("0x000000000000000000000000
 // Information of the creator with the highest voting weight
 var NominatedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000005")
 
-// Next dividend amount address
-var PreDividendAmountAddress = common.HexToAddress("0x0000000000000000000000000000000000000006")
-
-// Dividend amount generated per block
-var DividendAmountEachBlock, _ = new(big.Int).SetString("1800000000000000000", 10)
-
-// Current dividend amount address
-var DividendAmountAddress = common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-// Each dividend cycle
-var DividendBlockInterval uint64 = 120960 // a week
-
-// Storage address for the snft level 3 address list
-var SNFTLevel3AddressList = common.HexToAddress("0x0000000000000000000000000000000000000008")
-
-// Storage address for the information of the address list of SNFT level 3 participants in the current dividend
-var DividendAddressList = common.HexToAddress("0x0000000000000000000000000000000000000009")
-
 // Voting contract address
 var VoteContractAddress = common.HexToAddress("0x0000000000000000000000000000000000000010")
 
