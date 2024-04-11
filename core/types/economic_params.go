@@ -29,6 +29,10 @@ var VoteAmountEachBlock, _ = new(big.Int).SetString("800000000000000000", 10)
 // validator reward 0.16 ERB
 var DREBlockReward = big.NewInt(1.6e+17)
 
+// The percentage of rewards that validator receives
+// 10 represents 10 percent
+var PercentageValidatorReward = 10
+
 // Deflation rate
 var DeflationRate = 0.85
 

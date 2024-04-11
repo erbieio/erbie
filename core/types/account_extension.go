@@ -28,9 +28,10 @@ type WormholesExtension struct {
 	//NFTBalance uint64
 	// Indicates the reward method chosen by the miner
 	//RewardFlag uint8 // 0:SNFT 1:ERB default:1
-	SNFTNoMerge     bool
-	LockSNFTFlag    bool
-	StakerExtension StakersExtensionList
+	SNFTNoMerge        bool
+	LockSNFTFlag       bool
+	StakerExtension    StakersExtensionList
+	ValidatorExtension ValidatorsExtensionList
 }
 
 func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
@@ -66,6 +67,7 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 	newWorm.SNFTNoMerge = worm.SNFTNoMerge
 	newWorm.LockSNFTFlag = worm.LockSNFTFlag
 	newWorm.StakerExtension = *worm.StakerExtension.DeepCopy()
+	newWorm.ValidatorExtension = *worm.ValidatorExtension.DeepCopy()
 
 	return &newWorm
 }

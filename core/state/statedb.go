@@ -2322,6 +2322,30 @@ func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address,
 	}
 }
 
+func (s *StateDB) DistributeRewardsToStakers(validators []common.Address, blocknumber *big.Int) {
+	rewardAmount := GetRewardAmount(blocknumber.Uint64(), types.DREBlockReward)
+	stakersPercentage := 100 - types.PercentageValidatorReward
+	sumStakerReward := new(big.Int).Div(new(big.Int).Mul(rewardAmount, big.NewInt(int64(stakersPercentage))), big.NewInt(100))
+	for _, owner := range validators {
+		ownerObject := s.GetOrNewAccountStateObject(owner)
+		if ownerObject != nil {
+			stakerList := ownerObject.GetValidatorExtension()
+			ownerStakerBalance := stakerList.GetBalance(owner)
+			sumStakerBalance := new(big.Int).Sub(stakerList.GetAllBalance(), ownerStakerBalance)
+			actualSumStakerReward := big.NewInt(0)
+			for _, staker := range stakerList.ValidatorExtensions {
+				if staker.Addr != owner {
+					stakerReward := new(big.Int).Div(new(big.Int).Mul(sumStakerReward, staker.Balance), sumStakerBalance)
+					stakerObject := s.GetOrNewAccountStateObject(staker.Addr)
+					stakerObject.AddBalance(stakerReward)
+					actualSumStakerReward.Add(actualSumStakerReward, stakerReward)
+				}
+			}
+			ownerObject.SubBalance(actualSumStakerReward)
+		}
+	}
+}
+
 // - create a nft by user :creator can get a nft , include exchanger, royalty and meta.
 // wormholes chain will assign a nft address to the nft.
 // ````
@@ -2643,6 +2667,7 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 		fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
 		fromObject.StakerPledge(address, amount, blocknumber)
 		toObject.AddPledgedBalance(amount)
+		toObject.AddValidatorExtension(from, amount, blocknumber)
 		fromObject.SetPledgedBlockNumber(blocknumber)
 
 	} else {
@@ -2923,14 +2948,14 @@ func (s *StateDB) SubExchangerBalance(address common.Address, amount *big.Int) {
 func (s *StateDB) GetNFTInfo(nftAddr common.Address) (
 	string,
 	string,
-//*big.Int,
-//uint8,
+	//*big.Int,
+	//uint8,
 	common.Address,
 	common.Address,
 	uint8,
 	uint32,
-//bool,
-//*big.Int,
+	//bool,
+	//*big.Int,
 	common.Address,
 	uint16,
 	common.Address,

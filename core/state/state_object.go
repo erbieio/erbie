@@ -911,6 +911,41 @@ func (s *stateObject) GetStakerExtension() types.StakersExtensionList {
 	return s.data.Worm.StakerExtension
 }
 
+func (s *stateObject) AddValidatorExtension(addr common.Address, amount *big.Int, blocknumber *big.Int) {
+	newStakers := s.data.Worm.ValidatorExtension.DeepCopy()
+	newStakers.AddValidatorPledge(addr, amount, blocknumber)
+	s.SetValidatorExtension(newStakers)
+}
+
+func (s *stateObject) RemoveValidatorExtension(addr common.Address, amount *big.Int) {
+	newStakers := s.data.Worm.ValidatorExtension.DeepCopy()
+	newStakers.RemoveValidatorPledge(addr, amount)
+	s.SetValidatorExtension(newStakers)
+}
+
+func (s *stateObject) SetValidatorExtension(newStakers *types.ValidatorsExtensionList) {
+	s.db.journal.append(validatorExtensionChange{
+		account:               &s.address,
+		oldValidatorExtension: s.data.Worm.ValidatorExtension})
+	s.setValidatorExtension(newStakers)
+}
+
+func (s *stateObject) ValidatorExtensionLength() int {
+	newStakers := s.data.Worm.ValidatorExtension.DeepCopy()
+	if newStakers == nil {
+		return 0
+	}
+	return len(newStakers.ValidatorExtensions)
+}
+
+func (s *stateObject) setValidatorExtension(stakers *types.ValidatorsExtensionList) {
+	s.data.Worm.ValidatorExtension = *stakers
+}
+
+func (s *stateObject) GetValidatorExtension() types.ValidatorsExtensionList {
+	return s.data.Worm.ValidatorExtension
+}
+
 func (s *stateObject) CleanNFT() {
 	//if s.data.NFTPledgedBlockNumber == nil {
 	//	s.data.NFTPledgedBlockNumber = big.NewInt(0)

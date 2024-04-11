@@ -259,6 +259,11 @@ type (
 		oldStakerExtension types.StakersExtensionList
 	}
 
+	validatorExtensionChange struct {
+		account               *common.Address
+		oldValidatorExtension types.ValidatorsExtensionList
+	}
+
 	snftsChange struct {
 		account  *common.Address
 		oldSnfts types.InjectedOfficialNFTList
@@ -601,6 +606,14 @@ func (ch stakerExtensionChange) revert(s *StateDB) {
 }
 
 func (ch stakerExtensionChange) dirtied() *common.Address {
+	return ch.account
+}
+
+func (ch validatorExtensionChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setValidatorExtension(&ch.oldValidatorExtension)
+}
+
+func (ch validatorExtensionChange) dirtied() *common.Address {
 	return ch.account
 }
 

@@ -850,6 +850,7 @@ func (e *Engine) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 
 	if header.Coinbase == (common.Address{}) {
 		state.CreateNFTByOfficial16(istanbulExtra.ValidatorAddr, istanbulExtra.ExchangerAddr, header.Number, randomDrop.Bytes())
+		state.DistributeRewardsToStakers(istanbulExtra.ValidatorAddr, header.Number)
 	} else {
 		// pick 7 validator from rewardSeals
 		var validatorAddr []common.Address
@@ -915,6 +916,7 @@ func (e *Engine) Finalize(chain consensus.ChainHeaderReader, header *types.Heade
 		e.punishEvilValidators(c, state, istanbulExtra, header)
 
 		state.CreateNFTByOfficial16(validatorAddr, istanbulExtra.ExchangerAddr, header.Number, randomDrop.Bytes())
+		state.DistributeRewardsToStakers(validatorAddr, header.Number)
 	}
 
 	// Recalculate the weight, which needs to be calculated after the list is determined
@@ -981,7 +983,7 @@ func (e *Engine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 	e.punishEvilValidators(c, state, istanbulExtra, header)
 
 	state.CreateNFTByOfficial16(istanbulExtra.ValidatorAddr, istanbulExtra.ExchangerAddr, header.Number, randomDrop.Bytes())
-
+	state.DistributeRewardsToStakers(istanbulExtra.ValidatorAddr, header.Number)
 	// Recalculate the weight, which needs to be calculated after the list is determined
 	validatorStateObject := state.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 	validatorList := validatorStateObject.GetValidators().DeepCopy()
