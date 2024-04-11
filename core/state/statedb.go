@@ -1404,8 +1404,7 @@ func (s *StateDB) MergeNFT(nftAddr common.Address) error {
 			nftStateObject.data.Nft.Creator,
 			nftStateObject.data.Nft.Royalty,
 			nftStateObject.data.Nft.Exchanger,
-			metaUrl,
-			nftStateObject.data.Nft.SNFTRecipient)
+			metaUrl)
 	} else {
 		newMergeStateObject = s.GetOrNewNFTStateObject(newMergedAddr)
 		//newMergeStateObject.data.MergeLevel = nftStateObject.data.MergeLevel + 1
@@ -1426,8 +1425,7 @@ func (s *StateDB) MergeNFT(nftAddr common.Address) error {
 			nftStateObject.data.Nft.Creator,
 			nftStateObject.data.Nft.Royalty,
 			nftStateObject.data.Nft.Exchanger,
-			metaUrl,
-			nftStateObject.data.Nft.SNFTRecipient)
+			metaUrl)
 	}
 	//s.updateStateObject(newMergeStateObject)
 	s.MergeNFT(newMergedAddr)
@@ -1539,8 +1537,7 @@ func (s *StateDB) SplitNFT(nftAddr common.Address, level int) {
 					storeStateObject.data.Nft.Creator,
 					storeStateObject.data.Nft.Royalty,
 					storeStateObject.data.Nft.Exchanger,
-					metaUrl,
-					storeStateObject.data.Nft.SNFTRecipient)
+					metaUrl)
 			} else {
 				newSplitStateObject = s.GetOrNewNFTStateObject(splitAddr)
 				//newSplitStateObject.data.MergeLevel = storeStateObject.data.MergeLevel - uint8(i + 1)
@@ -1561,8 +1558,7 @@ func (s *StateDB) SplitNFT(nftAddr common.Address, level int) {
 					storeStateObject.data.Nft.Creator,
 					storeStateObject.data.Nft.Royalty,
 					storeStateObject.data.Nft.Exchanger,
-					metaUrl,
-					storeStateObject.data.Nft.SNFTRecipient)
+					metaUrl)
 			}
 			//s.updateStateObject(newSplitStateObject)
 		}
@@ -1681,12 +1677,6 @@ func (s *StateDB) IsCanMergeNFT16(nftAddr common.Address) bool {
 		return false
 	}
 	emptyAddress := common.Address{}
-
-	// snfts are not merged that the account's SNFTNoMerge is true
-	nftOwner := s.GetNFTOwner16(nftAddr)
-	if nftOwner != emptyAddress && s.GetSNFTNoMerge(nftOwner) {
-		return false
-	}
 
 	nftAddrS := nftAddr.String()
 	if strings.HasPrefix(nftAddrS, "0x") ||
@@ -1948,8 +1938,7 @@ func (s *StateDB) MergeNFT16(nftAddr common.Address, blocknumber *big.Int) (*big
 			nftStateObject.data.Nft.Creator,
 			nftStateObject.data.Nft.Royalty,
 			nftStateObject.data.Nft.Exchanger,
-			metaUrl,
-			nftStateObject.data.Nft.SNFTRecipient)
+			metaUrl)
 	} else {
 		newMergeStateObject = s.GetOrNewNFTStateObject(newMergedAddr)
 		//newMergeStateObject.data.MergeLevel = nftStateObject.data.MergeLevel + 1
@@ -1970,8 +1959,7 @@ func (s *StateDB) MergeNFT16(nftAddr common.Address, blocknumber *big.Int) (*big
 			nftStateObject.data.Nft.Creator,
 			nftStateObject.data.Nft.Royalty,
 			nftStateObject.data.Nft.Exchanger,
-			metaUrl,
-			nftStateObject.data.Nft.SNFTRecipient)
+			metaUrl)
 	}
 	//s.updateStateObject(newMergeStateObject)
 
@@ -2098,8 +2086,7 @@ func (s *StateDB) SplitNFT16(nftAddr common.Address, level int) {
 					storeStateObject.data.Nft.Creator,
 					storeStateObject.data.Nft.Royalty,
 					storeStateObject.data.Nft.Exchanger,
-					metaUrl,
-					storeStateObject.data.Nft.SNFTRecipient)
+					metaUrl)
 			} else {
 				newSplitStateObject = s.GetOrNewNFTStateObject(splitAddr)
 				//newSplitStateObject.data.MergeLevel = storeStateObject.data.MergeLevel - uint8(i + 1)
@@ -2120,8 +2107,7 @@ func (s *StateDB) SplitNFT16(nftAddr common.Address, level int) {
 					storeStateObject.data.Nft.Creator,
 					storeStateObject.data.Nft.Royalty,
 					storeStateObject.data.Nft.Exchanger,
-					metaUrl,
-					storeStateObject.data.Nft.SNFTRecipient)
+					metaUrl)
 			}
 			//s.updateStateObject(newSplitStateObject)
 		}
@@ -2232,7 +2218,6 @@ func GetRewardAmount(blocknumber uint64, initamount *big.Int) *big.Int {
 }
 
 func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address, blocknumber *big.Int, hash []byte) {
-	emptyAddress := common.Address{}
 	// reward ERB or SNFT to validators
 	log.Info("CreateNFTByOfficial16", "validators len=", len(validators), "blocknumber=", blocknumber.Uint64())
 	for _, addr := range validators {
@@ -2283,20 +2268,12 @@ func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address,
 		log.Info("CreateNFTByOfficial16()", "--nftAddr=", nftAddr.String(), "blocknumber=", blocknumber.Uint64())
 		stateObject := s.GetOrNewNFTStateObject(nftAddr)
 		if stateObject != nil {
-			var owner common.Address
-			awardeeObject := s.GetOrNewAccountStateObject(awardee)
-			if awardeeObject != nil {
-				owner = awardeeObject.GetSNFTAgentRecipient()
-			}
-			if owner == emptyAddress {
-				owner = awardee
-			}
 			stateObject.SetNFTInfo(
 				"",
 				"",
 				//big.NewInt(0),
 				//0,
-				owner,
+				awardee,
 				common.Address{},
 				0,
 				1,
@@ -2305,8 +2282,7 @@ func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address,
 				common.HexToAddress(creator),
 				royalty,
 				common.Address{},
-				metaUrl,
-				awardee)
+				metaUrl)
 
 			mintStateObject.AddOfficialMint(big.NewInt(1))
 
@@ -2386,8 +2362,7 @@ func (s *StateDB) CreateNFTByUser(exchanger common.Address,
 			owner,
 			royalty,
 			exchanger,
-			metaurl,
-			owner)
+			metaurl)
 		mintStateObject.AddUserMint(big.NewInt(1))
 
 		nftLog := s.MintNFTLog(nftAddr, blocknumber)
@@ -2642,31 +2617,22 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 		emptyAddress := common.Address{}
 
 		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-		validators := validatorStateObject.GetValidators()
 
-		if validators.Exist(address) {
-			toValidator := validators.GetValidatorByAddr(address)
-			if toValidator.Proxy != emptyAddress && address != from {
-				return errors.New("exist agent, cannot be pledged by others")
-			}
+		newProxy := common.Address{}
+		if wh.ProxyAddress != "" {
+			newProxy = common.HexToAddress(wh.ProxyAddress)
 		}
+
 		stakerStateObject.AddStaker(from, amount)
 		fromObject.SubBalance(amount)
-		var agentRecipient common.Address
-		if wh.ProxyAddress == "" {
-			if fromObject.GetSNFTAgentRecipient() == emptyAddress {
-				agentRecipient = fromObject.address
-			} else {
-				agentRecipient = fromObject.GetSNFTAgentRecipient()
-			}
-		} else {
-			agentRecipient = common.HexToAddress(wh.ProxyAddress)
-		}
 
-		fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url, agentRecipient)
+		fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url)
 		fromObject.StakerPledge(address, amount, blocknumber)
 		toObject.AddPledgedBalance(amount)
+
+		if from == address && newProxy != emptyAddress {
+			toObject.SetValidatorProxy(newProxy)
+		}
 		toObject.AddValidatorExtension(from, amount, blocknumber)
 		fromObject.SetPledgedBlockNumber(blocknumber)
 
@@ -2734,21 +2700,15 @@ func (s *StateDB) MinerBecome(address common.Address, proxy common.Address) erro
 	return nil
 }
 
-func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address) error {
+func (s *StateDB) ResetMinerBecome(address common.Address) error {
 	stateObject := s.GetOrNewAccountStateObject(address)
-	//empty := common.Address{}
 
 	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
 	if stateObject != nil {
-		validator := validatorStateObject.GetValidators()
-		for _, value := range validator.Validators {
-			if value.Addr == address {
-				proxy = value.Proxy
-				validatorStateObject.ResetemoveValidator(address)
-				break
-			}
-		}
+
+		validatorStateObject.ResetemoveValidator(address)
+
 		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
 		Erb10000 := big.NewInt(70000)
 		Erb10000.Mul(Erb10000, baseErb)
@@ -2759,6 +2719,7 @@ func (s *StateDB) ResetMinerBecome(address common.Address, proxy common.Address)
 		if coefficient == 0 {
 			s.AddValidatorCoefficient(address, VALIDATOR_COEFFICIENT)
 		}
+		proxy := stateObject.GetValidatorProxy()
 		validatorStateObject.SetValidatorAmount(address, stateObject.PledgedBalance(), proxy)
 	}
 	return nil
@@ -2805,7 +2766,7 @@ func (s *StateDB) CancelStakerPledge(from, address common.Address, amount *big.I
 		fromObject.AddBalance(amount)
 
 		if fromObject.StakerPledgeLength() == 0 {
-			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
+			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
 			//fromObject.SetExchangerInfoflag(false, blocknumber, "", 0)
 		}
 	}
@@ -2842,7 +2803,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 		fromObject.RemoveStakerPledge(address, amount)
 		toObject.SubPledgedBalance(amount)
 		if fromObject.StakerPledgeLength() == 0 {
-			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
+			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
 		}
 	}
 
@@ -2881,15 +2842,14 @@ func (s *StateDB) OpenExchanger(addr common.Address,
 	blocknumber *big.Int,
 	feerate uint16,
 	exchangername string,
-	exchangerurl string,
-	agentrecipient common.Address) {
+	exchangerurl string) {
 	stateObject := s.GetOrNewAccountStateObject(addr)
 	if stateObject != nil {
 		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
 		stakerStateObject.AddStaker(addr, amount)
 		stateObject.SubBalance(amount)
 		stateObject.SetExchangerBalance(amount)
-		stateObject.OpenExchanger(blocknumber, feerate, exchangername, exchangerurl, agentrecipient)
+		stateObject.OpenExchanger(blocknumber, feerate, exchangername, exchangerurl)
 	}
 }
 
@@ -3511,36 +3471,20 @@ func (s *StateDB) GetUserMint() *big.Int {
 	return nil
 }
 
-func (s *StateDB) ChangeSNFTAgentRecipient(addr common.Address, recipient common.Address) {
+func (s *StateDB) ChangeValidatorProxy(addr common.Address, newValidatorProxy common.Address) {
 	accountStateObject := s.GetOrNewAccountStateObject(addr)
 	if accountStateObject != nil {
-		accountStateObject.SetSNFTAgentRecipient(recipient)
+		accountStateObject.SetValidatorProxy(newValidatorProxy)
 	}
 }
 
-func (s *StateDB) GetSNFTAgentRecipient(addr common.Address) common.Address {
+func (s *StateDB) GetValidatorProxy(addr common.Address) common.Address {
 	accountStateObject := s.GetOrNewAccountStateObject(addr)
 	if accountStateObject != nil {
-		return accountStateObject.GetSNFTAgentRecipient()
+		return accountStateObject.GetValidatorProxy()
 	}
 
 	return common.Address{}
-}
-
-func (s *StateDB) GetSNFTNoMerge(addr common.Address) bool {
-	accountStateObject := s.GetOrNewAccountStateObject(addr)
-	if accountStateObject != nil {
-		return accountStateObject.GetSNFTNoMerge()
-	}
-
-	return false
-}
-
-func (s *StateDB) ChangeSNFTNoMerge(addr common.Address, flag bool) {
-	accountStateObject := s.GetOrNewAccountStateObject(addr)
-	if accountStateObject != nil {
-		accountStateObject.SetSNFTNoMerge(flag)
-	}
 }
 
 func (s *StateDB) GetSNFTL3Addrs(addr common.Address) []common.Address {
@@ -3610,22 +3554,6 @@ func (s *StateDB) RemoveDividendAddrsAll(addr common.Address) {
 	}
 }
 
-func (s *StateDB) GetLockSNFTFlag(addr common.Address) bool {
-	accountStateObject := s.GetOrNewAccountStateObject(addr)
-	if accountStateObject != nil {
-		return accountStateObject.GetLockSNFTFlag()
-	}
-
-	return false
-}
-
-func (s *StateDB) ChangeLockSNFTFlag(addr common.Address, flag bool) {
-	accountStateObject := s.GetOrNewAccountStateObject(addr)
-	if accountStateObject != nil {
-		accountStateObject.SetLockSNFTFlag(flag)
-	}
-}
-
 func (s *StateDB) PunishEvilValidators(evilValidators []common.Address, blocknumber *big.Int) error {
 	if len(evilValidators) == 0 {
 		return nil
@@ -3674,7 +3602,7 @@ func (s *StateDB) PunishEvilValidators(evilValidators []common.Address, blocknum
 				newStakerExtension := accountStateObject.GetStakerExtension()
 				if newStakerExtension.GetLen() == 0 {
 					//accountStateObject.SetExchangerInfoflag(false, blocknumber, "", 0)
-					accountStateObject.SetExchangerInfo(false, blocknumber, 0, "", "", common.Address{})
+					accountStateObject.SetExchangerInfo(false, blocknumber, 0, "", "")
 
 				}
 

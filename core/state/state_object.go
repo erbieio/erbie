@@ -822,8 +822,7 @@ func (s *stateObject) removeNFTApproveAddress(nftApproveAddress common.Address) 
 func (s *stateObject) OpenExchanger(blocknumber *big.Int,
 	feerate uint16,
 	exchangername string,
-	exchangerurl string,
-	agentRecipient common.Address) {
+	exchangerurl string) {
 	if s.data.Worm.ExchangerFlag {
 		return
 	}
@@ -831,30 +830,27 @@ func (s *stateObject) OpenExchanger(blocknumber *big.Int,
 		blocknumber,
 		feerate,
 		exchangername,
-		exchangerurl,
-		agentRecipient)
+		exchangerurl)
 }
 
 func (s *stateObject) CloseExchanger() {
 	if !s.data.Worm.ExchangerFlag {
 		return
 	}
-	s.SetExchangerInfo(false, big.NewInt(0), 0, "", "", common.Address{})
+	s.SetExchangerInfo(false, big.NewInt(0), 0, "", "")
 }
 
 func (s *stateObject) SetExchangerInfo(exchangerflag bool,
 	blocknumber *big.Int,
 	feerate uint16,
 	exchangername string,
-	exchangerurl string,
-	agentrecipient common.Address) {
+	exchangerurl string) {
 	openExchanger := openExchangerChange{
-		address:               &s.address,
-		oldExchangerFlag:      s.data.Worm.ExchangerFlag,
-		oldFeeRate:            s.data.Worm.FeeRate,
-		oldExchangerName:      s.data.Worm.ExchangerName,
-		oldExchangerURL:       s.data.Worm.ExchangerURL,
-		oldSNFTAgentRecipient: s.data.Worm.SNFTAgentRecipient,
+		address:          &s.address,
+		oldExchangerFlag: s.data.Worm.ExchangerFlag,
+		oldFeeRate:       s.data.Worm.FeeRate,
+		oldExchangerName: s.data.Worm.ExchangerName,
+		oldExchangerURL:  s.data.Worm.ExchangerURL,
 	}
 	if s.data.Worm.BlockNumber == nil {
 		openExchanger.oldBlockNumber = nil
@@ -862,21 +858,19 @@ func (s *stateObject) SetExchangerInfo(exchangerflag bool,
 		openExchanger.oldBlockNumber = new(big.Int).Set(s.data.Worm.BlockNumber)
 	}
 	s.db.journal.append(openExchanger)
-	s.setExchangerInfo(exchangerflag, blocknumber, feerate, exchangername, exchangerurl, agentrecipient)
+	s.setExchangerInfo(exchangerflag, blocknumber, feerate, exchangername, exchangerurl)
 }
 
 func (s *stateObject) setExchangerInfo(exchangerflag bool,
 	blocknumber *big.Int,
 	feerate uint16,
 	exchangername string,
-	exchangerurl string,
-	agentrecipient common.Address) {
+	exchangerurl string) {
 	s.data.Worm.ExchangerFlag = exchangerflag
 	s.data.Worm.BlockNumber = blocknumber
 	s.data.Worm.FeeRate = feerate
 	s.data.Worm.ExchangerName = exchangername
 	s.data.Worm.ExchangerURL = exchangerurl
-	s.data.Worm.SNFTAgentRecipient = agentrecipient
 }
 
 func (s *stateObject) StakerPledge(addr common.Address, amount *big.Int, blocknumber *big.Int) {
@@ -986,7 +980,6 @@ func (s *stateObject) cleanNFT() {
 	s.data.Nft.Royalty = 0
 	s.data.Nft.Exchanger = common.Address{}
 	s.data.Nft.MetaURL = ""
-	s.data.Nft.SNFTRecipient = common.Address{}
 }
 
 func (s *stateObject) SetNFTInfo(
@@ -1003,8 +996,7 @@ func (s *stateObject) SetNFTInfo(
 	creator common.Address,
 	royalty uint16,
 	exchanger common.Address,
-	metaURL string,
-	snftRecipient common.Address) {
+	metaURL string) {
 	//if s.data.NFTPledgedBlockNumber == nil {
 	//	s.data.NFTPledgedBlockNumber = big.NewInt(0)
 	//}
@@ -1017,11 +1009,10 @@ func (s *stateObject) SetNFTInfo(
 		oldMergeNumber: s.data.Nft.MergeNumber,
 		//oldPledgedFlag:           s.data.PledgedFlag,
 		//oldNFTPledgedBlockNumber: new(big.Int).Set(s.data.NFTPledgedBlockNumber),
-		oldCreator:       s.data.Nft.Creator,
-		oldRoyalty:       s.data.Nft.Royalty,
-		oldExchanger:     s.data.Nft.Exchanger,
-		oldMetaURL:       s.data.Nft.MetaURL,
-		oldSNFTRecipient: s.data.Nft.SNFTRecipient,
+		oldCreator:   s.data.Nft.Creator,
+		oldRoyalty:   s.data.Nft.Royalty,
+		oldExchanger: s.data.Nft.Exchanger,
+		oldMetaURL:   s.data.Nft.MetaURL,
 	}
 	//change.oldNFTApproveAddressList = append(change.oldNFTApproveAddressList, s.data.NFTApproveAddressList...)
 	change.oldNFTApproveAddressList = s.data.Nft.NFTApproveAddressList
@@ -1039,8 +1030,7 @@ func (s *stateObject) SetNFTInfo(
 		creator,
 		royalty,
 		exchanger,
-		metaURL,
-		snftRecipient)
+		metaURL)
 }
 
 func (s *stateObject) setNFTInfo(
@@ -1057,8 +1047,7 @@ func (s *stateObject) setNFTInfo(
 	creator common.Address,
 	royalty uint16,
 	exchanger common.Address,
-	metaURL string,
-	snftRecipient common.Address) {
+	metaURL string) {
 
 	s.data.Nft.Name = name
 	s.data.Nft.Symbol = symbol
@@ -1073,7 +1062,6 @@ func (s *stateObject) setNFTInfo(
 	s.data.Nft.Royalty = royalty
 	s.data.Nft.Exchanger = exchanger
 	s.data.Nft.MetaURL = metaURL
-	s.data.Nft.SNFTRecipient = snftRecipient
 
 }
 
@@ -1755,38 +1743,21 @@ func (s *stateObject) GetNominee() *types.NominatedOfficialNFT {
 	return nil
 }
 
-func (s *stateObject) GetSNFTAgentRecipient() common.Address {
-	return s.data.Worm.SNFTAgentRecipient
+func (s *stateObject) GetValidatorProxy() common.Address {
+	return s.data.Worm.ValidatorProxy
 }
 
-func (s *stateObject) SetSNFTAgentRecipient(recipient common.Address) {
-	s.db.journal.append(sNFTAgentRecipientChange{
-		account:               &s.address,
-		oldSNFTAgentRecipient: s.data.Worm.SNFTAgentRecipient,
+func (s *stateObject) SetValidatorProxy(newValidatorProxy common.Address) {
+	s.db.journal.append(validatorProxyChange{
+		account:           &s.address,
+		oldValidatorProxy: s.data.Worm.ValidatorProxy,
 	})
 
-	s.setSNFTAgentRecipient(recipient)
+	s.setValidatorProxy(newValidatorProxy)
 }
 
-func (s *stateObject) setSNFTAgentRecipient(recipient common.Address) {
-	s.data.Worm.SNFTAgentRecipient = recipient
-}
-
-func (s *stateObject) GetSNFTNoMerge() bool {
-	return s.data.Worm.SNFTNoMerge
-}
-
-func (s *stateObject) SetSNFTNoMerge(flag bool) {
-	s.db.journal.append(sNFTNoMergeChange{
-		account:        &s.address,
-		oldSNFTNoMerge: s.data.Worm.SNFTNoMerge,
-	})
-
-	s.setSNFTNoMerge(flag)
-}
-
-func (s *stateObject) setSNFTNoMerge(flag bool) {
-	s.data.Worm.SNFTNoMerge = flag
+func (s *stateObject) setValidatorProxy(newValidatorProxy common.Address) {
+	s.data.Worm.ValidatorProxy = newValidatorProxy
 }
 
 func (s *stateObject) GetSNFTL3Addrs() []common.Address {
@@ -1885,21 +1856,4 @@ func (s *stateObject) SetDividendAddrs(snftAddrs []common.Address) {
 
 func (s *stateObject) setDividendAddrs(snftAddrs []common.Address) {
 	s.data.Staker.DividendAddrs = snftAddrs[:]
-}
-
-func (s *stateObject) GetLockSNFTFlag() bool {
-	return s.data.Worm.LockSNFTFlag
-}
-
-func (s *stateObject) SetLockSNFTFlag(flag bool) {
-	s.db.journal.append(lockSNFTFlagChange{
-		account:         &s.address,
-		oldLockSNFTFlag: s.data.Worm.LockSNFTFlag,
-	})
-
-	s.setLockSNFTFlag(flag)
-}
-
-func (s *stateObject) setLockSNFTFlag(flag bool) {
-	s.data.Worm.LockSNFTFlag = flag
 }

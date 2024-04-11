@@ -11,27 +11,23 @@ type WormholesExtension struct {
 	// *** modify to support nft transaction 20211215 ***
 	//Owner common.Address
 	// whether the account has a NFT exchanger
-	ExchangerFlag      bool
-	BlockNumber        *big.Int
-	ExchangerBalance   *big.Int
-	SNFTAgentRecipient common.Address
-	VoteBlockNumber    *big.Int
-	VoteWeight         *big.Int
-	Coefficient        uint8
+	ExchangerFlag    bool
+	BlockNumber      *big.Int
+	ExchangerBalance *big.Int
+	//SNFTAgentRecipient common.Address
+	VoteBlockNumber *big.Int
+	VoteWeight      *big.Int
+	Coefficient     uint8
 	// The ratio that exchanger get.
 	FeeRate       uint16
 	ExchangerName string
 	ExchangerURL  string
 	// ApproveAddress have the right to handle all nfts of the account
 	ApproveAddressList []common.Address
-	// NFTBalance is the nft number that the account have
-	//NFTBalance uint64
-	// Indicates the reward method chosen by the miner
-	//RewardFlag uint8 // 0:SNFT 1:ERB default:1
-	SNFTNoMerge        bool
-	LockSNFTFlag       bool
+
 	StakerExtension    StakersExtensionList
 	ValidatorExtension ValidatorsExtensionList
+	ValidatorProxy     common.Address
 }
 
 func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
@@ -50,7 +46,7 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 	if worm.ExchangerBalance != nil {
 		newWorm.ExchangerBalance = new(big.Int).Set(worm.ExchangerBalance)
 	}
-	newWorm.SNFTAgentRecipient = worm.SNFTAgentRecipient
+	newWorm.ValidatorProxy = worm.ValidatorProxy
 	if worm.VoteBlockNumber != nil {
 		newWorm.VoteBlockNumber = new(big.Int).Set(worm.VoteBlockNumber)
 	}
@@ -64,8 +60,6 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 
 	newWorm.ApproveAddressList = make([]common.Address, len(worm.ApproveAddressList))
 	copy(newWorm.ApproveAddressList, worm.ApproveAddressList)
-	newWorm.SNFTNoMerge = worm.SNFTNoMerge
-	newWorm.LockSNFTFlag = worm.LockSNFTFlag
 	newWorm.StakerExtension = *worm.StakerExtension.DeepCopy()
 	newWorm.ValidatorExtension = *worm.ValidatorExtension.DeepCopy()
 
@@ -74,19 +68,14 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 
 type AccountNFT struct {
 	//Account
-	Name   string
-	Symbol string
-	//Price                 *big.Int
-	//Direction             uint8 // 0:no_tx,1:by,2:sell
+	Name                  string
+	Symbol                string
 	Owner                 common.Address
-	SNFTRecipient         common.Address
 	NFTApproveAddressList common.Address
-	//Auctions map[string][]common.Address
+
 	// MergeLevel is the level of NFT merged
 	MergeLevel  uint8
 	MergeNumber uint32
-	//PledgedFlag           bool
-	//NFTPledgedBlockNumber *big.Int
 
 	Creator   common.Address
 	Royalty   uint16
@@ -99,7 +88,6 @@ func (nft *AccountNFT) DeepCopy() *AccountNFT {
 		Name:                  nft.Name,
 		Symbol:                nft.Symbol,
 		Owner:                 nft.Owner,
-		SNFTRecipient:         nft.SNFTRecipient,
 		NFTApproveAddressList: nft.NFTApproveAddressList,
 		MergeLevel:            nft.MergeLevel,
 		MergeNumber:           nft.MergeNumber,

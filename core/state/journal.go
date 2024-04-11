@@ -158,13 +158,12 @@ type (
 	}
 
 	openExchangerChange struct {
-		address               *common.Address
-		oldExchangerFlag      bool
-		oldBlockNumber        *big.Int
-		oldFeeRate            uint16
-		oldExchangerName      string
-		oldExchangerURL       string
-		oldSNFTAgentRecipient common.Address
+		address          *common.Address
+		oldExchangerFlag bool
+		oldBlockNumber   *big.Int
+		oldFeeRate       uint16
+		oldExchangerName string
+		oldExchangerURL  string
 	}
 
 	nftInfoChange struct {
@@ -177,11 +176,10 @@ type (
 		oldMergeNumber           uint32
 		//oldPledgedFlag           bool
 		//oldNFTPledgedBlockNumber *big.Int
-		oldCreator       common.Address
-		oldRoyalty       uint16
-		oldExchanger     common.Address
-		oldMetaURL       string
-		oldSNFTRecipient common.Address
+		oldCreator   common.Address
+		oldRoyalty   uint16
+		oldExchanger common.Address
+		oldMetaURL   string
 	}
 
 	pledgedBalanceChange struct {
@@ -274,14 +272,9 @@ type (
 		oldNominee types.NominatedOfficialNFT
 	}
 
-	sNFTAgentRecipientChange struct {
-		account               *common.Address
-		oldSNFTAgentRecipient common.Address
-	}
-
-	sNFTNoMergeChange struct {
-		account        *common.Address
-		oldSNFTNoMerge bool
+	validatorProxyChange struct {
+		account           *common.Address
+		oldValidatorProxy common.Address
 	}
 
 	sNFTL3AddrsChange struct {
@@ -292,11 +285,6 @@ type (
 	dividendAddrsChange struct {
 		account          *common.Address
 		oldDividendAddrs []common.Address
-	}
-
-	lockSNFTFlagChange struct {
-		account         *common.Address
-		oldLockSNFTFlag bool
 	}
 )
 
@@ -462,8 +450,7 @@ func (ch openExchangerChange) revert(s *StateDB) {
 		ch.oldBlockNumber,
 		ch.oldFeeRate,
 		ch.oldExchangerName,
-		ch.oldExchangerURL,
-		ch.oldSNFTAgentRecipient)
+		ch.oldExchangerURL)
 }
 
 func (ch openExchangerChange) dirtied() *common.Address {
@@ -638,19 +625,11 @@ func (ch nomineeChange) dirtied() *common.Address {
 	return ch.account
 }
 
-func (ch sNFTAgentRecipientChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSNFTAgentRecipient(ch.oldSNFTAgentRecipient)
+func (ch validatorProxyChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setValidatorProxy(ch.oldValidatorProxy)
 }
 
-func (ch sNFTAgentRecipientChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch sNFTNoMergeChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSNFTNoMerge(ch.oldSNFTNoMerge)
-}
-
-func (ch sNFTNoMergeChange) dirtied() *common.Address {
+func (ch validatorProxyChange) dirtied() *common.Address {
 	return ch.account
 }
 
@@ -667,13 +646,5 @@ func (ch dividendAddrsChange) revert(s *StateDB) {
 }
 
 func (ch dividendAddrsChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch lockSNFTFlagChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setLockSNFTFlag(ch.oldLockSNFTFlag)
-}
-
-func (ch lockSNFTFlagChange) dirtied() *common.Address {
 	return ch.account
 }

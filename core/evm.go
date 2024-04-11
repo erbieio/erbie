@@ -152,8 +152,6 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		//GetPledgedFlag:              GetPledgedFlag,
 		//GetNFTPledgedBlockNumber:    GetNFTPledgedBlockNumber,
 		RecoverValidatorCoefficient: RecoverValidatorCoefficient,
-		ChangeSnftRecipient:         ChangeSnftRecipient,
-		ChangeSNFTNoMerge:           ChangeSNFTNoMerge,
 	}
 }
 
@@ -368,8 +366,8 @@ func IsExistOtherPledged(db vm.StateDB, address common.Address) bool {
 	return false
 }
 
-func ResetMinerBecome(db vm.StateDB, address common.Address, proxy common.Address) error {
-	return db.ResetMinerBecome(address, proxy)
+func ResetMinerBecome(db vm.StateDB, address common.Address) error {
+	return db.ResetMinerBecome(address)
 }
 
 func CancelPledgedToken(db vm.StateDB, address common.Address, amount *big.Int) {
@@ -388,19 +386,9 @@ func OpenExchanger(db vm.StateDB,
 	blocknumber *big.Int,
 	feerate uint16,
 	exchangername string,
-	exchangerurl string,
-	agentAddress string) {
+	exchangerurl string) {
 
-	emptyAddress := common.Address{}
-	var agentRecipient common.Address
-	if agentAddress == "" ||
-		common.HexToAddress(agentAddress) == emptyAddress {
-		agentRecipient = addr
-	} else {
-		agentRecipient = common.HexToAddress(agentAddress)
-	}
-
-	db.OpenExchanger(addr, amount, blocknumber, feerate, exchangername, exchangerurl, agentRecipient)
+	db.OpenExchanger(addr, amount, blocknumber, feerate, exchangername, exchangerurl)
 }
 
 func CloseExchanger(db vm.StateDB,
@@ -2378,14 +2366,4 @@ func BatchBuyNFTByApproveExchanger(
 	//db.AddBalance(InjectRewardAddress, injectRewardAmount)
 
 	return nil
-}
-
-func ChangeSnftRecipient(db vm.StateDB,
-	caller common.Address,
-	recipient string) {
-	db.ChangeSNFTAgentRecipient(caller, common.HexToAddress(recipient))
-}
-
-func ChangeSNFTNoMerge(db vm.StateDB, caller common.Address, noAutoMerge bool) {
-	db.ChangeSNFTNoMerge(caller, noAutoMerge)
 }

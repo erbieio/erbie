@@ -92,11 +92,11 @@ type StateDB interface {
 	GetStakerPledged(common.Address, common.Address) *types.StakerExtension
 	MinerConsign(common.Address, common.Address) error
 	MinerBecome(common.Address, common.Address) error
-	ResetMinerBecome(common.Address, common.Address) error
+	ResetMinerBecome(common.Address) error
 	CancelPledgedToken(common.Address, *big.Int)
 	CancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int)
 	NewCancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int) error
-	OpenExchanger(common.Address, *big.Int, *big.Int, uint16, string, string, common.Address)
+	OpenExchanger(common.Address, *big.Int, *big.Int, uint16, string, string)
 	CloseExchanger(common.Address, *big.Int)
 	GetExchangerFlag(common.Address) bool
 	GetOpenExchangerTime(common.Address) *big.Int
@@ -145,8 +145,6 @@ type StateDB interface {
 	IsOfficialNFT(common.Address) bool
 	GetOfficialMint() *big.Int
 	GetUserMint() *big.Int
-	ChangeSNFTAgentRecipient(common.Address, common.Address)
-	ChangeSNFTNoMerge(common.Address, bool)
 	GetDividendAddrs(common.Address) []common.Address
 	SetDividendAddrs(common.Address, []common.Address)
 }

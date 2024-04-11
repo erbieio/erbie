@@ -70,11 +70,11 @@ type (
 	MinerConsignFunc            func(StateDB, common.Address, *types.Wormholes) error
 	MinerBecomeFunc             func(StateDB, common.Address, common.Address) error
 	IsExistOtherPledgedFunc     func(StateDB, common.Address) bool
-	ResetMinerBecomeFunc        func(StateDB, common.Address, common.Address) error
+	ResetMinerBecomeFunc        func(StateDB, common.Address) error
 	CancelPledgedTokenFunc      func(StateDB, common.Address, *big.Int)
 	CancelStakerPledgeFunc      func(StateDB, common.Address, common.Address, *big.Int, *big.Int)
 	NewCancelStakerPledgeFunc   func(StateDB, common.Address, common.Address, *big.Int, *big.Int) error
-	OpenExchangerFunc           func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string, string)
+	OpenExchangerFunc           func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string)
 	CloseExchangerFunc          func(StateDB, common.Address, *big.Int)
 	GetExchangerFlagFunc        func(StateDB, common.Address) bool
 	GetOpenExchangerTimeFunc    func(StateDB, common.Address) *big.Int
@@ -126,8 +126,6 @@ type (
 	//GetNFTPledgedBlockNumberFunc    func(StateDB, common.Address) *big.Int
 	RecoverValidatorCoefficientFunc           func(StateDB, common.Address) error
 	BatchForcedSaleSNFTByApproveExchangerFunc func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	ChangeSnftRecipientFunc                   func(StateDB, common.Address, string)
-	ChangeSNFTNoMergeFunc                     func(StateDB, common.Address, bool)
 	GetDividendFunc                           func(StateDB, common.Address) error
 )
 
@@ -231,8 +229,6 @@ type BlockContext struct {
 	//GetPledgedFlag              GetPledgedFlagFunc
 	//GetNFTPledgedBlockNumber    GetNFTPledgedBlockNumberFunc
 	RecoverValidatorCoefficient RecoverValidatorCoefficientFunc
-	ChangeSnftRecipient         ChangeSnftRecipientFunc
-	ChangeSNFTNoMerge           ChangeSNFTNoMergeFunc
 	// Block information
 
 	ParentHeader *types.Header
@@ -1170,9 +1166,8 @@ func (evm *EVM) HandleNFT(
 
 		Erb100000 := big.NewInt(70000)
 		Erb100000.Mul(Erb100000, baseErb)
-		empty := common.Address{}
 
-		err := evm.Context.ResetMinerBecome(evm.StateDB, addr, empty)
+		err := evm.Context.ResetMinerBecome(evm.StateDB, addr)
 		if err != nil {
 			log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
@@ -1393,14 +1388,6 @@ func (evm *EVM) HandleNFT(
 		log.Info("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
-	case 25:
-		log.Info("HandleNFT(), ChangeSnftRecipient>>>>>>>>>>", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
-
-		evm.Context.ChangeSnftRecipient(evm.StateDB, caller.Address(), wormholes.ProxyAddress)
-
-		log.Info("HandleNFT(), ChangeSnftRecipient<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
 	case 26:
 		log.Info("HandleNFT(), RecoverValidatorCoefficient>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
