@@ -2749,29 +2749,43 @@ func (s *StateDB) CancelPledgedToken(address common.Address, amount *big.Int) {
 	}
 }
 
-func (s *StateDB) CancelStakerPledge(from, address common.Address, amount *big.Int, blocknumber *big.Int) {
-
-	toObject := s.GetOrNewAccountStateObject(address)
-	fromObject := s.GetOrNewAccountStateObject(from)
-
-	if fromObject != nil && toObject != nil {
-		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-		validatorStateObject.RemoveValidator(address, amount)
-
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.RemoveStaker(from, amount)
-
-		fromObject.RemoveStakerPledge(address, amount)
-		toObject.SubPledgedBalance(amount)
-		fromObject.AddBalance(amount)
-
-		if fromObject.StakerPledgeLength() == 0 {
-			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
-			//fromObject.SetExchangerInfoflag(false, blocknumber, "", 0)
-		}
-	}
-
-}
+//func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *big.Int, blocknumber *big.Int) error {
+//
+//	toObject := s.GetOrNewAccountStateObject(address)
+//	fromObject := s.GetOrNewAccountStateObject(from)
+//
+//	if fromObject != nil && toObject != nil {
+//		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+//		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+//		coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
+//		punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
+//		punishErb.Mul(punishErb, coebaseErb)
+//
+//		if from == address && fromObject.Coefficient() > 0 {
+//			if amount.Cmp(punishErb) < 0 {
+//				return errors.New("cancel pledge for insufficient punish amount")
+//			}
+//			fromObject.AddBalance(new(big.Int).Sub(amount, punishErb))
+//			Zeroaddress := s.GetOrNewAccountStateObject(common.HexToAddress("0x0000000000000000000000000000000000000000"))
+//			Zeroaddress.AddBalance(punishErb)
+//			fromObject.SetCoefficient(VALIDATOR_COEFFICIENT)
+//
+//		} else {
+//			fromObject.AddBalance(amount)
+//		}
+//		validatorStateObject.RemoveValidator(address, amount)
+//		stakerStateObject.RemoveStaker(from, amount)
+//
+//		fromObject.RemoveStakerPledge(address, amount)
+//		toObject.RemoveValidatorExtension(from, amount)
+//		toObject.SubPledgedBalance(amount)
+//		if fromObject.StakerPledgeLength() == 0 {
+//			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
+//		}
+//	}
+//
+//	return nil
+//}
 
 func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *big.Int, blocknumber *big.Int) error {
 
@@ -2781,44 +2795,91 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 	if fromObject != nil && toObject != nil {
 		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
-		punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
-		punishErb.Mul(punishErb, coebaseErb)
-
-		if from == address && fromObject.Coefficient() > 0 {
-			if amount.Cmp(punishErb) < 0 {
-				return errors.New("cancel pledge for insufficient punish amount")
+		if from == address {
+			coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
+			punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
+			punishErb.Mul(punishErb, coebaseErb)
+			if fromObject.Coefficient() > 0 {
+				if amount.Cmp(punishErb) < 0 {
+					return errors.New("cancel pledge for insufficient punish amount")
+				}
+				fromObject.AddBalance(new(big.Int).Sub(amount, punishErb))
+				Zeroaddress := s.GetOrNewAccountStateObject(common.HexToAddress("0x0000000000000000000000000000000000000000"))
+				Zeroaddress.AddBalance(punishErb)
+				fromObject.SetCoefficient(VALIDATOR_COEFFICIENT)
+			} else {
+				fromObject.AddBalance(amount)
 			}
-			fromObject.AddBalance(new(big.Int).Sub(amount, punishErb))
-			Zeroaddress := s.GetOrNewAccountStateObject(common.HexToAddress("0x0000000000000000000000000000000000000000"))
-			Zeroaddress.AddBalance(punishErb)
-			fromObject.SetCoefficient(VALIDATOR_COEFFICIENT)
+
+			validators := fromObject.GetStakerExtension()
+			pledgedAmount := validators.GetBalance(from)
+			if pledgedAmount == amount {
+				// withdraw all pledged amount
+				fromObject.RemoveStakerPledge(address, amount)
+				toObject.RemoveValidatorExtension(from, amount)
+				toObject.SubPledgedBalance(amount)
+				if fromObject.StakerPledgeLength() == 0 {
+					fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
+				}
+
+				validatorStateObject.RemoveValidator(address, amount)
+				stakerStateObject.RemoveStaker(from, amount)
+
+				// Revocation of pledge at current address of other staker
+				s.RevocateAllStakers(address, blocknumber)
+
+			} else {
+				fromObject.RemoveStakerPledge(address, amount)
+				toObject.RemoveValidatorExtension(from, amount)
+				toObject.SubPledgedBalance(amount)
+				if fromObject.StakerPledgeLength() == 0 {
+					fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
+				}
+
+				validatorStateObject.RemoveValidator(address, amount)
+				stakerStateObject.RemoveStaker(from, amount)
+			}
 
 		} else {
 			fromObject.AddBalance(amount)
-		}
-		validatorStateObject.RemoveValidator(address, amount)
-		stakerStateObject.RemoveStaker(from, amount)
 
-		fromObject.RemoveStakerPledge(address, amount)
-		toObject.SubPledgedBalance(amount)
-		if fromObject.StakerPledgeLength() == 0 {
-			fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
+			fromObject.RemoveStakerPledge(address, amount)
+			toObject.RemoveValidatorExtension(from, amount)
+			toObject.SubPledgedBalance(amount)
+			if fromObject.StakerPledgeLength() == 0 {
+				fromObject.SetExchangerInfo(false, blocknumber, 0, "", "")
+			}
+
+			validatorStateObject.RemoveValidator(address, amount)
+			stakerStateObject.RemoveStaker(from, amount)
 		}
+
 	}
 
 	return nil
 }
 
-func (s *StateDB) CancelStakerPledged(address common.Address, amount *big.Int) {
-	stateObject := s.GetOrNewAccountStateObject(address)
-	if stateObject != nil {
-		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-		validatorStateObject.RemoveValidator(address, amount)
+func (s *StateDB) RevocateAllStakers(addr common.Address, blocknumber *big.Int) {
+	addrObject := s.GetOrNewAccountStateObject(addr)
+	stakers := addrObject.GetValidatorExtension()
 
-		stateObject.SubPledgedBalance(amount)
-		stateObject.AddBalance(amount)
+	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
+	stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+
+	for _, staker := range stakers.ValidatorExtensions {
+		stakerObject := s.GetOrNewAccountStateObject(staker.Addr)
+		stakerObject.RemoveStakerPledge(addr, staker.Balance)
+		stakerObject.AddBalance(staker.Balance)
+		addrObject.SubPledgedBalance(staker.Balance)
+
+		if stakerObject.StakerPledgeLength() == 0 {
+			stakerObject.SetExchangerInfo(false, blocknumber, 0, "", "")
+		}
+		validatorStateObject.RemoveValidator(addr, staker.Balance)
+		stakerStateObject.RemoveStaker(staker.Addr, staker.Balance)
 	}
+	// clean up validator extension
+	addrObject.SetValidatorExtension(&types.ValidatorsExtensionList{})
 }
 
 // - open exchanger:

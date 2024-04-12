@@ -100,7 +100,6 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		IsExistOtherPledged:     IsExistOtherPledged,
 		ResetMinerBecome:        ResetMinerBecome,
 		CancelPledgedToken:      CancelPledgedToken,
-		CancelStakerPledge:      CancelStakerPledge,
 		NewCancelStakerPledge:   NewCancelStakerPledge,
 		OpenExchanger:           OpenExchanger,
 		CloseExchanger:          CloseExchanger,
@@ -373,9 +372,7 @@ func ResetMinerBecome(db vm.StateDB, address common.Address) error {
 func CancelPledgedToken(db vm.StateDB, address common.Address, amount *big.Int) {
 	db.CancelPledgedToken(address, amount)
 }
-func CancelStakerPledge(db vm.StateDB, from common.Address, address common.Address, amount *big.Int, blocknumber *big.Int) {
-	db.CancelStakerPledge(from, address, amount, blocknumber)
-}
+
 func NewCancelStakerPledge(db vm.StateDB, from common.Address, address common.Address, amount *big.Int, blocknumber *big.Int) error {
 	return db.NewCancelStakerPledge(from, address, amount, blocknumber)
 }

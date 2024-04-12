@@ -72,7 +72,6 @@ type (
 	IsExistOtherPledgedFunc     func(StateDB, common.Address) bool
 	ResetMinerBecomeFunc        func(StateDB, common.Address) error
 	CancelPledgedTokenFunc      func(StateDB, common.Address, *big.Int)
-	CancelStakerPledgeFunc      func(StateDB, common.Address, common.Address, *big.Int, *big.Int)
 	NewCancelStakerPledgeFunc   func(StateDB, common.Address, common.Address, *big.Int, *big.Int) error
 	OpenExchangerFunc           func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string)
 	CloseExchangerFunc          func(StateDB, common.Address, *big.Int)
@@ -177,7 +176,6 @@ type BlockContext struct {
 	IsExistOtherPledged     IsExistOtherPledgedFunc
 	ResetMinerBecome        ResetMinerBecomeFunc
 	CancelPledgedToken      CancelPledgedTokenFunc
-	CancelStakerPledge      CancelStakerPledgeFunc
 	NewCancelStakerPledge   NewCancelStakerPledgeFunc
 	OpenExchanger           OpenExchangerFunc
 	CloseExchanger          CloseExchangerFunc
@@ -1195,13 +1193,13 @@ func (evm *EVM) HandleNFT(
 			}
 		}
 
-		if caller.Address() == addr {
-			if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
-				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
-					"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
-				return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
-			}
-		}
+		//if caller.Address() == addr {
+		//	if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
+		//		log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+		//			"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
+		//		return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
+		//	}
+		//}
 
 		if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
 			log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
