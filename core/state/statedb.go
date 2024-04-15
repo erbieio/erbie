@@ -3614,50 +3614,7 @@ func (s *StateDB) PunishEvilValidators(evilValidators []common.Address, blocknum
 	}
 
 	for _, evil := range evilValidators {
-		evilStateObject := s.GetOrNewAccountStateObject(evil)
-		if evilStateObject == nil {
-			return errors.New("no exist account")
-		}
-
-		// get all stakers
-		stakers := s.GetStakers(types.StakerStorageAddress).DeepCopy()
-		for _, staker := range stakers.Stakers {
-			accountStateObject := s.GetOrNewAccountStateObject(staker.Addr)
-			if accountStateObject == nil {
-				return errors.New("no exist account")
-			}
-
-			// get validators who staker pledge to
-			stakerExtension := accountStateObject.GetStakerExtension()
-			if stakerExtension.StakerExtensions == nil ||
-				len(stakerExtension.StakerExtensions) == 0 {
-				return errors.New("no validators")
-			}
-
-			if stakerExtension.IsExist(evil) {
-
-				evilBalance := stakerExtension.GetBalance(evil)
-				// subtract balance that staker pledged from the validator
-				evilStateObject.SubPledgedBalance(evilBalance)
-				// remove the validator from staker's StakerExtension
-				accountStateObject.RemoveStakerPledge(evil, evilBalance)
-				// discard the balance to address 0
-				s.AddBalance(common.HexToAddress("0x0000000000000000000000000000000000000000"), evilBalance)
-
-				// remove the validator from the validator list if remove condition is satisfied
-				validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-				validatorStateObject.RemoveValidator(evil, evilBalance)
-
-				// close exchanger if staker is no longer a staker
-				newStakerExtension := accountStateObject.GetStakerExtension()
-				if newStakerExtension.GetLen() == 0 {
-					//accountStateObject.SetExchangerInfoflag(false, blocknumber, "", 0)
-					accountStateObject.SetExchangerInfo(false, blocknumber, 0, "", "")
-
-				}
-
-			}
-		}
+		s.SubValidatorCoefficient(evil, types.DEFAULT_VALIDATOR_COEFFICIENT)
 	}
 
 	return nil
