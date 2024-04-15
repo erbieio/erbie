@@ -2616,14 +2616,11 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 	if fromObject != nil && toObject != nil {
 		emptyAddress := common.Address{}
 
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-
 		newProxy := common.Address{}
 		if wh.ProxyAddress != "" {
 			newProxy = common.HexToAddress(wh.ProxyAddress)
 		}
 
-		stakerStateObject.AddStaker(from, amount)
 		fromObject.SubBalance(amount)
 
 		fromObject.SetExchangerInfo(true, blocknumber, wh.FeeRate, wh.Name, wh.Url)
@@ -2794,7 +2791,6 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 
 	if fromObject != nil && toObject != nil {
 		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
 		if from == address {
 			coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
 			punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
@@ -2823,7 +2819,6 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 				}
 
 				validatorStateObject.RemoveValidator(address, amount)
-				stakerStateObject.RemoveStaker(from, amount)
 
 				// Revocation of pledge at current address of other staker
 				s.RevocateAllStakers(address, blocknumber)
@@ -2837,7 +2832,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 				}
 
 				validatorStateObject.RemoveValidator(address, amount)
-				stakerStateObject.RemoveStaker(from, amount)
+
 			}
 
 		} else {
@@ -2851,7 +2846,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 			}
 
 			validatorStateObject.RemoveValidator(address, amount)
-			stakerStateObject.RemoveStaker(from, amount)
+
 		}
 
 	}
@@ -2864,7 +2859,6 @@ func (s *StateDB) RevocateAllStakers(addr common.Address, blocknumber *big.Int) 
 	stakers := addrObject.GetValidatorExtension()
 
 	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
-	stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
 
 	for _, staker := range stakers.ValidatorExtensions {
 		stakerObject := s.GetOrNewAccountStateObject(staker.Addr)
@@ -2876,7 +2870,7 @@ func (s *StateDB) RevocateAllStakers(addr common.Address, blocknumber *big.Int) 
 			stakerObject.SetExchangerInfo(false, blocknumber, 0, "", "")
 		}
 		validatorStateObject.RemoveValidator(addr, staker.Balance)
-		stakerStateObject.RemoveStaker(staker.Addr, staker.Balance)
+
 	}
 	// clean up validator extension
 	addrObject.SetValidatorExtension(&types.ValidatorsExtensionList{})
@@ -2906,8 +2900,6 @@ func (s *StateDB) OpenExchanger(addr common.Address,
 	exchangerurl string) {
 	stateObject := s.GetOrNewAccountStateObject(addr)
 	if stateObject != nil {
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.AddStaker(addr, amount)
 		stateObject.SubBalance(amount)
 		stateObject.SetExchangerBalance(amount)
 		stateObject.OpenExchanger(blocknumber, feerate, exchangername, exchangerurl)
@@ -2927,8 +2919,6 @@ func (s *StateDB) CloseExchanger(addr common.Address,
 	if stateObject != nil {
 		if blocknumber.Cmp(stateObject.GetBlockNumber()) > 0 {
 			amount := stateObject.ExchangerBalance()
-			stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-			stakerStateObject.RemoveStaker(addr, amount)
 			stateObject.AddBalance(amount)
 			stateObject.SetExchangerBalance(new(big.Int).SetInt64(0))
 			stateObject.CloseExchanger()
@@ -2939,8 +2929,6 @@ func (s *StateDB) CloseExchanger(addr common.Address,
 func (s *StateDB) AddExchangerToken(address common.Address, amount *big.Int) {
 	stateObject := s.GetOrNewAccountStateObject(address)
 	if stateObject != nil {
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.AddStaker(address, amount)
 		stateObject.SubBalance(amount)
 		stateObject.AddExchangerBalance(amount)
 	}
@@ -2949,8 +2937,6 @@ func (s *StateDB) AddExchangerToken(address common.Address, amount *big.Int) {
 func (s *StateDB) SubExchangerToken(address common.Address, amount *big.Int) {
 	stateObject := s.GetOrNewAccountStateObject(address)
 	if stateObject != nil {
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.RemoveStaker(address, amount)
 		stateObject.SubExchangerBalance(amount)
 		stateObject.AddBalance(amount)
 	}
@@ -2959,8 +2945,6 @@ func (s *StateDB) SubExchangerToken(address common.Address, amount *big.Int) {
 func (s *StateDB) SubExchangerBalance(address common.Address, amount *big.Int) {
 	stateObject := s.GetOrNewAccountStateObject(address)
 	if stateObject != nil {
-		stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-		stakerStateObject.RemoveStaker(address, amount)
 		stateObject.SubExchangerBalance(amount)
 		stateObject.AddBalance(amount)
 	}
@@ -3654,10 +3638,6 @@ func (s *StateDB) PunishEvilValidators(evilValidators []common.Address, blocknum
 				// remove the validator from the validator list if remove condition is satisfied
 				validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 				validatorStateObject.RemoveValidator(evil, evilBalance)
-
-				// remove the staker from the validator list if remove condition is satisfied
-				stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
-				stakerStateObject.RemoveStaker(staker.Addr, evilBalance)
 
 				// close exchanger if staker is no longer a staker
 				newStakerExtension := accountStateObject.GetStakerExtension()
