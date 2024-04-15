@@ -151,6 +151,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		//GetPledgedFlag:              GetPledgedFlag,
 		//GetNFTPledgedBlockNumber:    GetNFTPledgedBlockNumber,
 		RecoverValidatorCoefficient: RecoverValidatorCoefficient,
+		IsExistStakerStorageAddress: IsExistStakerStorageAddress,
 	}
 }
 
@@ -480,6 +481,12 @@ func VerifyPledgedBalance(db vm.StateDB, addr common.Address, amount *big.Int) b
 
 func VerifyStakerPledgedBalance(db vm.StateDB, from common.Address, addr common.Address, amount *big.Int) bool {
 	return db.GetStakerPledgedBalance(from, addr).Cmp(amount) >= 0
+}
+
+func IsExistStakerStorageAddress(db vm.StateDB, address common.Address) bool {
+	pdcs := db.GetStakerStorageAddress()
+
+	return pdcs.IsExist(address)
 }
 
 func VerifyCancelValidatorPledgedBalance(db vm.StateDB, addr common.Address, amount *big.Int) bool {

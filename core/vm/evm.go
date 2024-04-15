@@ -126,6 +126,7 @@ type (
 	RecoverValidatorCoefficientFunc           func(StateDB, common.Address) error
 	BatchForcedSaleSNFTByApproveExchangerFunc func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
 	GetDividendFunc                           func(StateDB, common.Address) error
+	IsExistStakerStorageAddressFunc           func(StateDB, common.Address) bool
 )
 
 func (evm *EVM) precompile(addr common.Address) (PrecompiledContract, bool) {
@@ -227,6 +228,7 @@ type BlockContext struct {
 	//GetPledgedFlag              GetPledgedFlagFunc
 	//GetNFTPledgedBlockNumber    GetNFTPledgedBlockNumberFunc
 	RecoverValidatorCoefficient RecoverValidatorCoefficientFunc
+	IsExistStakerStorageAddress IsExistStakerStorageAddressFunc
 	// Block information
 
 	ParentHeader *types.Header
@@ -1008,16 +1010,17 @@ func (evm *EVM) HandleNFT(
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
 	case 1: //transfer nft
-		//nftAddress, _, err := evm.Context.GetNftAddressAndLevel(wormholes.NFTAddress)
-		//if err != nil {
-		//	log.Error("HandleNFT(), TransferNFT", "wormholes.Type", wormholes.Type, "error",
-		//		err, "blocknumber", evm.Context.BlockNumber.Uint64())
-		//	return nil, gas, err
-		//}
+
 		if evm.Context.VerifyNFTOwner(evm.StateDB, wormholes.NFTAddress, caller.Address()) {
-			//if !evm.StateDB.Exist(nftAddress) {
-			//	evm.StateDB.CreateAccount(nftAddress)
-			//}
+
+			// whether pdc(snft) is first transfer
+			if IsOfficialNFT(common.HexToAddress(wormholes.NFTAddress)) {
+				if !evm.Context.IsExistStakerStorageAddress(evm.StateDB, caller.Address()) {
+					log.Info("HandleNFT(), TransferNFT pdc not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
+						"blocknumber", evm.Context.BlockNumber.Uint64())
+				}
+			}
+
 			log.Info("HandleNFT(), TransferNFT>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 			err := evm.Context.TransferNFT(evm.StateDB, wormholes.NFTAddress, addr, evm.Context.BlockNumber)
@@ -1226,6 +1229,11 @@ func (evm *EVM) HandleNFT(
 		if value.Cmp(big.NewInt(0)) <= 0 {
 			return nil, gas, ErrTransAmount
 		}
+		if IsOfficialNFT(common.HexToAddress(wormholes.Buyer.NFTAddress)) {
+			log.Error("HandleNFT(), BuyNFTBySellerOrExchanger. no trade pdc ", "wormholes.Type", wormholes.Type,
+				"blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, ErrNoTrade
+		}
 		err := evm.Context.BuyNFTBySellerOrExchanger(
 			evm.StateDB,
 			evm.Context.BlockNumber,
@@ -1245,6 +1253,11 @@ func (evm *EVM) HandleNFT(
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 		if value.Cmp(big.NewInt(0)) <= 0 {
 			return nil, gas, ErrTransAmount
+		}
+		if IsOfficialNFT(common.HexToAddress(wormholes.Seller1.NFTAddress)) {
+			log.Error("HandleNFT(), BuyNFTByBuyer. no trade pdc ", "wormholes.Type", wormholes.Type,
+				"blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, ErrNoTrade
 		}
 		err := evm.Context.BuyNFTByBuyer(
 			evm.StateDB,
@@ -1306,6 +1319,11 @@ func (evm *EVM) HandleNFT(
 		if value.Cmp(big.NewInt(0)) <= 0 {
 			return nil, gas, ErrTransAmount
 		}
+		if IsOfficialNFT(common.HexToAddress(wormholes.Buyer.NFTAddress)) {
+			log.Error("HandleNFT(), BuyNFTByApproveExchanger. no trade pdc ", "wormholes.Type", wormholes.Type,
+				"blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, ErrNoTrade
+		}
 		err := evm.Context.BuyNFTByApproveExchanger(
 			evm.StateDB,
 			evm.Context.BlockNumber,
@@ -1345,6 +1363,11 @@ func (evm *EVM) HandleNFT(
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 		if value.Cmp(big.NewInt(0)) <= 0 {
 			return nil, gas, ErrTransAmount
+		}
+		if IsOfficialNFT(common.HexToAddress(wormholes.Buyer.NFTAddress)) {
+			log.Error("HandleNFT(), BuyNFTByExchanger. no trade pdc ", "wormholes.Type", wormholes.Type,
+				"blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, ErrNoTrade
 		}
 		err := evm.Context.BuyNFTByExchanger(
 			evm.StateDB,

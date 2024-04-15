@@ -2876,6 +2876,15 @@ func (s *StateDB) RevocateAllStakers(addr common.Address, blocknumber *big.Int) 
 	addrObject.SetValidatorExtension(&types.ValidatorsExtensionList{})
 }
 
+func (s *StateDB) GetStakerStorageAddress() *types.StakerList {
+	stakerStateObject := s.GetOrNewStakerStateObject(types.StakerStorageAddress)
+	if stakerStateObject != nil {
+		stakers := stakerStateObject.GetStakers()
+		return stakers
+	}
+	return nil
+}
+
 // - open exchanger:
 // ````
 // {

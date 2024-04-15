@@ -146,6 +146,7 @@ type StateDB interface {
 	GetUserMint() *big.Int
 	GetDividendAddrs(common.Address) []common.Address
 	SetDividendAddrs(common.Address, []common.Address)
+	GetStakerStorageAddress() *types.StakerList
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM
