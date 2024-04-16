@@ -82,3 +82,19 @@ var DefaultCreator string = "0x0000000000000000000000000000000000000000"
 // if TransactionType is erbie, the input data of the transaction is "type Wormholes struct".
 var TransactionType = "erbie:"
 var TransactionTypeLen = 6
+
+func StakerBase() *big.Int {
+	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+	Erb100 := big.NewInt(700)
+	Erb100.Mul(Erb100, baseErb)
+
+	return Erb100
+}
+
+func ValidatorBase() *big.Int {
+	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+	Erb100000 := big.NewInt(70000)
+	Erb100000.Mul(Erb100000, baseErb)
+
+	return Erb100000
+}

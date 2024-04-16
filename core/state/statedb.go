@@ -2706,10 +2706,7 @@ func (s *StateDB) ResetMinerBecome(address common.Address) error {
 
 		validatorStateObject.ResetemoveValidator(address)
 
-		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-		Erb10000 := big.NewInt(70000)
-		Erb10000.Mul(Erb10000, baseErb)
-		if stateObject.PledgedBalance().Cmp(Erb10000) < 0 {
+		if stateObject.PledgedBalance().Cmp(types.ValidatorBase()) < 0 {
 			return nil
 		}
 		coefficient := s.GetValidatorCoefficient(address)

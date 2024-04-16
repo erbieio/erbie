@@ -404,10 +404,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 		case 10:
 			//pledgedBalance := st.state.GetStakerPledgedBalance(msg.From(), st.to())
 			//if pledgedBalance.Cmp(msg.Value()) != 0 {
-			//	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			//	Erb1000 := big.NewInt(700)
-			//	Erb1000.Mul(Erb1000, baseErb)
-			//if msg.Value().Sign() > 0 && !st.evm.Context.VerifyStakerPledgedBalance(st.state, msg.From(), st.to(), new(big.Int).Add(msg.Value(), Erb1000)) {
+			//if msg.Value().Sign() > 0 && !st.evm.Context.VerifyStakerPledgedBalance(st.state, msg.From(), st.to(), new(big.Int).Add(msg.Value(), types.StakerBase())) {
 			//	return nil, fmt.Errorf("%w: address %v", ErrInsufficientFundsForTransfer, msg.From().Hex())
 			//}
 			//if msg.Value().Sign() > 0 && !st.evm.Context.CanTransfer(st.state, msg.From(), msg.Value()) {
@@ -485,10 +482,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 				return nil, fmt.Errorf("%w: address %v", ErrInsufficientFundsForTransfer, msg.From().Hex())
 			}
 		case 22:
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
-			if msg.Value().Sign() > 0 && !st.evm.Context.VerifyExchangerBalance(st.state, msg.From(), new(big.Int).Add(msg.Value(), Erb100)) {
+			if msg.Value().Sign() > 0 && !st.evm.Context.VerifyExchangerBalance(st.state, msg.From(), new(big.Int).Add(msg.Value(), types.StakerBase())) {
 				return nil, fmt.Errorf("%w: address %v", ErrInsufficientFundsForTransfer, msg.From().Hex())
 			}
 		//case 24:

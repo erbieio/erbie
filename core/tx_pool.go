@@ -623,10 +623,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		switch wormholes.Type {
 		case 9:
 			pledgedBalance := pool.currentState.GetPledgedBalance(*tx.To())
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
-			if pledgedBalance.Cmp(Erb100) < 0 {
+			if pledgedBalance.Cmp(types.StakerBase()) < 0 {
 				if from != *tx.To() {
 					log.Error("validateTx()", "from pledge balance not more than 700 ERB")
 					return errors.New("from pledge balance not more than 700 ERB")
@@ -652,10 +649,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 				}
 				stakerBalance := pool.currentState.GetStakerPledgedBalance(from, *tx.To())
 				if stakerBalance.Cmp(tx.Value()) != 0 {
-					baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-					Erb1000 := big.NewInt(700)
-					Erb1000.Mul(Erb1000, baseErb)
-					if tx.Value().Sign() > 0 && stakerBalance.Cmp(new(big.Int).Add(tx.Value(), Erb1000)) < 0 {
+					if tx.Value().Sign() > 0 && stakerBalance.Cmp(new(big.Int).Add(tx.Value(), types.StakerBase())) < 0 {
 						return ErrInsufficientFundsForTransfer
 					}
 				}
@@ -765,10 +759,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 			if pool.currentState.GetBalance(from).Cmp(tx.GasFee()) < 0 {
 				return ErrInsufficientFunds
 			}
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
-			if pool.currentState.GetExchangerBalance(from).Cmp(new(big.Int).Add(tx.Value(), Erb100)) < 0 {
+			if pool.currentState.GetExchangerBalance(from).Cmp(new(big.Int).Add(tx.Value(), types.StakerBase())) < 0 {
 				return ErrInsufficientFunds
 			}
 		case 24:

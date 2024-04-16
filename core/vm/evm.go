@@ -440,10 +440,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		case 10:
 			pledgedBalance := evm.StateDB.GetStakerPledgedBalance(caller.Address(), addr)
 			if pledgedBalance.Cmp(value) != 0 {
-				baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-				Erb1000 := big.NewInt(700)
-				Erb1000.Mul(Erb1000, baseErb)
-				if value.Sign() > 0 && !evm.Context.VerifyStakerPledgedBalance(evm.StateDB, caller.Address(), addr, new(big.Int).Add(value, Erb1000)) {
+				if value.Sign() > 0 && !evm.Context.VerifyStakerPledgedBalance(evm.StateDB, caller.Address(), addr, new(big.Int).Add(value, types.StakerBase())) {
 					log.Error("Call()", "insufficient balance for transfer")
 					return nil, gas, ErrInsufficientBalance
 				}
@@ -519,10 +516,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 				return nil, gas, ErrInsufficientBalance
 			}
 		case 22:
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100 := big.NewInt(700)
-			Erb100.Mul(Erb100, baseErb)
-			if value.Sign() > 0 && !evm.Context.VerifyExchangerBalance(evm.StateDB, caller.Address(), new(big.Int).Add(value, Erb100)) {
+			if value.Sign() > 0 && !evm.Context.VerifyExchangerBalance(evm.StateDB, caller.Address(), new(big.Int).Add(value, types.StakerBase())) {
 				return nil, gas, ErrInsufficientBalance
 			}
 		//case 24:
@@ -1132,13 +1126,10 @@ func (evm *EVM) HandleNFT(
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
 	case 9: //staker token
-		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-		Erb100 := big.NewInt(700)
-		Erb100.Mul(Erb100, baseErb)
 
 		stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
-		if stakerpledged.Balance.Cmp(Erb100) < 0 {
-			if value.Cmp(Erb100) < 0 {
+		if stakerpledged.Balance.Cmp(types.StakerBase()) < 0 {
+			if value.Cmp(types.StakerBase()) < 0 {
 				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type,
 					"error", ErrNotMoreThan100ERB, "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, ErrNotMoreThan100ERB
@@ -1165,9 +1156,6 @@ func (evm *EVM) HandleNFT(
 			return nil, gas, ErrInsufficientBalance
 		}
 
-		Erb100000 := big.NewInt(70000)
-		Erb100000.Mul(Erb100000, baseErb)
-
 		err := evm.Context.ResetMinerBecome(evm.StateDB, addr)
 		if err != nil {
 			log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
@@ -1182,14 +1170,11 @@ func (evm *EVM) HandleNFT(
 		log.Info("HandleNFT(), CancelPledgedToken>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
-		baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-		Erb100 := big.NewInt(700)
-		Erb100.Mul(Erb100, baseErb)
 		stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
 		pledgedBalance := stakerpledged.Balance
 
 		if pledgedBalance.Cmp(value) != 0 {
-			if Erb100.Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
+			if types.StakerBase().Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
 				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
 					"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, errors.New("the after revocation is less than 700ERB")
