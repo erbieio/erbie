@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-// NFT and sNFT minting sequence storage address
+// NFT and CSBT minting sequence storage address
 var MintDeepStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000001")
 
 // validators storage address
@@ -15,7 +15,7 @@ var ValidatorStorageAddress = common.HexToAddress("0x000000000000000000000000000
 var StakerStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000003")
 
 // Storage address for selected creator information
-var SnftInjectedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000004")
+var CsbtInjectedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000004")
 
 // Information of the creator with the highest voting weight
 var NominatedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000005")
@@ -60,19 +60,19 @@ var ConsensusValidatorsNum = 11
 // Number of validators receiving rewards
 var ValidatorRewardNum = 7
 
-// The number of stakers receiving SNFT rewards
+// The number of stakers receiving CSBT rewards
 var StakerRewardNum = 4
 
-// 一期包含的snft碎片数量
-// snft版税
-// 系统默认的snft的创建者
-// The default location for storing metadata of SNFT in the system
+// 一期包含的CSBT碎片数量
+// CSBT版税
+// 系统默认的CSBT的创建者
+// The default location for storing metadata of CSBT in the system
 var DefaultDir string = "/ipfs/Qmf3xw9rEmsjJdQTV3ZcyF4KfYGtxMkXdNQ8YkVqNmLHY8"
 
-// The number of SNFT fragments included in the first phase
+// The number of CSBT fragments included in the first phase
 var DefaultNumber uint64 = 4096
 
-// snft royalty
+// CSBT royalty
 var DefaultRoyalty uint16 = 1000
 
 // default creator

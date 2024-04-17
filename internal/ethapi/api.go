@@ -782,11 +782,9 @@ func (s *PublicBlockChainAPI) GetBlockBeneficiaryAddressByNumber(ctx context.Con
 		beneficiaryList = append(beneficiaryList, &beneficiaryAddress)
 	}
 	for _, owner := range exchangers {
-		//nftAddr, _, ok := snftExchangePool.PopAddress(new(big.Int).SetUint64(uint64(number)))
-		//if !ok {
+
 		nftAddr := common.BytesToAddress(officialMint.Bytes())
 		officialMint.Add(officialMint, big.NewInt(1))
-		//}
 
 		beneficiaryAddress := BeneficiaryAddress{
 			Address:    owner,
@@ -927,7 +925,7 @@ func (s *PublicBlockChainAPI) GetCurrentNFTInfo(ctx context.Context, number rpc.
 	if st == nil || err != nil {
 		return nil
 	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
+	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
 	if length := len(InjectedList.InjectedOfficialNFTs); length > 0 {
 		return InjectedList.InjectedOfficialNFTs[length-1]
 	} else {
@@ -940,7 +938,7 @@ func (s *PublicBlockChainAPI) GetInjectedNFTInfo(ctx context.Context, number rpc
 	if st == nil || err != nil {
 		return nil
 	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
+	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
 	return InjectedList
 }
 
@@ -1058,7 +1056,7 @@ func (s *PublicBlockChainAPI) CalculateExchangeAmount(level uint8, mergenumber u
 	}
 }
 
-func (s *PublicBlockChainAPI) GetForcedSaleSNFTAddresses(ctx context.Context,
+func (s *PublicBlockChainAPI) GetForcedSaleCSBTAddresses(ctx context.Context,
 	nftParentAddress string, buyer common.Address, blockNrOrHash rpc.BlockNumberOrHash) []common.Address {
 
 	var nftAddrs []common.Address
@@ -1101,7 +1099,7 @@ func (s *PublicBlockChainAPI) GetForcedSaleSNFTAddresses(ctx context.Context,
 		siblingOwner := st.GetNFTOwner16(siblingAddr)
 		if siblingOwner != emptyAddress &&
 			siblingOwner != buyer {
-			log.Debug("GetForcedSaleSNFTAddresses",
+			log.Debug("GetForcedSaleCSBTAddresses",
 				"siblingAddr", siblingAddr.String(), "owner", siblingOwner.String(), "buyer", buyer.String())
 			nftAddrs = append(nftAddrs, siblingAddr)
 		}
@@ -2222,11 +2220,9 @@ func (w *PublicWormholesAPI) GetBlockBeneficiaryAddressByNumber(ctx context.Cont
 		beneficiaryList = append(beneficiaryList, &beneficiaryAddress)
 	}
 	for _, owner := range exchangers {
-		//nftAddr, _, ok := snftExchangePool.PopAddress(new(big.Int).SetUint64(uint64(number)))
-		//if !ok {
+
 		nftAddr := common.BytesToAddress(officialMint.Bytes())
 		officialMint.Add(officialMint, big.NewInt(1))
-		//}
 
 		beneficiaryAddress := BeneficiaryAddress{
 			Address:    owner,
@@ -2342,7 +2338,7 @@ func (w *PublicWormholesAPI) GetCurrentNFTInfo(ctx context.Context, number rpc.B
 	if st == nil || err != nil {
 		return nil
 	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
+	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
 	if length := len(InjectedList.InjectedOfficialNFTs); length > 0 {
 		return InjectedList.InjectedOfficialNFTs[length-1]
 	} else {
@@ -2355,7 +2351,7 @@ func (w *PublicWormholesAPI) GetInjectedNFTInfo(ctx context.Context, number rpc.
 	if st == nil || err != nil {
 		return nil
 	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
+	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
 	return InjectedList
 }
 

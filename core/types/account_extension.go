@@ -14,10 +14,9 @@ type WormholesExtension struct {
 	ExchangerFlag    bool
 	BlockNumber      *big.Int
 	ExchangerBalance *big.Int
-	//SNFTAgentRecipient common.Address
-	VoteBlockNumber *big.Int
-	VoteWeight      *big.Int
-	Coefficient     uint8
+	VoteBlockNumber  *big.Int
+	VoteWeight       *big.Int
+	Coefficient      uint8
 	// The ratio that exchanger get.
 	FeeRate       uint16
 	ExchangerName string
@@ -104,7 +103,7 @@ type AccountStaker struct {
 	Mint          MintDeep
 	Validators    ValidatorList
 	Stakers       StakerList
-	Snfts         InjectedOfficialNFTList
+	Csbts         InjectedOfficialNFTList
 	Nominee       *NominatedOfficialNFT `rlp:"nil"`
 	SNFTL3Addrs   []common.Address
 	DividendAddrs []common.Address
@@ -122,7 +121,7 @@ func (staker *AccountStaker) DeepCopy() *AccountStaker {
 
 	newStaker.Validators = *staker.Validators.DeepCopy()
 	newStaker.Stakers = *staker.Stakers.DeepCopy()
-	newStaker.Snfts = *staker.Snfts.DeepCopy()
+	newStaker.Csbts = *staker.Csbts.DeepCopy()
 
 	if staker.Nominee != nil {
 		nominee := &NominatedOfficialNFT{}

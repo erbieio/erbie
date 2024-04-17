@@ -1647,7 +1647,7 @@ func (s *StateDB) ChangeNFTOwner(nftAddr common.Address,
 //		return common.Address{}
 //	}
 //
-// if snfts have been merged, original snfts are not exist, they become a new merged snft
+// if csbts have been merged, original csbts are not exist, they become a new merged csbt
 func (s *StateDB) GetNFTOwner16(nftAddr common.Address) common.Address {
 	stateObject := s.GetOrNewNFTStateObject(nftAddr)
 	if stateObject != nil {
@@ -2137,8 +2137,8 @@ func (s *StateDB) InjectOfficialNFT(dir string,
 		Royalty:    royalty,
 		Creator:    creator,
 	}
-	snftStateObject := s.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
-	snftStateObject.AddInjectedSnfts(injectNFT)
+	csbtStateObject := s.GetOrNewStakerStateObject(types.CsbtInjectedStorageAddress)
+	csbtStateObject.AddInjectedCsbts(injectNFT)
 }
 
 /*
@@ -2239,8 +2239,8 @@ func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address,
 	}
 
 	mintStateObject := s.GetOrNewStakerStateObject(types.MintDeepStorageAddress)
-	snftStateObject := s.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
-	InjectedSnfts := snftStateObject.GetSnfts()
+	csbtStateObject := s.GetOrNewStakerStateObject(types.CsbtInjectedStorageAddress)
+	InjectedCsbts := csbtStateObject.GetCsbts()
 
 	for _, awardee := range exchangers {
 		nftAddr := common.Address{}
@@ -2253,7 +2253,7 @@ func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address,
 			log.Info("CreateNFTByOfficial16()", "blocknumber=", blocknumber.Uint64())
 		}
 		nftAddr = common.BytesToAddress(mintStateObject.OfficialMint().Bytes())
-		injectedInfo := InjectedSnfts.GetInjectedInfo(nftAddr)
+		injectedInfo := InjectedCsbts.GetInjectedInfo(nftAddr)
 		if injectedInfo == nil {
 			return
 		}
@@ -2290,9 +2290,9 @@ func (s *StateDB) CreateNFTByOfficial16(validators, exchangers []common.Address,
 	}
 
 	// Try to delete expired InjectedOfficialNFTs
-	snftStateObject.RemoveInjectSnfts(new(big.Int).Sub(mintStateObject.OfficialMint(), big.NewInt(1)))
+	csbtStateObject.RemoveInjectCsbts(new(big.Int).Sub(mintStateObject.OfficialMint(), big.NewInt(1)))
 
-	if InjectedSnfts.RemainderNum(mintStateObject.OfficialMint()) <= 110 {
+	if InjectedCsbts.RemainderNum(mintStateObject.OfficialMint()) <= 110 {
 		//s.ElectNominatedOfficialNFT(blocknumber)
 		s.ElectNominatedOfficialNFT2(blocknumber, hash)
 	}
@@ -3315,7 +3315,7 @@ func (s *StateDB) VoteOfficialNFT(nominatedOfficialNFT *types.NominatedOfficialN
 // vote to be snfts
 func (s *StateDB) ElectNominatedOfficialNFT(blocknumber *big.Int) {
 	emptyAddress := common.Address{}
-	snftStateObject := s.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
+	csbtStateObject := s.GetOrNewStakerStateObject(types.CsbtInjectedStorageAddress)
 	nomineeStateObject := s.GetOrNewStakerStateObject(types.NominatedStorageAddress)
 	nominee := nomineeStateObject.GetNominee()
 	if nominee != nil &&
@@ -3332,7 +3332,7 @@ func (s *StateDB) ElectNominatedOfficialNFT(blocknumber *big.Int) {
 		voteBlockNumber := s.GetVoteBlockNumber(nominee.Address)
 		subNumber := new(big.Int).Sub(blocknumber, voteBlockNumber)
 		injectNFT.VoteWeight = new(big.Int).Mul(voteWeight, subNumber)
-		snftStateObject.AddInjectedSnfts(injectNFT)
+		csbtStateObject.AddInjectedCsbts(injectNFT)
 		//s.SubVoteWeight(s.NominatedOfficialNFT.Address, voteWeight)
 		s.SetVoteBlockNumber(nominee.Address, blocknumber)
 
@@ -3343,17 +3343,17 @@ func (s *StateDB) ElectNominatedOfficialNFT(blocknumber *big.Int) {
 	} else {
 		injectNFT := &types.InjectedOfficialNFT{
 			Dir:        types.DefaultDir,
-			StartIndex: new(big.Int).Set(snftStateObject.GetSnfts().MaxIndex()),
+			StartIndex: new(big.Int).Set(csbtStateObject.GetCsbts().MaxIndex()),
 			Number:     types.DefaultNumber,
 			Royalty:    types.DefaultRoyalty,
 			Creator:    types.DefaultCreator,
 		}
-		snftStateObject.AddInjectedSnfts(injectNFT)
+		csbtStateObject.AddInjectedCsbts(injectNFT)
 	}
 
 	tempNominatedNFT := types.NominatedOfficialNFT{}
 	tempNominatedNFT.Dir = types.DefaultDir
-	tempNominatedNFT.StartIndex = new(big.Int).Set(snftStateObject.GetSnfts().MaxIndex())
+	tempNominatedNFT.StartIndex = new(big.Int).Set(csbtStateObject.GetCsbts().MaxIndex())
 	tempNominatedNFT.Number = types.DefaultNumber
 	tempNominatedNFT.Royalty = types.DefaultRoyalty
 	tempNominatedNFT.Creator = types.DefaultCreator
@@ -3364,16 +3364,16 @@ func (s *StateDB) ElectNominatedOfficialNFT(blocknumber *big.Int) {
 // select nft to be snfts
 func (s *StateDB) ElectNominatedOfficialNFT2(blocknumber *big.Int, hash []byte) {
 
-	snftStateObject := s.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
+	csbtStateObject := s.GetOrNewStakerStateObject(types.CsbtInjectedStorageAddress)
 
 	injectNFT := &types.InjectedOfficialNFT{
 		Dir:        types.DefaultDir,
-		StartIndex: new(big.Int).Set(snftStateObject.GetSnfts().MaxIndex()),
+		StartIndex: new(big.Int).Set(csbtStateObject.GetCsbts().MaxIndex()),
 		Number:     types.DefaultNumber,
 		Royalty:    types.DefaultRoyalty,
 		Creator:    types.DefaultCreator,
 	}
-	snftStateObject.AddInjectedSnfts(injectNFT)
+	csbtStateObject.AddInjectedCsbts(injectNFT)
 
 }
 
@@ -3418,8 +3418,8 @@ func (s *StateDB) GetVoteBlockNumber(addr common.Address) *big.Int {
 }
 
 func (s *StateDB) NextIndex() *big.Int {
-	snftStateObject := s.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
-	return snftStateObject.GetSnfts().MaxIndex()
+	csbtStateObject := s.GetOrNewStakerStateObject(types.CsbtInjectedStorageAddress)
+	return csbtStateObject.GetCsbts().MaxIndex()
 }
 
 //func (s *StateDB) ChangeRewardFlag(addr common.Address, flag uint8) {
@@ -3482,11 +3482,11 @@ func (s *StateDB) GetValidators(addr common.Address) *types.ValidatorList {
 	return nil
 }
 
-func (s *StateDB) GetSnfts(addr common.Address) *types.InjectedOfficialNFTList {
-	snftStateObject := s.GetOrNewStakerStateObject(addr)
-	if snftStateObject != nil {
-		snfts := snftStateObject.GetSnfts()
-		return snfts
+func (s *StateDB) GetCsbts(addr common.Address) *types.InjectedOfficialNFTList {
+	csbtStateObject := s.GetOrNewStakerStateObject(addr)
+	if csbtStateObject != nil {
+		csbts := csbtStateObject.GetCsbts()
+		return csbts
 	}
 
 	return nil

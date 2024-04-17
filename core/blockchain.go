@@ -2881,7 +2881,7 @@ func (bc *BlockChain) GetRandomDrop(header *types.Header) (hash common.Hash, err
 		return common.Hash{}, errors.New("get stakers error")
 	}
 
-	prevCreator := db.GetSnfts(types.SnftInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
+	prevCreator := db.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
 
 	// Obtain random landing points according to the surrounding chain algorithm
 	randomHash := GetRandomDropV2(validatorList, stakers, header, common.HexToAddress(prevCreator))
@@ -2917,7 +2917,7 @@ func (bc *BlockChain) Random11ValidatorFromPool(header *types.Header) (*types.Va
 		return nil, errors.New("get stakers error")
 	}
 
-	prevCreator := db.GetSnfts(types.SnftInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
+	prevCreator := db.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
 
 	// Obtain random landing points according to the surrounding chain algorithm
 	randomHash := GetRandomDropV2(validatorList, stakers, header, common.HexToAddress(prevCreator))
@@ -2999,7 +2999,7 @@ func (bc *BlockChain) Random11ValidatorWithOutProxy(header *types.Header) (*type
 		return nil, errors.New("get stakers error")
 	}
 
-	prevCreator := db.GetSnfts(types.SnftInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
+	prevCreator := db.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
 
 	// Obtain random landing points according to the surrounding chain algorithm
 	randomHash := GetRandomDropV2(validatorList, stakers, header, common.HexToAddress(prevCreator))
@@ -3065,17 +3065,6 @@ func (bc *BlockChain) WriteMintDeep(header *types.Header, mintDeep *types.MintDe
 func (bc *BlockChain) ReadMintDeep(header *types.Header) (*types.MintDeep, error) {
 	return rawdb.ReadMintDeep(bc.db, header.Hash(), header.Number.Uint64())
 }
-
-//func (bc *BlockChain) WriteSNFTExchangePool(header *types.Header, SNFTExchangePool *types.SNFTExchangeList) {
-//	poolBatch := bc.db.NewBatch()
-//	rawdb.WriteSNFTExchangePool(poolBatch, header.Hash(), header.Number.Uint64(), SNFTExchangePool)
-//	if err := poolBatch.Write(); err != nil {
-//		log.Crit("Failed to write SNFTExchangePool disk", "err", err)
-//	}
-//}
-//func (bc *BlockChain) ReadSNFTExchangePool(header *types.Header) (*types.SNFTExchangeList, error) {
-//	return rawdb.ReadSNFTExchangePool(bc.db, header.Hash(), header.Number.Uint64())
-//}
 
 func (bc *BlockChain) WriteOfficialNFTPool(header *types.Header, OfficialNFTPool *types.InjectedOfficialNFTList) {
 	poolBatch := bc.db.NewBatch()

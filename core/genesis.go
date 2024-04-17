@@ -324,13 +324,13 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 		Royalty:    g.Royalty,
 		Creator:    g.Creator,
 	}
-	snftStateObject := statedb.GetOrNewStakerStateObject(types.SnftInjectedStorageAddress)
-	snftStateObject.AddInjectedSnfts(&officialNFT)
+	csbtStateObject := statedb.GetOrNewStakerStateObject(types.CsbtInjectedStorageAddress)
+	csbtStateObject.AddInjectedCsbts(&officialNFT)
 
 	nomineeStateObject := statedb.GetOrNewStakerStateObject(types.NominatedStorageAddress)
 	tempNominatedNFT := types.NominatedOfficialNFT{}
 	tempNominatedNFT.Dir = types.DefaultDir
-	tempNominatedNFT.StartIndex = new(big.Int).Set(snftStateObject.GetSnfts().MaxIndex())
+	tempNominatedNFT.StartIndex = new(big.Int).Set(csbtStateObject.GetCsbts().MaxIndex())
 	tempNominatedNFT.Number = types.DefaultNumber
 	tempNominatedNFT.Royalty = types.DefaultRoyalty
 	tempNominatedNFT.Creator = types.DefaultCreator

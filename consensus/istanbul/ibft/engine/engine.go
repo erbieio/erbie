@@ -563,7 +563,7 @@ func (e *Engine) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 			return errors.New("get stakers error")
 		}
 
-		prevCreator := statedb.GetSnfts(types.SnftInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
+		prevCreator := statedb.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
 
 		// Obtain random landing points according to the surrounding chain algorithm
 		randomHash := core.GetRandomDropV2(validatorList, stakers, parent, common.HexToAddress(prevCreator))

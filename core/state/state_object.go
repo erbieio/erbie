@@ -123,30 +123,6 @@ type Account struct {
 	Extra    []byte
 }
 
-//type WormholesExtension struct {
-//	PledgedBalance     *big.Int
-//	PledgedBlockNumber *big.Int
-//	// *** modify to support nft transaction 20211215 ***
-//	//Owner common.Address
-//	// whether the account has a NFT exchanger
-//	ExchangerFlag    bool
-//	BlockNumber      *big.Int
-//	ExchangerBalance *big.Int
-//	VoteBlockNumber  *big.Int
-//	VoteWeight       *big.Int
-//	Coefficient      uint8
-//	// The ratio that exchanger get.
-//	FeeRate       uint16
-//	ExchangerName string
-//	ExchangerURL  string
-//	// ApproveAddress have the right to handle all nfts of the account
-//	ApproveAddressList []common.Address
-//	// NFTBalance is the nft number that the account have
-//	//NFTBalance uint64
-//	// Indicates the reward method chosen by the miner
-//	//RewardFlag uint8 // 0:SNFT 1:ERB default:1
-//}
-
 // *** modify to support nft transaction 20211215 begin ***
 
 func (acc *Account) IsApproveAddress(address common.Address) bool {
@@ -1684,34 +1660,34 @@ func (s *stateObject) GetStakers() *types.StakerList {
 	return nil
 }
 
-func (s *stateObject) AddInjectedSnfts(InjectedSnft *types.InjectedOfficialNFT) {
-	newSnfts := s.data.Staker.Snfts.DeepCopy()
-	newSnfts.InjectedOfficialNFTs = append(newSnfts.InjectedOfficialNFTs, InjectedSnft)
-	s.SetSnfts(newSnfts)
+func (s *stateObject) AddInjectedCsbts(InjectedCsbt *types.InjectedOfficialNFT) {
+	newCsbts := s.data.Staker.Csbts.DeepCopy()
+	newCsbts.InjectedOfficialNFTs = append(newCsbts.InjectedOfficialNFTs, InjectedCsbt)
+	s.SetCsbts(newCsbts)
 }
 
-func (s *stateObject) RemoveInjectSnfts(num *big.Int) {
-	newSnfts := s.data.Staker.Snfts.DeepCopy()
-	newSnfts.DeleteExpireElem(num)
-	s.SetSnfts(newSnfts)
+func (s *stateObject) RemoveInjectCsbts(num *big.Int) {
+	newCsbts := s.data.Staker.Csbts.DeepCopy()
+	newCsbts.DeleteExpireElem(num)
+	s.SetCsbts(newCsbts)
 }
 
-func (s *stateObject) SetSnfts(snfts *types.InjectedOfficialNFTList) {
-	s.db.journal.append(snftsChange{
+func (s *stateObject) SetCsbts(csbts *types.InjectedOfficialNFTList) {
+	s.db.journal.append(csbtsChange{
 		account:  &s.address,
-		oldSnfts: s.data.Staker.Snfts,
+		oldCsbts: s.data.Staker.Csbts,
 	})
 
-	s.setSnfts(snfts)
+	s.setCsbts(csbts)
 }
 
-func (s *stateObject) setSnfts(snfts *types.InjectedOfficialNFTList) {
-	s.data.Staker.Snfts = *snfts
+func (s *stateObject) setCsbts(csbts *types.InjectedOfficialNFTList) {
+	s.data.Staker.Csbts = *csbts
 }
 
-func (s *stateObject) GetSnfts() *types.InjectedOfficialNFTList {
+func (s *stateObject) GetCsbts() *types.InjectedOfficialNFTList {
 	if s.data.Staker != nil {
-		return &s.data.Staker.Snfts
+		return &s.data.Staker.Csbts
 	}
 
 	return nil

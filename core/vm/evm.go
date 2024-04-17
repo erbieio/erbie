@@ -360,7 +360,7 @@ func RecoverAddress(msg string, sigStr string) (common.Address, error) {
 	return crypto.PubkeyToAddress(*rpk), nil
 }
 
-func GetSnftAddrs(db StateDB, nftParentAddress string, addr common.Address) []common.Address {
+func GetCsbtAddrs(db StateDB, nftParentAddress string, addr common.Address) []common.Address {
 	var nftAddrs []common.Address
 	emptyAddress := common.Address{}
 	if strings.HasPrefix(nftParentAddress, "0x") ||
@@ -1007,10 +1007,10 @@ func (evm *EVM) HandleNFT(
 
 		if evm.Context.VerifyNFTOwner(evm.StateDB, wormholes.NFTAddress, caller.Address()) {
 
-			// whether pdc(snft) is first transfer
+			// whether csbt is first transfer
 			if IsOfficialNFT(common.HexToAddress(wormholes.NFTAddress)) {
 				if !evm.Context.IsExistStakerStorageAddress(evm.StateDB, caller.Address()) {
-					log.Info("HandleNFT(), TransferNFT pdc not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
+					log.Info("HandleNFT(), TransferNFT csbt not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
 						"blocknumber", evm.Context.BlockNumber.Uint64())
 				}
 			}
@@ -1215,7 +1215,7 @@ func (evm *EVM) HandleNFT(
 			return nil, gas, ErrTransAmount
 		}
 		if IsOfficialNFT(common.HexToAddress(wormholes.Buyer.NFTAddress)) {
-			log.Error("HandleNFT(), BuyNFTBySellerOrExchanger. no trade pdc ", "wormholes.Type", wormholes.Type,
+			log.Error("HandleNFT(), BuyNFTBySellerOrExchanger. no trade csbt ", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrNoTrade
 		}
@@ -1240,7 +1240,7 @@ func (evm *EVM) HandleNFT(
 			return nil, gas, ErrTransAmount
 		}
 		if IsOfficialNFT(common.HexToAddress(wormholes.Seller1.NFTAddress)) {
-			log.Error("HandleNFT(), BuyNFTByBuyer. no trade pdc ", "wormholes.Type", wormholes.Type,
+			log.Error("HandleNFT(), BuyNFTByBuyer. no trade csbt ", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrNoTrade
 		}
@@ -1305,7 +1305,7 @@ func (evm *EVM) HandleNFT(
 			return nil, gas, ErrTransAmount
 		}
 		if IsOfficialNFT(common.HexToAddress(wormholes.Buyer.NFTAddress)) {
-			log.Error("HandleNFT(), BuyNFTByApproveExchanger. no trade pdc ", "wormholes.Type", wormholes.Type,
+			log.Error("HandleNFT(), BuyNFTByApproveExchanger. no trade csbt ", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrNoTrade
 		}
@@ -1350,7 +1350,7 @@ func (evm *EVM) HandleNFT(
 			return nil, gas, ErrTransAmount
 		}
 		if IsOfficialNFT(common.HexToAddress(wormholes.Buyer.NFTAddress)) {
-			log.Error("HandleNFT(), BuyNFTByExchanger. no trade pdc ", "wormholes.Type", wormholes.Type,
+			log.Error("HandleNFT(), BuyNFTByExchanger. no trade csbt ", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrNoTrade
 		}

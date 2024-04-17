@@ -893,31 +893,6 @@ func ReadMintDeep(db ethdb.Reader, hash common.Hash, number uint64) (*types.Mint
 	return mintDeep, nil
 }
 
-//// WriteSNFTExchangePool stores SNFTExchangePool into the database.
-//func WriteSNFTExchangePool(db ethdb.KeyValueWriter, hash common.Hash, number uint64, SNFTExchangePool *types.SNFTExchangeList) {
-//	data, err := rlp.EncodeToBytes(SNFTExchangePool)
-//	if err != nil {
-//		log.Crit("Failed to RLP SNFTExchangePool", "err", err)
-//	}
-//	if err := db.Put(snftExchangePoolKey(number, hash), data); err != nil {
-//		log.Crit("Failed to store SNFTExchangePool", "err", err)
-//	}
-//}
-//
-//// ReadSNFTExchangePool retrieves the SNFTExchangePool corresponding to the hash.
-//func ReadSNFTExchangePool(db ethdb.Reader, hash common.Hash, number uint64) (*types.SNFTExchangeList, error) {
-//	data, err := db.Get(snftExchangePoolKey(number, hash))
-//	if err != nil {
-//		return nil, err
-//	}
-//	SNFTExchangePool := new(types.SNFTExchangeList)
-//	if err := rlp.Decode(bytes.NewReader(data), SNFTExchangePool); err != nil {
-//		log.Error("Invalid SNFTExchangePool RLP", "hash", hash, "err", err)
-//		return nil, err
-//	}
-//	return SNFTExchangePool, nil
-//}
-
 // WriteOfficialNFTPool stores OfficialNFTPool into the database.
 func WriteOfficialNFTPool(db ethdb.KeyValueWriter, hash common.Hash, number uint64, OfficialNFTPool *types.InjectedOfficialNFTList) {
 	data, err := rlp.EncodeToBytes(OfficialNFTPool)

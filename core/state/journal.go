@@ -262,9 +262,9 @@ type (
 		oldValidatorExtension types.ValidatorsExtensionList
 	}
 
-	snftsChange struct {
+	csbtsChange struct {
 		account  *common.Address
-		oldSnfts types.InjectedOfficialNFTList
+		oldCsbts types.InjectedOfficialNFTList
 	}
 
 	nomineeChange struct {
@@ -604,11 +604,11 @@ func (ch validatorExtensionChange) dirtied() *common.Address {
 	return ch.account
 }
 
-func (ch snftsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSnfts(&ch.oldSnfts)
+func (ch csbtsChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setCsbts(&ch.oldCsbts)
 }
 
-func (ch snftsChange) dirtied() *common.Address {
+func (ch csbtsChange) dirtied() *common.Address {
 	return ch.account
 }
 
