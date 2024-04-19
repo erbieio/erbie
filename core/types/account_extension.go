@@ -8,21 +8,9 @@ import (
 type WormholesExtension struct {
 	PledgedBalance     *big.Int
 	PledgedBlockNumber *big.Int
-	// *** modify to support nft transaction 20211215 ***
-	//Owner common.Address
-	// whether the account has a NFT exchanger
-	ExchangerFlag    bool
-	BlockNumber      *big.Int
-	ExchangerBalance *big.Int
-	VoteBlockNumber  *big.Int
-	VoteWeight       *big.Int
-	Coefficient      uint8
-	// The ratio that exchanger get.
-	FeeRate       uint16
-	ExchangerName string
-	ExchangerURL  string
-	// ApproveAddress have the right to handle all nfts of the account
-	ApproveAddressList []common.Address
+	VoteBlockNumber    *big.Int
+	VoteWeight         *big.Int
+	Coefficient        uint8
 
 	StakerExtension    StakersExtensionList
 	ValidatorExtension ValidatorsExtensionList
@@ -38,13 +26,7 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 	if worm.PledgedBlockNumber != nil {
 		newWorm.PledgedBlockNumber = new(big.Int).Set(worm.PledgedBlockNumber)
 	}
-	newWorm.ExchangerFlag = worm.ExchangerFlag
-	if worm.BlockNumber != nil {
-		newWorm.BlockNumber = new(big.Int).Set(worm.BlockNumber)
-	}
-	if worm.ExchangerBalance != nil {
-		newWorm.ExchangerBalance = new(big.Int).Set(worm.ExchangerBalance)
-	}
+
 	newWorm.ValidatorProxy = worm.ValidatorProxy
 	if worm.VoteBlockNumber != nil {
 		newWorm.VoteBlockNumber = new(big.Int).Set(worm.VoteBlockNumber)
@@ -53,12 +35,7 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 		newWorm.VoteWeight = new(big.Int).Set(worm.VoteWeight)
 	}
 	newWorm.Coefficient = worm.Coefficient
-	newWorm.FeeRate = worm.FeeRate
-	newWorm.ExchangerName = worm.ExchangerName
-	newWorm.ExchangerURL = worm.ExchangerURL
 
-	newWorm.ApproveAddressList = make([]common.Address, len(worm.ApproveAddressList))
-	copy(newWorm.ApproveAddressList, worm.ApproveAddressList)
 	newWorm.StakerExtension = *worm.StakerExtension.DeepCopy()
 	newWorm.ValidatorExtension = *worm.ValidatorExtension.DeepCopy()
 
@@ -67,46 +44,31 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 
 type AccountNFT struct {
 	//Account
-	Name                  string
-	Symbol                string
-	Owner                 common.Address
-	NFTApproveAddressList common.Address
-
-	// MergeLevel is the level of NFT merged
-	MergeLevel  uint8
-	MergeNumber uint32
-
-	Creator   common.Address
-	Royalty   uint16
-	Exchanger common.Address
-	MetaURL   string
+	Name    string
+	Symbol  string
+	Owner   common.Address
+	Creator common.Address
+	MetaURL string
 }
 
 func (nft *AccountNFT) DeepCopy() *AccountNFT {
 	newNft := &AccountNFT{
-		Name:                  nft.Name,
-		Symbol:                nft.Symbol,
-		Owner:                 nft.Owner,
-		NFTApproveAddressList: nft.NFTApproveAddressList,
-		MergeLevel:            nft.MergeLevel,
-		MergeNumber:           nft.MergeNumber,
-		Creator:               nft.Creator,
-		Royalty:               nft.Royalty,
-		Exchanger:             nft.Exchanger,
-		MetaURL:               nft.MetaURL,
+		Name:    nft.Name,
+		Symbol:  nft.Symbol,
+		Owner:   nft.Owner,
+		Creator: nft.Creator,
+		MetaURL: nft.MetaURL,
 	}
 
 	return newNft
 }
 
 type AccountStaker struct {
-	Mint          MintDeep
-	Validators    ValidatorList
-	Stakers       StakerList
-	Csbts         InjectedOfficialNFTList
-	Nominee       *NominatedOfficialNFT `rlp:"nil"`
-	SNFTL3Addrs   []common.Address
-	DividendAddrs []common.Address
+	Mint       MintDeep
+	Validators ValidatorList
+	Stakers    StakerList
+	Csbts      InjectedOfficialNFTList
+	Nominee    *NominatedOfficialNFT `rlp:"nil"`
 }
 
 func (staker *AccountStaker) DeepCopy() *AccountStaker {
@@ -136,9 +98,6 @@ func (staker *AccountStaker) DeepCopy() *AccountStaker {
 
 		newStaker.Nominee = nominee
 	}
-
-	newStaker.SNFTL3Addrs = append(newStaker.SNFTL3Addrs, staker.SNFTL3Addrs...)
-	newStaker.DividendAddrs = append(newStaker.DividendAddrs, staker.DividendAddrs...)
 
 	return &newStaker
 }

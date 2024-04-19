@@ -147,39 +147,14 @@ type (
 		oldOwner common.Address
 	}
 	// *** modify to support nft transaction 20211215 end ***
-	nftApproveAddressChange struct {
-		nftAddr               *common.Address
-		oldApproveAddressList []common.Address
-	}
-
-	nftApproveAddressChangeOne struct {
-		nftAddr                  *common.Address
-		oldNFTApproveAddressList common.Address
-	}
-
-	openExchangerChange struct {
-		address          *common.Address
-		oldExchangerFlag bool
-		oldBlockNumber   *big.Int
-		oldFeeRate       uint16
-		oldExchangerName string
-		oldExchangerURL  string
-	}
 
 	nftInfoChange struct {
-		address                  *common.Address
-		oldName                  string
-		oldSymbol                string
-		oldOwner                 common.Address
-		oldNFTApproveAddressList common.Address
-		oldMergeLevel            uint8
-		oldMergeNumber           uint32
-		//oldPledgedFlag           bool
-		//oldNFTPledgedBlockNumber *big.Int
-		oldCreator   common.Address
-		oldRoyalty   uint16
-		oldExchanger common.Address
-		oldMetaURL   string
+		address    *common.Address
+		oldName    string
+		oldSymbol  string
+		oldOwner   common.Address
+		oldCreator common.Address
+		oldMetaURL string
 	}
 
 	pledgedBalanceChange struct {
@@ -188,16 +163,6 @@ type (
 	}
 
 	pledgedBlockNumberChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	exchangerBalanceChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	blockNumberChange struct {
 		account *common.Address
 		prev    *big.Int
 	}
@@ -212,16 +177,6 @@ type (
 		prev    *big.Int
 	}
 
-	//pledgedNFTInfo struct {
-	//	account               *common.Address
-	//	pledgedFlag           bool
-	//	nftPledgedBlockNumber *big.Int
-	//}
-
-	//RewardFlagChange struct {
-	//	account    *common.Address
-	//	rewardFlag uint8
-	//}
 	coefficientChange struct {
 		account *common.Address
 		prev    uint8
@@ -275,16 +230,6 @@ type (
 	validatorProxyChange struct {
 		account           *common.Address
 		oldValidatorProxy common.Address
-	}
-
-	sNFTL3AddrsChange struct {
-		account        *common.Address
-		oldSNFTL3Addrs []common.Address
-	}
-
-	dividendAddrsChange struct {
-		account          *common.Address
-		oldDividendAddrs []common.Address
 	}
 )
 
@@ -426,49 +371,12 @@ func (ch nftOwnerChange) dirtied() *common.Address {
 	return ch.nftAddr
 }
 
-// *** modify to support nft transaction 20211215 end ***
-func (ch nftApproveAddressChange) revert(s *StateDB) {
-	s.getStateObject(*ch.nftAddr).setJournalApproveAddress(ch.oldApproveAddressList)
-}
-
-func (ch nftApproveAddressChange) dirtied() *common.Address {
-	return ch.nftAddr
-}
-
-// *** modify to support nft transaction 20211215 end ***
-func (ch nftApproveAddressChangeOne) revert(s *StateDB) {
-	s.getStateObject(*ch.nftAddr).setJournalNFTApproveAddress(ch.oldNFTApproveAddressList)
-}
-
-func (ch nftApproveAddressChangeOne) dirtied() *common.Address {
-	return ch.nftAddr
-}
-
-func (ch openExchangerChange) revert(s *StateDB) {
-	s.getStateObject(*ch.address).setExchangerInfo(
-		ch.oldExchangerFlag,
-		ch.oldBlockNumber,
-		ch.oldFeeRate,
-		ch.oldExchangerName,
-		ch.oldExchangerURL)
-}
-
-func (ch openExchangerChange) dirtied() *common.Address {
-	return ch.address
-}
-
 func (ch nftInfoChange) revert(s *StateDB) {
 	s.getStateObject(*ch.address).setJournalNFTInfo(
 		ch.oldName,
 		ch.oldSymbol,
-		nil,
-		0,
 		ch.oldOwner,
-		ch.oldNFTApproveAddressList,
-		ch.oldMergeLevel,
 		ch.oldCreator,
-		ch.oldRoyalty,
-		ch.oldExchanger,
 		ch.oldMetaURL)
 }
 
@@ -489,22 +397,6 @@ func (ch pledgedBlockNumberChange) revert(s *StateDB) {
 }
 
 func (ch pledgedBlockNumberChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch exchangerBalanceChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setExchangerBalance(ch.prev)
-}
-
-func (ch exchangerBalanceChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch blockNumberChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setBlockNumber(ch.prev)
-}
-
-func (ch blockNumberChange) dirtied() *common.Address {
 	return ch.account
 }
 
@@ -630,21 +522,5 @@ func (ch validatorProxyChange) revert(s *StateDB) {
 }
 
 func (ch validatorProxyChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch sNFTL3AddrsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSNFTL3Addrs(ch.oldSNFTL3Addrs)
-}
-
-func (ch sNFTL3AddrsChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch dividendAddrsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setDividendAddrs(ch.oldDividendAddrs)
-}
-
-func (ch dividendAddrsChange) dirtied() *common.Address {
 	return ch.account
 }

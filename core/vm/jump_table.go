@@ -997,12 +997,12 @@ func newFrontierInstructionSet() JumpTable {
 			minStack:    minStack(1, 1),
 			maxStack:    maxStack(1, 1),
 		},
-		NTRANSFERFROM: {
-			execute:     opNTransferFrom,
-			constantGas: GasExtStep,
-			minStack:    minStack(3, 0),
-			maxStack:    maxStack(3, 0),
-		},
+		//NTRANSFERFROM: {
+		//	execute:     opNTransferFrom,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(3, 0),
+		//	maxStack:    maxStack(3, 0),
+		//},
 		//NAPPROVE: {
 		//	execute:     opNApprove,
 		//	constantGas: GasExtStep,
@@ -1015,18 +1015,18 @@ func newFrontierInstructionSet() JumpTable {
 		//	minStack:    minStack(2, 1),
 		//	maxStack:    maxStack(2, 1),
 		//},
-		NGETAPPROVED: {
-			execute:     opNGetApproved,
-			constantGas: GasExtStep,
-			minStack:    minStack(1, 1),
-			maxStack:    maxStack(1, 1),
-		},
-		NISAPPROVEDFORALL: {
-			execute:     opNIsApprovedForAll,
-			constantGas: GasExtStep,
-			minStack:    minStack(1, 1),
-			maxStack:    maxStack(1, 1),
-		},
+		//NGETAPPROVED: {
+		//	execute:     opNGetApproved,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(1, 1),
+		//	maxStack:    maxStack(1, 1),
+		//},
+		//NISAPPROVEDFORALL: {
+		//	execute:     opNIsApprovedForAll,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(1, 1),
+		//	maxStack:    maxStack(1, 1),
+		//},
 		NTOKENURI: {
 			execute:     opNTokenURI,
 			constantGas: GasExtStep,
@@ -1063,12 +1063,12 @@ func newFrontierInstructionSet() JumpTable {
 			minStack:    minStack(1, 1),
 			maxStack:    maxStack(1, 1),
 		},
-		NROALTYRATIO: {
-			execute:     opNRoyaltyRatio,
-			constantGas: GasExtStep,
-			minStack:    minStack(1, 1),
-			maxStack:    maxStack(1, 1),
-		},
+		//NROALTYRATIO: {
+		//	execute:     opNRoyaltyRatio,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(1, 1),
+		//	maxStack:    maxStack(1, 1),
+		//},
 		CREATE: {
 			execute:     opCreate,
 			constantGas: params.CreateGas,

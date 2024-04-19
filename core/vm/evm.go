@@ -55,60 +55,32 @@ type (
 	// VerifyNFTOwnerFunc is to judge whether the owner own the nft
 	VerifyNFTOwnerFunc func(StateDB, string, common.Address) bool
 	// TransferNFTFunc is the signature of a TransferNFT function
-	TransferNFTFunc           func(StateDB, string, common.Address, *big.Int) error
-	ExchangeNFTToCurrencyFunc func(StateDB, common.Address, string, *big.Int) error
-	PledgeTokenFunc           func(StateDB, common.Address, *big.Int, *types.Wormholes, *big.Int) error
-	StakerPledgeFunc          func(StateDB, common.Address, common.Address, *big.Int, *big.Int, *types.Wormholes) error
-	GetPledgedTimeFunc        func(StateDB, common.Address, common.Address) *big.Int
-	GetStakerPledgedFunc      func(StateDB, common.Address, common.Address) *types.StakerExtension
-	MinerConsignFunc          func(StateDB, common.Address, *types.Wormholes) error
-	MinerBecomeFunc           func(StateDB, common.Address, common.Address) error
-	IsExistOtherPledgedFunc   func(StateDB, common.Address) bool
-	ResetMinerBecomeFunc      func(StateDB, common.Address) error
-	CancelPledgedTokenFunc    func(StateDB, common.Address, *big.Int)
-	NewCancelStakerPledgeFunc func(StateDB, common.Address, common.Address, *big.Int, *big.Int) error
-	OpenExchangerFunc         func(StateDB, common.Address, *big.Int, *big.Int, uint16, string, string)
-	CloseExchangerFunc        func(StateDB, common.Address, *big.Int)
-	GetExchangerFlagFunc      func(StateDB, common.Address) bool
-	GetOpenExchangerTimeFunc  func(StateDB, common.Address) *big.Int
-	GetFeeRateFunc            func(StateDB, common.Address) uint16
-	GetExchangerNameFunc      func(StateDB, common.Address) string
-	GetExchangerURLFunc       func(StateDB, common.Address) string
-	GetApproveAddressFunc     func(StateDB, common.Address) []common.Address
-	//GetNFTBalanceFunc           func(StateDB, common.Address) uint64
-	GetNFTNameFunc   func(StateDB, common.Address) string
-	GetNFTSymbolFunc func(StateDB, common.Address) string
-	//GetNFTApproveAddressFunc func(StateDB, common.Address) []common.Address
-	GetNFTApproveAddressFunc                func(StateDB, common.Address) common.Address
-	GetNFTMergeLevelFunc                    func(StateDB, common.Address) uint8
-	GetNFTCreatorFunc                       func(StateDB, common.Address) common.Address
-	GetNFTRoyaltyFunc                       func(StateDB, common.Address) uint16
-	GetNFTExchangerFunc                     func(StateDB, common.Address) common.Address
-	GetNFTMetaURLFunc                       func(StateDB, common.Address) string
-	IsExistNFTFunc                          func(StateDB, common.Address) bool
-	IsApprovedFunc                          func(StateDB, common.Address, common.Address) bool
-	IsApprovedOneFunc                       func(StateDB, common.Address, common.Address) bool
-	IsApprovedForAllFunc                    func(StateDB, common.Address, common.Address) bool
-	VerifyPledgedBalanceFunc                func(StateDB, common.Address, *big.Int) bool
-	VerifyStakerPledgedBalanceFunc          func(StateDB, common.Address, common.Address, *big.Int) bool
-	VerifyCancelValidatorPledgedBalanceFunc func(StateDB, common.Address, *big.Int) bool
-	InjectOfficialNFTFunc                   func(StateDB, string, *big.Int, uint64, uint16, string)
-	AddExchangerTokenFunc                   func(StateDB, common.Address, *big.Int)
-	ModifyOpenExchangerTimeFunc             func(StateDB, common.Address, *big.Int)
-	SubExchangerTokenFunc                   func(StateDB, common.Address, *big.Int)
-	SubExchangerBalanceFunc                 func(StateDB, common.Address, *big.Int)
-	VerifyExchangerBalanceFunc              func(StateDB, common.Address, *big.Int) bool
-	GetNftAddressAndLevelFunc               func(string) (common.Address, int, error)
-	VoteOfficialNFTFunc                     func(StateDB, *types.NominatedOfficialNFT, *big.Int) error
-	ElectNominatedOfficialNFTFunc           func(StateDB, *big.Int)
-	NextIndexFunc                           func(db StateDB) *big.Int
-	VoteOfficialNFTByApprovedExchangerFunc  func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
-	//ChangeRewardFlagFunc                   func(StateDB, common.Address, uint8)
-	//PledgeNFTFunc                   func(StateDB, common.Address, *big.Int)
-	//CancelPledgedNFTFunc            func(StateDB, common.Address)
-	GetMergeNumberFunc func(StateDB, common.Address) uint32
-	//GetPledgedFlagFunc              func(StateDB, common.Address) bool
-	//GetNFTPledgedBlockNumberFunc    func(StateDB, common.Address) *big.Int
+	TransferNFTFunc                           func(StateDB, string, common.Address, *big.Int) error
+	ExchangeNFTToCurrencyFunc                 func(StateDB, common.Address, string, *big.Int) error
+	PledgeTokenFunc                           func(StateDB, common.Address, *big.Int, *types.Wormholes, *big.Int) error
+	StakerPledgeFunc                          func(StateDB, common.Address, common.Address, *big.Int, *big.Int, *types.Wormholes) error
+	GetPledgedTimeFunc                        func(StateDB, common.Address, common.Address) *big.Int
+	GetStakerPledgedFunc                      func(StateDB, common.Address, common.Address) *types.StakerExtension
+	MinerConsignFunc                          func(StateDB, common.Address, *types.Wormholes) error
+	MinerBecomeFunc                           func(StateDB, common.Address, common.Address) error
+	IsExistOtherPledgedFunc                   func(StateDB, common.Address) bool
+	ResetMinerBecomeFunc                      func(StateDB, common.Address) error
+	CancelPledgedTokenFunc                    func(StateDB, common.Address, *big.Int)
+	NewCancelStakerPledgeFunc                 func(StateDB, common.Address, common.Address, *big.Int, *big.Int) error
+	GetNFTNameFunc                            func(StateDB, common.Address) string
+	GetNFTSymbolFunc                          func(StateDB, common.Address) string
+	GetNFTCreatorFunc                         func(StateDB, common.Address) common.Address
+	GetNFTMetaURLFunc                         func(StateDB, common.Address) string
+	IsExistNFTFunc                            func(StateDB, common.Address) bool
+	VerifyPledgedBalanceFunc                  func(StateDB, common.Address, *big.Int) bool
+	VerifyStakerPledgedBalanceFunc            func(StateDB, common.Address, common.Address, *big.Int) bool
+	VerifyCancelValidatorPledgedBalanceFunc   func(StateDB, common.Address, *big.Int) bool
+	InjectOfficialNFTFunc                     func(StateDB, string, *big.Int, uint64, uint16, string)
+	GetNftAddressAndLevelFunc                 func(string) (common.Address, int, error)
+	VoteOfficialNFTFunc                       func(StateDB, *types.NominatedOfficialNFT, *big.Int) error
+	ElectNominatedOfficialNFTFunc             func(StateDB, *big.Int)
+	NextIndexFunc                             func(db StateDB) *big.Int
+	VoteOfficialNFTByApprovedExchangerFunc    func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
 	RecoverValidatorCoefficientFunc           func(StateDB, common.Address) error
 	BatchForcedSaleSNFTByApproveExchangerFunc func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
 	GetDividendFunc                           func(StateDB, common.Address) error
@@ -148,59 +120,32 @@ type BlockContext struct {
 	// TransferNFT transfers NFT from one owner to the other
 	TransferNFT TransferNFTFunc
 	// *** modify to support nft transaction 20211215 end ***
-	PledgeToken           PledgeTokenFunc
-	StakerPledge          StakerPledgeFunc
-	GetPledgedTime        GetPledgedTimeFunc
-	GetStakerPledged      GetStakerPledgedFunc
-	MinerConsign          MinerConsignFunc
-	MinerBecome           MinerBecomeFunc
-	IsExistOtherPledged   IsExistOtherPledgedFunc
-	ResetMinerBecome      ResetMinerBecomeFunc
-	CancelPledgedToken    CancelPledgedTokenFunc
-	NewCancelStakerPledge NewCancelStakerPledgeFunc
-	OpenExchanger         OpenExchangerFunc
-	CloseExchanger        CloseExchangerFunc
-	GetExchangerFlag      GetExchangerFlagFunc
-	GetOpenExchangerTime  GetOpenExchangerTimeFunc
-	GetFeeRate            GetFeeRateFunc
-	GetExchangerName      GetExchangerNameFunc
-	GetExchangerURL       GetExchangerURLFunc
-	GetApproveAddress     GetApproveAddressFunc
-	//GetNFTBalance                      GetNFTBalanceFunc
+	PledgeToken                         PledgeTokenFunc
+	StakerPledge                        StakerPledgeFunc
+	GetPledgedTime                      GetPledgedTimeFunc
+	GetStakerPledged                    GetStakerPledgedFunc
+	MinerConsign                        MinerConsignFunc
+	MinerBecome                         MinerBecomeFunc
+	IsExistOtherPledged                 IsExistOtherPledgedFunc
+	ResetMinerBecome                    ResetMinerBecomeFunc
+	CancelPledgedToken                  CancelPledgedTokenFunc
+	NewCancelStakerPledge               NewCancelStakerPledgeFunc
 	GetNFTName                          GetNFTNameFunc
 	GetNFTSymbol                        GetNFTSymbolFunc
-	GetNFTApproveAddress                GetNFTApproveAddressFunc
-	GetNFTMergeLevel                    GetNFTMergeLevelFunc
 	GetNFTCreator                       GetNFTCreatorFunc
-	GetNFTRoyalty                       GetNFTRoyaltyFunc
-	GetNFTExchanger                     GetNFTExchangerFunc
 	GetNFTMetaURL                       GetNFTMetaURLFunc
 	IsExistNFT                          IsExistNFTFunc
-	IsApproved                          IsApprovedFunc
-	IsApprovedOne                       IsApprovedOneFunc
-	IsApprovedForAll                    IsApprovedForAllFunc
 	VerifyPledgedBalance                VerifyPledgedBalanceFunc
 	VerifyStakerPledgedBalance          VerifyStakerPledgedBalanceFunc
 	VerifyCancelValidatorPledgedBalance VerifyCancelValidatorPledgedBalanceFunc
 	InjectOfficialNFT                   InjectOfficialNFTFunc
-	AddExchangerToken                   AddExchangerTokenFunc
-	ModifyOpenExchangerTime             ModifyOpenExchangerTimeFunc
-	SubExchangerToken                   SubExchangerTokenFunc
-	SubExchangerBalance                 SubExchangerBalanceFunc
-	VerifyExchangerBalance              VerifyExchangerBalanceFunc
 	GetNftAddressAndLevel               GetNftAddressAndLevelFunc
 	VoteOfficialNFT                     VoteOfficialNFTFunc
 	ElectNominatedOfficialNFT           ElectNominatedOfficialNFTFunc
 	NextIndex                           NextIndexFunc
 	VoteOfficialNFTByApprovedExchanger  VoteOfficialNFTByApprovedExchangerFunc
-	//ChangeRewardFlag                   ChangeRewardFlagFunc
-	//PledgeNFT                   PledgeNFTFunc
-	//CancelPledgedNFT            CancelPledgedNFTFunc
-	GetMergeNumber GetMergeNumberFunc
-	//GetPledgedFlag              GetPledgedFlagFunc
-	//GetNFTPledgedBlockNumber    GetNFTPledgedBlockNumberFunc
-	RecoverValidatorCoefficient RecoverValidatorCoefficientFunc
-	IsExistStakerStorageAddress IsExistStakerStorageAddressFunc
+	RecoverValidatorCoefficient         RecoverValidatorCoefficientFunc
+	IsExistStakerStorageAddress         IsExistStakerStorageAddressFunc
 	// Block information
 
 	ParentHeader *types.Header
