@@ -81,11 +81,7 @@ type StateDB interface {
 	GetNFTOwner16(common.Address) common.Address
 	// *** modify to support nft transaction 20211215 end ***
 	//CreateNFTByOfficial([]common.Address, *big.Int)
-	CreateNFTByUser(common.Address, common.Address, uint16, string, *big.Int) (common.Address, bool)
 	ChangeApproveAddress(common.Address, common.Address)
-	CancelApproveAddress(common.Address, common.Address)
-	ChangeNFTApproveAddress(common.Address, common.Address)
-	CancelNFTApproveAddress(common.Address, common.Address)
 	PledgeToken(common.Address, *big.Int, common.Address, *big.Int) error
 	StakerPledge(common.Address, common.Address, *big.Int, *big.Int, *types.Wormholes) error
 	GetPledgedTime(common.Address, common.Address) *big.Int

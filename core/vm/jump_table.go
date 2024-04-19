@@ -1003,18 +1003,18 @@ func newFrontierInstructionSet() JumpTable {
 			minStack:    minStack(3, 0),
 			maxStack:    maxStack(3, 0),
 		},
-		NAPPROVE: {
-			execute:     opNApprove,
-			constantGas: GasExtStep,
-			minStack:    minStack(2, 0),
-			maxStack:    maxStack(2, 0),
-		},
-		NSETAPPROVALFORALL: {
-			execute:     opNSetApprovalForAll,
-			constantGas: GasExtStep,
-			minStack:    minStack(2, 1),
-			maxStack:    maxStack(2, 1),
-		},
+		//NAPPROVE: {
+		//	execute:     opNApprove,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(2, 0),
+		//	maxStack:    maxStack(2, 0),
+		//},
+		//NSETAPPROVALFORALL: {
+		//	execute:     opNSetApprovalForAll,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(2, 1),
+		//	maxStack:    maxStack(2, 1),
+		//},
 		NGETAPPROVED: {
 			execute:     opNGetApproved,
 			constantGas: GasExtStep,
@@ -1033,12 +1033,12 @@ func newFrontierInstructionSet() JumpTable {
 			minStack:    minStack(1, 1),
 			maxStack:    maxStack(1, 1),
 		},
-		NMINT: {
-			execute:     opNMint,
-			constantGas: GasExtStep,
-			minStack:    minStack(3, 0),
-			maxStack:    maxStack(3, 0),
-		},
+		//NMINT: {
+		//	execute:     opNMint,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(3, 0),
+		//	maxStack:    maxStack(3, 0),
+		//},
 		NNAME: {
 			execute:     opNName,
 			constantGas: GasExtStep,

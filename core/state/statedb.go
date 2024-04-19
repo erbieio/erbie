@@ -2322,57 +2322,6 @@ func (s *StateDB) DistributeRewardsToStakers(validators []common.Address, blockn
 	}
 }
 
-// - create a nft by user :creator can get a nft , include exchanger, royalty and meta.
-// wormholes chain will assign a nft address to the nft.
-// ````
-// {
-// data:{
-// royalty:
-// metaUrl:
-// }
-// }
-// ````
-//
-//from:exchanger addr
-//to:creator
-//version:0
-//type:0
-func (s *StateDB) CreateNFTByUser(exchanger common.Address,
-	owner common.Address,
-	royalty uint16,
-	metaurl string,
-	blocknumber *big.Int) (common.Address, bool) {
-
-	mintStateObject := s.GetOrNewStakerStateObject(types.MintDeepStorageAddress)
-
-	nftAddr := common.BytesToAddress(mintStateObject.UserMint().Bytes())
-	stateObject := s.GetOrNewNFTStateObject(nftAddr)
-	if stateObject != nil {
-		stateObject.SetNFTInfo(
-			"",
-			"",
-			//big.NewInt(0),
-			//0,
-			owner,
-			common.Address{},
-			0,
-			1,
-			//false,
-			//big.NewInt(0),
-			owner,
-			royalty,
-			exchanger,
-			metaurl)
-		mintStateObject.AddUserMint(big.NewInt(1))
-
-		nftLog := s.MintNFTLog(nftAddr, blocknumber)
-		s.AddLog(nftLog)
-		return nftAddr, true
-	}
-
-	return common.Address{}, false
-}
-
 func (s *StateDB) MintNFTLog(nftAddress common.Address, blockNumber *big.Int) *types.Log {
 	//event MintNFT(address indexed nftaddress)
 	//hash1 is MintNFT(address indexed nftaddress)
@@ -2412,28 +2361,6 @@ func (s *StateDB) ChangeApproveAddress(addr common.Address, approveAddr common.A
 	stateObject := s.GetOrNewAccountStateObject(addr)
 	if stateObject != nil {
 		stateObject.ChangeApproveAddress(approveAddr)
-	}
-}
-
-func (s *StateDB) CancelApproveAddress(addr common.Address, approveAddr common.Address) {
-	stateObject := s.GetOrNewAccountStateObject(addr)
-	if stateObject != nil {
-		stateObject.CancelApproveAddress(approveAddr)
-	}
-}
-
-// ChangeNFTApproveAddress is to approve a nft
-func (s *StateDB) ChangeNFTApproveAddress(nftAddr common.Address, approveAddr common.Address) {
-	stateObject := s.GetOrNewNFTStateObject(nftAddr)
-	if stateObject != nil {
-		stateObject.ChangeNFTApproveAddress(approveAddr)
-	}
-}
-
-func (s *StateDB) CancelNFTApproveAddress(nftAddr common.Address, approveAddr common.Address) {
-	stateObject := s.GetOrNewNFTStateObject(nftAddr)
-	if stateObject != nil {
-		stateObject.CancelNFTApproveAddress(approveAddr)
 	}
 }
 

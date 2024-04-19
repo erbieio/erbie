@@ -703,13 +703,6 @@ func (s *stateObject) setJournalApproveAddress(approveAddressList []common.Addre
 	s.data.Worm.ApproveAddressList = append(s.data.Worm.ApproveAddressList, approveAddressList...)
 }
 
-func (s *stateObject) CancelApproveAddress(approveAddress common.Address) {
-	if !s.data.IsApproveAddress(approveAddress) {
-		return
-	}
-	s.RemoveApproveAddress(approveAddress)
-}
-
 func (s *stateObject) RemoveApproveAddress(approveAddress common.Address) {
 	change := nftApproveAddressChange{
 		nftAddr: &s.address,
@@ -729,14 +722,6 @@ func (s *stateObject) removeApproveAddress(approveAddress common.Address) {
 	}
 
 	s.data.Worm.ApproveAddressList = append(s.data.Worm.ApproveAddressList[:index], s.data.Worm.ApproveAddressList[index+1:]...)
-}
-
-func (s *stateObject) ChangeNFTApproveAddress(newApproveAddress common.Address) {
-	if s.data.IsNFTApproveAddress(newApproveAddress) {
-		log.Info("ChangeNFTApproveAddress()", "Is approved", true)
-		return
-	}
-	s.SetNFTApproveAddress(newApproveAddress)
 }
 
 func (s *stateObject) SetNFTApproveAddress(newApproveAddress common.Address) {
@@ -761,14 +746,6 @@ func (s *stateObject) setJournalNFTApproveAddress(ApproveAddressList common.Addr
 
 	//s.data.NFTApproveAddressList = append(s.data.NFTApproveAddressList, ApproveAddressList...)
 	s.data.Nft.NFTApproveAddressList = ApproveAddressList
-}
-
-func (s *stateObject) CancelNFTApproveAddress(nftApproveAddress common.Address) {
-	if !s.data.IsNFTApproveAddress(nftApproveAddress) {
-		return
-	}
-
-	s.RemoveNFTApproveAddress(nftApproveAddress)
 }
 
 func (s *stateObject) RemoveNFTApproveAddress(nftApproveAddress common.Address) {

@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
 	"math/big"
-	"regexp"
 )
 
 type MintDeep struct {
@@ -163,88 +162,12 @@ func (w *Wormholes) CheckFormat() error {
 	//regAddr, _ := regexp.Compile(PattenAddr)
 
 	switch w.Type {
-	case 0:
-		if len(w.MetaURL) > 256 {
-			return errors.New("metaurl too long")
-		}
-		//exchangerMatch := regAddr.MatchString(w.Exchanger)
-		//if !exchangerMatch {
-		//	return errors.New("exchanger format error")
-		//}
 
 	case 1:
-
-	case 2:
-	case 3:
-	case 4:
-	case 5:
 	case 9:
 	case 10:
-	case 11:
-
-		if len(w.Name) > 64 {
-			w.Name = string([]byte(w.Name)[:64])
-		}
-		if len(w.Url) > 128 {
-			w.Url = string([]byte(w.Url)[:128])
-		}
-
-	case 14:
-	case 15:
-	case 16:
-		if len(w.Seller2.MetaURL) > 256 {
-			return errors.New("metaurl too long")
-		}
-
-	case 17:
-		if len(w.Seller2.MetaURL) > 256 {
-			return errors.New("metaurl too long")
-		}
-
-	case 18:
-	case 19:
-		if len(w.Seller2.MetaURL) > 256 {
-			return errors.New("metaurl too long")
-		}
-
-	case 20:
-	case 21:
-	case 22:
-	case 23:
-		if len(w.Dir) > 256 {
-			return errors.New("dir too long")
-		}
-
-		if len(w.Creator) > 0 {
-			regAddr, err := regexp.Compile(PattenAddr)
-			if err != nil {
-				return err
-			}
-			match := regAddr.MatchString(w.Creator)
-			if !match {
-				return errors.New("invalid creator")
-			}
-		}
-
-	case 24:
-		if len(w.Dir) > 256 {
-			return errors.New("dir too long")
-		}
-
-		if len(w.Creator) > 0 {
-			regAddr, err := regexp.Compile(PattenAddr)
-			if err != nil {
-				return err
-			}
-			match := regAddr.MatchString(w.Creator)
-			if !match {
-				return errors.New("invalid creator")
-			}
-		}
 
 	case 26:
-	case 27:
-	//case 30:
 	case 31:
 	default:
 		return errors.New("not exist nft type")
@@ -256,52 +179,15 @@ func (w *Wormholes) CheckFormat() error {
 func (w *Wormholes) TxGas() (uint64, error) {
 
 	switch w.Type {
-	case 0:
-		return params.WormholesTx0, nil
 	case 1:
 		return params.WormholesTx1, nil
-	case 2:
-		return params.WormholesTx2, nil
-	case 3:
-		return params.WormholesTx3, nil
-	case 4:
-		return params.WormholesTx4, nil
-	case 5:
-		return params.WormholesTx5, nil
 	case 9:
 		return params.WormholesTx9, nil
 	case 10:
 		return params.WormholesTx10, nil
-	case 11:
-		return params.WormholesTx11, nil
-	case 14:
-		return params.WormholesTx14, nil
-	case 15:
-		return params.WormholesTx15, nil
-	case 16:
-		return params.WormholesTx16, nil
-	case 17:
-		return params.WormholesTx17, nil
-	case 18:
-		return params.WormholesTx18, nil
-	case 19:
-		return params.WormholesTx19, nil
-	case 20:
-		return params.WormholesTx20, nil
-	case 21:
-		return params.WormholesTx21, nil
-	case 22:
-		return params.WormholesTx22, nil
-	case 23:
-		return params.WormholesTx23, nil
-	case 24:
-		return params.WormholesTx24, nil
+
 	case 26:
 		return params.WormholesTx26, nil
-	case 27:
-		return params.WormholesTx27, nil
-	//case 30:
-	//	return params.WormholesTx30, nil
 	case 31:
 		return params.WormholesTx31, nil
 	default:

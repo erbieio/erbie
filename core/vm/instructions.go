@@ -877,32 +877,32 @@ func opNTransferFrom(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContex
 	}
 }
 
-func opNApprove(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	to, id := scope.Stack.pop(), scope.Stack.pop()
-	nftAddr := common.Address(id.Bytes20())
-	toAddr := common.Address(to.Bytes20())
-	caller := scope.Contract.Caller()
-	fmt.Println("nft.approve()---", caller.String(), nftAddr.String(), toAddr.String())
-	if caller == interpreter.evm.StateDB.GetNFTOwner16(nftAddr) {
-		interpreter.evm.StateDB.ChangeNFTApproveAddress(nftAddr, toAddr)
-		return nil, nil
-	} else {
-		return makeRevertRet("NFT Approve Failed: Caller is not owner"), ErrExecutionReverted
-	}
-}
+//func opNApprove(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	to, id := scope.Stack.pop(), scope.Stack.pop()
+//	nftAddr := common.Address(id.Bytes20())
+//	toAddr := common.Address(to.Bytes20())
+//	caller := scope.Contract.Caller()
+//	fmt.Println("nft.approve()---", caller.String(), nftAddr.String(), toAddr.String())
+//	if caller == interpreter.evm.StateDB.GetNFTOwner16(nftAddr) {
+//		interpreter.evm.StateDB.ChangeNFTApproveAddress(nftAddr, toAddr)
+//		return nil, nil
+//	} else {
+//		return makeRevertRet("NFT Approve Failed: Caller is not owner"), ErrExecutionReverted
+//	}
+//}
 
-func opNSetApprovalForAll(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	approved, to := scope.Stack.pop(), scope.Stack.pop()
-	toAddr := common.Address(to.Bytes20())
-	caller := scope.Contract.Caller()
-	if approved.IsZero() {
-		interpreter.evm.StateDB.CancelApproveAddress(caller, toAddr)
-	} else {
-		interpreter.evm.StateDB.ChangeApproveAddress(caller, toAddr)
-	}
-	fmt.Println("nft.setApprovalForAll()---", caller.String(), toAddr.String(), approved.String())
-	return nil, nil
-}
+//func opNSetApprovalForAll(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	approved, to := scope.Stack.pop(), scope.Stack.pop()
+//	toAddr := common.Address(to.Bytes20())
+//	caller := scope.Contract.Caller()
+//	if approved.IsZero() {
+//		interpreter.evm.StateDB.CancelApproveAddress(caller, toAddr)
+//	} else {
+//		interpreter.evm.StateDB.ChangeApproveAddress(caller, toAddr)
+//	}
+//	fmt.Println("nft.setApprovalForAll()---", caller.String(), toAddr.String(), approved.String())
+//	return nil, nil
+//}
 
 func opNGetApproved(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
 	slot := scope.Stack.peek()
@@ -943,24 +943,24 @@ func opNTokenURI(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) (
 	return nil, nil
 }
 
-func opNMint(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	uri, royalty, to := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.peek()
-	caller := scope.Contract.Caller()
-	if interpreter.evm.StateDB.GetExchangerFlag(caller) {
-		offset := int64(uri.Uint64())
-		length := int64(uri.SetBytes(scope.Memory.GetPtr(offset, 32)).Uint64())
-		uriStr := scope.Memory.GetCopy(offset+32, length)
-		toAddr := common.Address(to.Bytes20())
-		nftAddr, _ := interpreter.evm.StateDB.CreateNFTByUser(caller, toAddr, uint16(royalty.Uint64()), string(uriStr), interpreter.evm.Context.BlockNumber)
-
-		to.SetBytes(nftAddr.Bytes())
-		fmt.Println("nft.mint()---", caller.String(), toAddr.String(), royalty.Uint64(), string(uriStr), nftAddr.String())
-		return nil, nil
-	} else {
-		fmt.Println("nft.mint()---", caller.String(), royalty.Uint64())
-		return makeRevertRet("NFT Mint Failed: caller Not exchanger"), ErrExecutionReverted
-	}
-}
+//func opNMint(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	uri, royalty, to := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.peek()
+//	caller := scope.Contract.Caller()
+//	if interpreter.evm.StateDB.GetExchangerFlag(caller) {
+//		offset := int64(uri.Uint64())
+//		length := int64(uri.SetBytes(scope.Memory.GetPtr(offset, 32)).Uint64())
+//		uriStr := scope.Memory.GetCopy(offset+32, length)
+//		toAddr := common.Address(to.Bytes20())
+//		nftAddr, _ := interpreter.evm.StateDB.CreateNFTByUser(caller, toAddr, uint16(royalty.Uint64()), string(uriStr), interpreter.evm.Context.BlockNumber)
+//
+//		to.SetBytes(nftAddr.Bytes())
+//		fmt.Println("nft.mint()---", caller.String(), toAddr.String(), royalty.Uint64(), string(uriStr), nftAddr.String())
+//		return nil, nil
+//	} else {
+//		fmt.Println("nft.mint()---", caller.String(), royalty.Uint64())
+//		return makeRevertRet("NFT Mint Failed: caller Not exchanger"), ErrExecutionReverted
+//	}
+//}
 
 func opNName(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
 	v := scope.Stack.peek()

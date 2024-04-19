@@ -1615,22 +1615,6 @@ func DoEstimateGas(ctx context.Context, b Backend, args TransactionArgs, blockNr
 				switch wormholes.Type {
 				case 10:
 
-				case 14:
-
-				case 17:
-
-				case 18:
-
-				case 19:
-
-				case 20:
-
-				case 22:
-
-				case 24:
-
-				case 27:
-
 				default:
 					if args.Value.ToInt().Cmp(available) >= 0 {
 						return 0, errors.New("insufficient funds for transfer")
