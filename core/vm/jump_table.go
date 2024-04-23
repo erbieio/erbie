@@ -1027,30 +1027,30 @@ func newFrontierInstructionSet() JumpTable {
 		//	minStack:    minStack(1, 1),
 		//	maxStack:    maxStack(1, 1),
 		//},
-		NTOKENURI: {
-			execute:     opNTokenURI,
-			constantGas: GasExtStep,
-			minStack:    minStack(1, 1),
-			maxStack:    maxStack(1, 1),
-		},
+		//NTOKENURI: {
+		//	execute:     opNTokenURI,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(1, 1),
+		//	maxStack:    maxStack(1, 1),
+		//},
 		//NMINT: {
 		//	execute:     opNMint,
 		//	constantGas: GasExtStep,
 		//	minStack:    minStack(3, 0),
 		//	maxStack:    maxStack(3, 0),
 		//},
-		NNAME: {
-			execute:     opNName,
-			constantGas: GasExtStep,
-			minStack:    minStack(1, 1),
-			maxStack:    maxStack(1, 1),
-		},
-		NSYMBOL: {
-			execute:     opNSymbol,
-			constantGas: GasExtStep,
-			minStack:    minStack(1, 1),
-			maxStack:    maxStack(1, 1),
-		},
+		//NNAME: {
+		//	execute:     opNName,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(1, 1),
+		//	maxStack:    maxStack(1, 1),
+		//},
+		//NSYMBOL: {
+		//	execute:     opNSymbol,
+		//	constantGas: GasExtStep,
+		//	minStack:    minStack(1, 1),
+		//	maxStack:    maxStack(1, 1),
+		//},
 		NCREATOR: {
 			execute:     opNCreator,
 			constantGas: GasExtStep,

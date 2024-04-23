@@ -563,10 +563,8 @@ func (e *Engine) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 			return errors.New("get stakers error")
 		}
 
-		prevCreator := statedb.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
-
 		// Obtain random landing points according to the surrounding chain algorithm
-		randomHash := core.GetRandomDropV2(validatorList, stakers, parent, common.HexToAddress(prevCreator))
+		randomHash := core.GetRandomDropV2(validatorList, stakers, parent)
 		if randomHash == (common.Hash{}) {
 			log.Error("Engine: Prepare : invalid random hash", "no", c.CurrentHeader().Number.Uint64())
 			return err

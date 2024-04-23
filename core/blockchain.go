@@ -2881,10 +2881,8 @@ func (bc *BlockChain) GetRandomDrop(header *types.Header) (hash common.Hash, err
 		return common.Hash{}, errors.New("get stakers error")
 	}
 
-	prevCreator := db.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
-
 	// Obtain random landing points according to the surrounding chain algorithm
-	randomHash := GetRandomDropV2(validatorList, stakers, header, common.HexToAddress(prevCreator))
+	randomHash := GetRandomDropV2(validatorList, stakers, header)
 	if randomHash == (common.Hash{}) {
 		log.Error("GetRandomDrop : invalid random hash", "no", bc.CurrentHeader().Number.Uint64())
 		return common.Hash{}, err
@@ -2917,10 +2915,8 @@ func (bc *BlockChain) Random11ValidatorFromPool(header *types.Header) (*types.Va
 		return nil, errors.New("get stakers error")
 	}
 
-	prevCreator := db.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
-
 	// Obtain random landing points according to the surrounding chain algorithm
-	randomHash := GetRandomDropV2(validatorList, stakers, header, common.HexToAddress(prevCreator))
+	randomHash := GetRandomDropV2(validatorList, stakers, header)
 	if randomHash == (common.Hash{}) {
 		log.Error("Random11ValidatorFromPool : invalid random hash", "no", bc.CurrentHeader().Number.Uint64())
 		return nil, err
@@ -2999,10 +2995,8 @@ func (bc *BlockChain) Random11ValidatorWithOutProxy(header *types.Header) (*type
 		return nil, errors.New("get stakers error")
 	}
 
-	prevCreator := db.GetCsbts(types.CsbtInjectedStorageAddress).InjectedOfficialNFTs[0].Creator
-
 	// Obtain random landing points according to the surrounding chain algorithm
-	randomHash := GetRandomDropV2(validatorList, stakers, header, common.HexToAddress(prevCreator))
+	randomHash := GetRandomDropV2(validatorList, stakers, header)
 	if randomHash == (common.Hash{}) {
 		log.Error("Random11ValidatorWithOutProxy : invalid random hash", "no", bc.CurrentHeader().Number.Uint64())
 		return nil, err
@@ -3392,7 +3386,7 @@ func (fb *FactorsBuilder) build() (result []string) {
 	return result
 }
 
-func GetRandomDropV2(v *types.ValidatorList, s *types.StakerList, prevHeader *types.Header, prevCreator common.Address) common.Hash {
+func GetRandomDropV2(v *types.ValidatorList, s *types.StakerList, prevHeader *types.Header) common.Hash {
 	if emptyList(v) || emptyList(s) { // Determine if the validator or stakers is empty
 		return common.Hash{}
 	}
@@ -3401,11 +3395,11 @@ func GetRandomDropV2(v *types.ValidatorList, s *types.StakerList, prevHeader *ty
 
 	fb := NewFactorsBuilder()
 	fb.SetValidators(v).SetStakers(s). // set factors
-						SetPrevHeader(prevHeader).SetPrevCreator(prevCreator).
+						SetPrevHeader(prevHeader).
 						SetRandomIndex(indexs)
 
 	fb.AddOption(opOnValidators).AddOption(opOnStakers). // set options
-								AddOption(opOnPrevHeader).AddOption(opOnPrevCreator)
+								AddOption(opOnPrevHeader)
 
 	factors := fb.build() // Construct all factors
 

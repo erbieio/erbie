@@ -24,8 +24,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/metrics"
@@ -71,7 +69,7 @@ type stateObject struct {
 	address  common.Address
 	addrHash common.Hash // hash of ethereum address of the account
 	data     Account
-	//nft 	AccountNFT
+
 	db *StateDB
 
 	// DB error.
@@ -105,7 +103,7 @@ func (s *stateObject) empty() bool {
 		s.data.Balance.Sign() == 0 &&
 		bytes.Equal(s.data.CodeHash, emptyCodeHash) &&
 		s.data.Worm == nil &&
-		s.data.Nft == nil &&
+		s.data.Csbt == nil &&
 		s.data.Staker == nil &&
 		s.data.Extra == nil
 }
@@ -118,7 +116,7 @@ type Account struct {
 	Root     common.Hash // merkle root of the storage trie
 	CodeHash []byte
 	Worm     *types.WormholesExtension `rlp:"nil"`
-	Nft      *types.AccountNFT         `rlp:"nil"`
+	Csbt     *types.AccountCSBT        `rlp:"nil"`
 	Staker   *types.AccountStaker      `rlp:"nil"`
 	Extra    []byte
 }
@@ -153,8 +151,8 @@ func newObject(db *StateDB, address common.Address, data Account) *stateObject {
 		newStateObject.data.Worm = data.Worm.DeepCopy()
 	}
 
-	if data.Nft != nil {
-		newStateObject.data.Nft = data.Nft.DeepCopy()
+	if data.Csbt != nil {
+		newStateObject.data.Csbt = data.Csbt.DeepCopy()
 	}
 
 	if data.Staker != nil {
@@ -597,7 +595,7 @@ func (s *stateObject) Value() *big.Int {
 
 // ChangeNFTOwner change nft's owner to newOwner.
 func (s *stateObject) ChangeNFTOwner(newOwner common.Address) {
-	if s.data.Nft.Owner == newOwner {
+	if s.data.Csbt.Owner == newOwner {
 		return
 	}
 	s.SetOwner(newOwner)
@@ -606,17 +604,17 @@ func (s *stateObject) ChangeNFTOwner(newOwner common.Address) {
 func (s *stateObject) SetOwner(newOwner common.Address) {
 	s.db.journal.append(nftOwnerChange{
 		nftAddr:  &s.address,
-		oldOwner: s.data.Nft.Owner,
+		oldOwner: s.data.Csbt.Owner,
 	})
 	s.setOwner(newOwner)
 }
 
 func (s *stateObject) setOwner(newOwner common.Address) {
-	s.data.Nft.Owner = newOwner
+	s.data.Csbt.Owner = newOwner
 }
 
 func (s *stateObject) NFTOwner() common.Address {
-	return s.data.Nft.Owner
+	return s.data.Csbt.Owner
 }
 
 // *** modify to support nft transaction 20211215 end ***
@@ -694,114 +692,57 @@ func (s *stateObject) CleanNFT() {
 	//}
 	change := nftInfoChange{
 		address:    &s.address,
-		oldName:    s.data.Nft.Name,
-		oldSymbol:  s.data.Nft.Symbol,
-		oldOwner:   s.data.Nft.Owner,
-		oldCreator: s.data.Nft.Creator,
-		oldMetaURL: s.data.Nft.MetaURL,
+		oldOwner:   s.data.Csbt.Owner,
+		oldCreator: s.data.Csbt.Creator,
 	}
 	s.db.journal.append(change)
 	s.cleanNFT()
 }
 
 func (s *stateObject) cleanNFT() {
-	s.data.Nft.Name = ""
-	s.data.Nft.Symbol = ""
-	s.data.Nft.Owner = common.Address{}
-	s.data.Nft.Creator = common.Address{}
-	s.data.Nft.MetaURL = ""
+	s.data.Csbt.Owner = common.Address{}
+	s.data.Csbt.Creator = common.Address{}
 }
 
 func (s *stateObject) SetNFTInfo(
-	name string,
-	symbol string,
 	owner common.Address,
-	creator common.Address,
-	metaURL string) {
+	creator common.Address) {
 
 	change := nftInfoChange{
 		address:    &s.address,
-		oldName:    s.data.Nft.Name,
-		oldSymbol:  s.data.Nft.Symbol,
-		oldOwner:   s.data.Nft.Owner,
-		oldCreator: s.data.Nft.Creator,
-		oldMetaURL: s.data.Nft.MetaURL,
+		oldOwner:   s.data.Csbt.Owner,
+		oldCreator: s.data.Csbt.Creator,
 	}
 
 	s.db.journal.append(change)
-	s.setNFTInfo(name,
-		symbol,
-		owner,
-		creator,
-		metaURL)
+	s.setNFTInfo(owner,
+		creator)
 }
 
 func (s *stateObject) setNFTInfo(
-	name string,
-	symbol string,
 	owner common.Address,
-	creator common.Address,
-	metaURL string) {
-
-	s.data.Nft.Name = name
-	s.data.Nft.Symbol = symbol
-	s.data.Nft.Owner = owner
-	s.data.Nft.Creator = creator
-	s.data.Nft.MetaURL = metaURL
-
+	creator common.Address) {
+	s.data.Csbt.Owner = owner
+	s.data.Csbt.Creator = creator
 }
 
 func (s *stateObject) setJournalNFTInfo(
-	name string,
-	symbol string,
 	owner common.Address,
-	creator common.Address,
-	metaURL string) {
-
-	s.data.Nft.Name = name
-	s.data.Nft.Symbol = symbol
-	s.data.Nft.Owner = owner
-	s.data.Nft.Creator = creator
-	s.data.Nft.MetaURL = metaURL
-
+	creator common.Address) {
+	s.data.Csbt.Owner = owner
+	s.data.Csbt.Creator = creator
 }
 
 func (s *stateObject) GetNFTInfo() (
-	string,
-	string,
 	common.Address,
-	common.Address,
-	string) {
+	common.Address) {
 
-	return s.data.Nft.Name,
-		s.data.Nft.Symbol,
-		s.data.Nft.Owner,
-		s.data.Nft.Creator,
-		s.data.Nft.MetaURL
-
+	return s.data.Csbt.Owner,
+		s.data.Csbt.Creator
 }
-
-func (s *stateObject) GetName() string {
-	return s.data.Nft.Name
-}
-func (s *stateObject) GetSymbol() string {
-	return s.data.Nft.Symbol
-}
-
-//func (s *stateObject) GetPledgedFlag() bool {
-//	return s.data.PledgedFlag
-//}
-//
-//func (s *stateObject) GetNFTPledgedBlockNumber() *big.Int {
-//	return s.data.NFTPledgedBlockNumber
-//}
 
 func (s *stateObject) GetCreator() common.Address {
-	return s.data.Nft.Creator
-}
-
-func (s *stateObject) GetMetaURL() string {
-	return s.data.Nft.MetaURL
+	return s.data.Csbt.Creator
 }
 
 func (s *stateObject) PledgedBalance() *big.Int {
@@ -853,13 +794,6 @@ func (s *stateObject) SubPledgedBalance(amount *big.Int) {
 		return
 	}
 	s.SetPledgedBalance(new(big.Int).Sub(s.PledgedBalance(), amount))
-}
-
-func (s *stateObject) VoteWeight() *big.Int {
-	if s.data.Worm.VoteWeight == nil {
-		return big.NewInt(0)
-	}
-	return new(big.Int).Set(s.data.Worm.VoteWeight)
 }
 
 func (s *stateObject) Coefficient() uint8 {
@@ -915,52 +849,6 @@ func (s *stateObject) RemoveCoefficient() {
 	s.SetCoefficient(result)
 }
 
-// AddVoteWeight adds amount to s's vote weight.
-// It is used to add funds to the destination account of a vote.
-func (s *stateObject) AddVoteWeight(amount *big.Int) {
-	// EIP161: We must check emptiness for the objects such that the account
-	// clearing (0,0,0 objects) can take effect.
-	if amount.Sign() == 0 {
-		return
-	}
-	if s.data.Worm.VoteWeight == nil {
-		s.data.Worm.VoteWeight = big.NewInt(0)
-	}
-	s.SetVoteWeight(new(big.Int).Add(s.VoteWeight(), amount))
-}
-
-// SubVoteWeight removes amount from s's pledged balance.
-// It is used to remove funds from the origin account of a vote.
-func (s *stateObject) SubVoteWeight(amount *big.Int) {
-	if amount.Sign() == 0 {
-		return
-	}
-	log.Info("stateObject.SubVoteWeight", "amount", amount, "VoteWeight", s.VoteWeight())
-	s.SetVoteWeight(new(big.Int).Sub(s.VoteWeight(), amount))
-}
-
-func (s *stateObject) SetVoteBlockNumber(blocknumber *big.Int) {
-	if s.data.Worm.VoteBlockNumber == nil {
-		s.data.Worm.VoteBlockNumber = big.NewInt(0)
-	}
-	s.db.journal.append(voteBlockNumberChange{
-		account: &s.address,
-		prev:    new(big.Int).Set(s.data.Worm.VoteBlockNumber),
-	})
-	s.setVoteBlockNumber(new(big.Int).Set(blocknumber))
-}
-
-func (s *stateObject) setVoteBlockNumber(blocknumber *big.Int) {
-	s.data.Worm.VoteBlockNumber = blocknumber
-}
-
-func (s *stateObject) VoteBlockNumber() *big.Int {
-	if s.data.Worm.VoteBlockNumber == nil {
-		return big.NewInt(0)
-	}
-	return new(big.Int).Set(s.data.Worm.VoteBlockNumber)
-}
-
 func (s *stateObject) SetPledgedBalance(amount *big.Int) {
 	if s.data.Worm.PledgedBalance == nil {
 		s.data.Worm.PledgedBalance = big.NewInt(0)
@@ -994,66 +882,6 @@ func (s *stateObject) setPledgedBlockNumber(blocknumber *big.Int) {
 func (s *stateObject) GetAccountInfo() Account {
 	return s.data
 }
-
-func (s *stateObject) SetVoteWeight(amount *big.Int) {
-	s.db.journal.append(voteWeightChange{
-		account: &s.address,
-		prev:    new(big.Int).Set(s.data.Worm.VoteWeight),
-	})
-
-	// for test
-	if amount.Cmp(big.NewInt(0)) < 0 {
-		log.Error("stateObject.SetVoteWeight", "negative amount", amount)
-		amount = big.NewInt(0)
-	}
-
-	s.setVoteWeight(amount)
-}
-
-func (s *stateObject) setVoteWeight(amount *big.Int) {
-	s.data.Worm.VoteWeight = amount
-}
-
-//func (s *stateObject) ChangeRewardFlag(flag uint8) {
-//	s.db.journal.append(RewardFlagChange{
-//		account:    &s.address,
-//		rewardFlag: flag,
-//	})
-//	s.setRewardFlag(flag)
-//}
-
-//func (s *stateObject) RewardFlag() uint8 {
-//	return s.data.RewardFlag
-//}
-//
-//func (s *stateObject) setRewardFlag(flag uint8) {
-//	s.data.RewardFlag = flag
-//}
-
-//func (s *stateObject) PledgeNFT(blocknumber *big.Int) {
-//	s.SetPledgedNFTInfo(true, blocknumber)
-//}
-//
-//func (s *stateObject) CancelPledgedNFT() {
-//	s.SetPledgedNFTInfo(false, big.NewInt(0))
-//}
-
-//func (s *stateObject) SetPledgedNFTInfo(pledgedflag bool, blocknumber *big.Int) {
-//	if s.data.NFTPledgedBlockNumber == nil {
-//		s.data.NFTPledgedBlockNumber = big.NewInt(0)
-//	}
-//	s.db.journal.append(pledgedNFTInfo{
-//		account:               &s.address,
-//		pledgedFlag:           s.data.PledgedFlag,
-//		nftPledgedBlockNumber: new(big.Int).Set(s.data.NFTPledgedBlockNumber),
-//	})
-//	s.setPledgedNFTInfo(pledgedflag, blocknumber)
-//}
-
-//func (s *stateObject) setPledgedNFTInfo(pledgedflag bool, blocknumber *big.Int) {
-//	s.data.PledgedFlag = pledgedflag
-//	s.data.NFTPledgedBlockNumber = blocknumber
-//}
 
 func (s *stateObject) SetExtra(extra []byte) {
 	oldExtra := extraChange{
@@ -1201,19 +1029,19 @@ func (s *stateObject) GetValidators() *types.ValidatorList {
 }
 
 func (s *stateObject) AddStaker(addr common.Address, balance *big.Int) {
-	newStakers := s.data.Staker.Stakers.DeepCopy()
+	newStakers := s.data.Staker.CSBTCreators.DeepCopy()
 	newStakers.AddStaker(addr, balance)
 	s.SetStakers(newStakers)
 }
 
 func (s *stateObject) RemoveStaker(addr common.Address, balance *big.Int) {
-	newStakers := s.data.Staker.Stakers.DeepCopy()
+	newStakers := s.data.Staker.CSBTCreators.DeepCopy()
 	newStakers.RemoveStaker(addr, balance)
 	s.SetStakers(newStakers)
 }
 
 func (s *stateObject) CancelStaker(addr common.Address) {
-	newStakers := s.data.Staker.Stakers.DeepCopy()
+	newStakers := s.data.Staker.CSBTCreators.DeepCopy()
 	newStakers.CancelStaker(addr)
 	s.SetStakers(newStakers)
 }
@@ -1221,78 +1049,19 @@ func (s *stateObject) CancelStaker(addr common.Address) {
 func (s *stateObject) SetStakers(stakers *types.StakerList) {
 	s.db.journal.append(stakersChange{
 		account:    &s.address,
-		oldStakers: s.data.Staker.Stakers,
+		oldStakers: s.data.Staker.CSBTCreators,
 	})
 
 	s.setStakers(stakers)
 }
 
 func (s *stateObject) setStakers(stakers *types.StakerList) {
-	s.data.Staker.Stakers = *stakers
+	s.data.Staker.CSBTCreators = *stakers
 }
 
 func (s *stateObject) GetStakers() *types.StakerList {
 	if s.data.Staker != nil {
-		return &s.data.Staker.Stakers
-	}
-
-	return nil
-}
-
-func (s *stateObject) AddInjectedCsbts(InjectedCsbt *types.InjectedOfficialNFT) {
-	newCsbts := s.data.Staker.Csbts.DeepCopy()
-	newCsbts.InjectedOfficialNFTs = append(newCsbts.InjectedOfficialNFTs, InjectedCsbt)
-	s.SetCsbts(newCsbts)
-}
-
-func (s *stateObject) RemoveInjectCsbts(num *big.Int) {
-	newCsbts := s.data.Staker.Csbts.DeepCopy()
-	newCsbts.DeleteExpireElem(num)
-	s.SetCsbts(newCsbts)
-}
-
-func (s *stateObject) SetCsbts(csbts *types.InjectedOfficialNFTList) {
-	s.db.journal.append(csbtsChange{
-		account:  &s.address,
-		oldCsbts: s.data.Staker.Csbts,
-	})
-
-	s.setCsbts(csbts)
-}
-
-func (s *stateObject) setCsbts(csbts *types.InjectedOfficialNFTList) {
-	s.data.Staker.Csbts = *csbts
-}
-
-func (s *stateObject) GetCsbts() *types.InjectedOfficialNFTList {
-	if s.data.Staker != nil {
-		return &s.data.Staker.Csbts
-	}
-
-	return nil
-}
-
-func (s *stateObject) SetNominee(nominee *types.NominatedOfficialNFT) {
-	oldNomineeChange := nomineeChange{
-		account: &s.address,
-	}
-	if s.data.Staker.Nominee != nil {
-		oldNomineeChange.oldNominee = *s.data.Staker.Nominee
-	} else {
-		oldNomineeChange.oldNominee = types.NominatedOfficialNFT{}
-	}
-	s.db.journal.append(oldNomineeChange)
-
-	s.setNominee(nominee)
-}
-
-func (s *stateObject) setNominee(nominee *types.NominatedOfficialNFT) {
-	s.data.Staker.Nominee = nominee
-}
-
-func (s *stateObject) GetNominee() *types.NominatedOfficialNFT {
-	if s.data.Staker != nil {
-		return s.data.Staker.Nominee
+		return &s.data.Staker.CSBTCreators
 	}
 
 	return nil

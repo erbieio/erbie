@@ -14,12 +14,6 @@ var ValidatorStorageAddress = common.HexToAddress("0x000000000000000000000000000
 // stakers storage address
 var StakerStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000003")
 
-// Storage address for selected creator information
-var CsbtInjectedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000004")
-
-// Information of the creator with the highest voting weight
-var NominatedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000005")
-
 // Voting contract address
 var VoteContractAddress = common.HexToAddress("0x0000000000000000000000000000000000000010")
 

@@ -385,7 +385,7 @@ func (pool *TxPool) validateTx(ctx context.Context, tx *types.Transaction) error
 	wormholes, err := tx.GetWormholes()
 	if err == nil {
 		switch wormholes.Type {
-		case 10:
+		case 4:
 			if currentState.GetBalance(from).Cmp(tx.GasFee()) < 0 {
 				return core.ErrInsufficientFunds
 			}

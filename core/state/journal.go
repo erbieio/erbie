@@ -150,11 +150,8 @@ type (
 
 	nftInfoChange struct {
 		address    *common.Address
-		oldName    string
-		oldSymbol  string
 		oldOwner   common.Address
 		oldCreator common.Address
-		oldMetaURL string
 	}
 
 	pledgedBalanceChange struct {
@@ -163,16 +160,6 @@ type (
 	}
 
 	pledgedBlockNumberChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	voteBlockNumberChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	voteWeightChange struct {
 		account *common.Address
 		prev    *big.Int
 	}
@@ -215,16 +202,6 @@ type (
 	validatorExtensionChange struct {
 		account               *common.Address
 		oldValidatorExtension types.ValidatorsExtensionList
-	}
-
-	csbtsChange struct {
-		account  *common.Address
-		oldCsbts types.InjectedOfficialNFTList
-	}
-
-	nomineeChange struct {
-		account    *common.Address
-		oldNominee types.NominatedOfficialNFT
 	}
 
 	validatorProxyChange struct {
@@ -373,11 +350,8 @@ func (ch nftOwnerChange) dirtied() *common.Address {
 
 func (ch nftInfoChange) revert(s *StateDB) {
 	s.getStateObject(*ch.address).setJournalNFTInfo(
-		ch.oldName,
-		ch.oldSymbol,
 		ch.oldOwner,
-		ch.oldCreator,
-		ch.oldMetaURL)
+		ch.oldCreator)
 }
 
 func (ch nftInfoChange) dirtied() *common.Address {
@@ -397,22 +371,6 @@ func (ch pledgedBlockNumberChange) revert(s *StateDB) {
 }
 
 func (ch pledgedBlockNumberChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch voteBlockNumberChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setVoteBlockNumber(ch.prev)
-}
-
-func (ch voteBlockNumberChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch voteWeightChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setVoteWeight(ch.prev)
-}
-
-func (ch voteWeightChange) dirtied() *common.Address {
 	return ch.account
 }
 
@@ -493,27 +451,6 @@ func (ch validatorExtensionChange) revert(s *StateDB) {
 }
 
 func (ch validatorExtensionChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch csbtsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setCsbts(&ch.oldCsbts)
-}
-
-func (ch csbtsChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch nomineeChange) revert(s *StateDB) {
-	emptyNominee := types.NominatedOfficialNFT{}
-	if ch.oldNominee != emptyNominee {
-		s.getStateObject(*ch.account).setNominee(&ch.oldNominee)
-	} else {
-		s.getStateObject(*ch.account).setNominee(nil)
-	}
-}
-
-func (ch nomineeChange) dirtied() *common.Address {
 	return ch.account
 }
 

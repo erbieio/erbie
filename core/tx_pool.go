@@ -621,7 +621,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	wormholes, err := tx.GetWormholes()
 	if err == nil {
 		switch wormholes.Type {
-		case 9:
+		case 3:
 			pledgedBalance := pool.currentState.GetPledgedBalance(*tx.To())
 			if pledgedBalance.Cmp(types.StakerBase()) < 0 {
 				if from != *tx.To() {
@@ -629,14 +629,11 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 					return errors.New("from pledge balance not more than 700 ERB")
 				}
 			}
-			if wormholes.FeeRate < 100 || wormholes.FeeRate >= 10000 {
-				log.Error("validateTx()", "abnormal rate")
-				return errors.New("abnormal rate")
-			}
+
 			if pool.currentState.GetBalance(from).Cmp(big.NewInt(0).Add(tx.GasFee(), tx.Value())) < 0 {
 				return ErrInsufficientFunds
 			}
-		case 10:
+		case 4:
 			if pool.currentState.GetBalance(from).Cmp(tx.GasFee()) < 0 {
 				return ErrInsufficientFunds
 			}

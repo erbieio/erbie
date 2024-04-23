@@ -52,10 +52,10 @@ type (
 	// and is used by the BLOCKHASH EVM op code.
 	GetHashFunc func(uint64) common.Hash
 
-	// VerifyNFTOwnerFunc is to judge whether the owner own the nft
-	VerifyNFTOwnerFunc func(StateDB, string, common.Address) bool
-	// TransferNFTFunc is the signature of a TransferNFT function
-	TransferNFTFunc                           func(StateDB, string, common.Address, *big.Int) error
+	// VerifyCSBTOwnerFunc is to judge whether the owner own the csbt
+	VerifyCSBTOwnerFunc func(StateDB, string, common.Address) bool
+	// TransferCSBTFunc is the signature of a TransferCSBT function
+	TransferCSBTFunc                          func(StateDB, string, common.Address, *big.Int) error
 	ExchangeNFTToCurrencyFunc                 func(StateDB, common.Address, string, *big.Int) error
 	PledgeTokenFunc                           func(StateDB, common.Address, *big.Int, *types.Wormholes, *big.Int) error
 	StakerPledgeFunc                          func(StateDB, common.Address, common.Address, *big.Int, *big.Int, *types.Wormholes) error
@@ -67,20 +67,12 @@ type (
 	ResetMinerBecomeFunc                      func(StateDB, common.Address) error
 	CancelPledgedTokenFunc                    func(StateDB, common.Address, *big.Int)
 	NewCancelStakerPledgeFunc                 func(StateDB, common.Address, common.Address, *big.Int, *big.Int) error
-	GetNFTNameFunc                            func(StateDB, common.Address) string
-	GetNFTSymbolFunc                          func(StateDB, common.Address) string
 	GetNFTCreatorFunc                         func(StateDB, common.Address) common.Address
-	GetNFTMetaURLFunc                         func(StateDB, common.Address) string
 	IsExistNFTFunc                            func(StateDB, common.Address) bool
 	VerifyPledgedBalanceFunc                  func(StateDB, common.Address, *big.Int) bool
 	VerifyStakerPledgedBalanceFunc            func(StateDB, common.Address, common.Address, *big.Int) bool
 	VerifyCancelValidatorPledgedBalanceFunc   func(StateDB, common.Address, *big.Int) bool
-	InjectOfficialNFTFunc                     func(StateDB, string, *big.Int, uint64, uint16, string)
 	GetNftAddressAndLevelFunc                 func(string) (common.Address, int, error)
-	VoteOfficialNFTFunc                       func(StateDB, *types.NominatedOfficialNFT, *big.Int) error
-	ElectNominatedOfficialNFTFunc             func(StateDB, *big.Int)
-	NextIndexFunc                             func(db StateDB) *big.Int
-	VoteOfficialNFTByApprovedExchangerFunc    func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
 	RecoverValidatorCoefficientFunc           func(StateDB, common.Address) error
 	BatchForcedSaleSNFTByApproveExchangerFunc func(StateDB, *big.Int, common.Address, common.Address, *types.Wormholes, *big.Int) error
 	GetDividendFunc                           func(StateDB, common.Address) error
@@ -115,10 +107,10 @@ type BlockContext struct {
 	GetHash GetHashFunc
 
 	// *** modify to support nft transaction 20211215 begin ***
-	// VerifyNFTOwner is to judge whether the owner own the nft
-	VerifyNFTOwner VerifyNFTOwnerFunc
-	// TransferNFT transfers NFT from one owner to the other
-	TransferNFT TransferNFTFunc
+	// VerifyCSBTOwner is to judge whether the owner own the nft
+	VerifyCSBTOwner VerifyCSBTOwnerFunc
+	// TransferCSBT transfers NFT from one owner to the other
+	TransferCSBT TransferCSBTFunc
 	// *** modify to support nft transaction 20211215 end ***
 	PledgeToken                         PledgeTokenFunc
 	StakerPledge                        StakerPledgeFunc
@@ -130,20 +122,12 @@ type BlockContext struct {
 	ResetMinerBecome                    ResetMinerBecomeFunc
 	CancelPledgedToken                  CancelPledgedTokenFunc
 	NewCancelStakerPledge               NewCancelStakerPledgeFunc
-	GetNFTName                          GetNFTNameFunc
-	GetNFTSymbol                        GetNFTSymbolFunc
 	GetNFTCreator                       GetNFTCreatorFunc
-	GetNFTMetaURL                       GetNFTMetaURLFunc
 	IsExistNFT                          IsExistNFTFunc
 	VerifyPledgedBalance                VerifyPledgedBalanceFunc
 	VerifyStakerPledgedBalance          VerifyStakerPledgedBalanceFunc
 	VerifyCancelValidatorPledgedBalance VerifyCancelValidatorPledgedBalanceFunc
-	InjectOfficialNFT                   InjectOfficialNFTFunc
 	GetNftAddressAndLevel               GetNftAddressAndLevelFunc
-	VoteOfficialNFT                     VoteOfficialNFTFunc
-	ElectNominatedOfficialNFT           ElectNominatedOfficialNFTFunc
-	NextIndex                           NextIndexFunc
-	VoteOfficialNFTByApprovedExchanger  VoteOfficialNFTByApprovedExchangerFunc
 	RecoverValidatorCoefficient         RecoverValidatorCoefficientFunc
 	IsExistStakerStorageAddress         IsExistStakerStorageAddressFunc
 	// Block information
@@ -354,7 +338,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	// Fail if we're trying to transfer more than the available balance
 	if nftTransaction {
 		switch wormholes.Type {
-		case 10:
+		case 4:
 			pledgedBalance := evm.StateDB.GetStakerPledgedBalance(caller.Address(), addr)
 			if pledgedBalance.Cmp(value) != 0 {
 				if value.Sign() > 0 && !evm.Context.VerifyStakerPledgedBalance(evm.StateDB, caller.Address(), addr, new(big.Int).Add(value, types.StakerBase())) {
@@ -393,7 +377,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	log.Info("EVM.Call()", "nftTransaction", nftTransaction)
 	if nftTransaction {
 		log.Info("EVM.Call()", "nftTransaction", nftTransaction, "wormholes.Type", wormholes.Type)
-		ret, gas, err = evm.HandleNFT(caller, addr, wormholes, gas, value)
+		ret, gas, err = evm.HandleCSBT(caller, addr, wormholes, gas, value)
 		if err != nil {
 			return ret, gas, err
 		}
@@ -501,8 +485,8 @@ func (evm *EVM) TransferNFTByContract(caller ContractRef, input []byte, gas uint
 	}
 	//nftAddress := common.BytesToAddress(nftAddressBytes)
 
-	if evm.Context.VerifyNFTOwner(evm.StateDB, strNftAddress, from) {
-		err := evm.Context.TransferNFT(evm.StateDB, strNftAddress, to, evm.Context.BlockNumber)
+	if evm.Context.VerifyCSBTOwner(evm.StateDB, strNftAddress, from) {
+		err := evm.Context.TransferCSBT(evm.StateDB, strNftAddress, to, evm.Context.BlockNumber)
 		if err != nil {
 			return nil, gas, err
 		}
@@ -763,7 +747,7 @@ func (evm *EVM) Create2(caller ContractRef, code []byte, gas uint64, endowment *
 // ChainConfig returns the environment's chain configuration
 func (evm *EVM) ChainConfig() *params.ChainConfig { return evm.chainConfig }
 
-func (evm *EVM) HandleNFT(
+func (evm *EVM) HandleCSBT(
 	caller ContractRef,
 	addr common.Address,
 	wormholes types.Wormholes,
@@ -772,45 +756,55 @@ func (evm *EVM) HandleNFT(
 
 	formatErr := wormholes.CheckFormat()
 	if formatErr != nil {
-		log.Error("HandleNFT() format error", "wormholes.Type", wormholes.Type, "error", formatErr, "blocknumber", evm.Context.BlockNumber.Uint64())
+		log.Error("HandleCSBT() format error", "wormholes.Type", wormholes.Type, "error", formatErr, "blocknumber", evm.Context.BlockNumber.Uint64())
 		return nil, gas, formatErr
 	}
 
 	switch wormholes.Type {
-	case 1: //transfer nft
+	case 1: //transfer csbt
 
-		if evm.Context.VerifyNFTOwner(evm.StateDB, wormholes.NFTAddress, caller.Address()) {
+		if evm.Context.VerifyCSBTOwner(evm.StateDB, wormholes.CSBTAddress, caller.Address()) {
 
 			// whether csbt is first transfer
-			if IsOfficialNFT(common.HexToAddress(wormholes.NFTAddress)) {
+			if IsOfficialNFT(common.HexToAddress(wormholes.CSBTAddress)) {
 				if !evm.Context.IsExistStakerStorageAddress(evm.StateDB, caller.Address()) {
-					log.Info("HandleNFT(), TransferNFT csbt not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
+					log.Info("HandleCSBT(), TransferCSBT csbt not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
 						"blocknumber", evm.Context.BlockNumber.Uint64())
 				}
 			}
 
-			log.Info("HandleNFT(), TransferNFT>>>>>>>>>>", "wormholes.Type", wormholes.Type,
+			log.Info("HandleCSBT(), TransferCSBT>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
-			err := evm.Context.TransferNFT(evm.StateDB, wormholes.NFTAddress, addr, evm.Context.BlockNumber)
+			err := evm.Context.TransferCSBT(evm.StateDB, wormholes.CSBTAddress, addr, evm.Context.BlockNumber)
 			if err != nil {
-				log.Error("HandleNFT(), TransferNFT", "wormholes.Type", wormholes.Type,
+				log.Error("HandleCSBT(), TransferCSBT", "wormholes.Type", wormholes.Type,
 					"error", err, "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
-			log.Info("HandleNFT(), TransferNFT<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+			log.Info("HandleCSBT(), TransferCSBT<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 		} else {
-			log.Error("HandleNFT(), TransferNFT", "wormholes.Type", wormholes.Type,
+			log.Error("HandleCSBT(), TransferCSBT", "wormholes.Type", wormholes.Type,
 				"error", ErrNotOwner, "blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrNotOwner
 		}
 
-	case 9: //staker token
+	case 2:
+
+		if evm.Context.VerifyCSBTOwner(evm.StateDB, wormholes.CSBTAddress, addr) {
+			evm.Context.Transfer(evm.StateDB, caller.Address(), addr, value)
+		} else {
+			log.Error("HandleCSBT(), Withdraw ERB", "wormholes.Type", wormholes.Type,
+				"error", ErrNotOwner, "blocknumber", evm.Context.BlockNumber.Uint64())
+			return nil, gas, ErrNotOwner
+		}
+
+	case 3: //staker token
 
 		stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
 		if stakerpledged.Balance.Cmp(types.StakerBase()) < 0 {
 			if value.Cmp(types.StakerBase()) < 0 {
-				log.Error("HandleNFT(), StakerPledge", "wormholes.Type", wormholes.Type,
+				log.Error("HandleCSBT(), StakerPledge", "wormholes.Type", wormholes.Type,
 					"error", ErrNotMoreThan100ERB, "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, ErrNotMoreThan100ERB
 			}
@@ -818,36 +812,36 @@ func (evm *EVM) HandleNFT(
 
 		currentBlockNumber := new(big.Int).Set(evm.Context.BlockNumber)
 
-		log.Info("HandleNFT()", "StakerPledge.req", wormholes, "blocknumber", evm.Context.BlockNumber.Uint64())
+		log.Info("HandleCSBT()", "StakerPledge.req", wormholes, "blocknumber", evm.Context.BlockNumber.Uint64())
 		if evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
-			log.Info("HandleNFT(), StakerPledge>>>>>>>>>>", "wormholes.Type", wormholes.Type,
+			log.Info("HandleCSBT(), StakerPledge>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 
 			err := evm.Context.StakerPledge(evm.StateDB, caller.Address(), addr, value, currentBlockNumber, &wormholes)
 			if err != nil {
-				log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type, "error", err,
+				log.Error("HandleCSBT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type, "error", err,
 					"blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
 
 		} else {
-			log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+			log.Error("HandleCSBT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 				"error", ErrInsufficientBalance, "blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrInsufficientBalance
 		}
 
 		err := evm.Context.ResetMinerBecome(evm.StateDB, addr)
 		if err != nil {
-			log.Error("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+			log.Error("HandleCSBT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, err
 		}
 
-		log.Info("HandleNFT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+		log.Info("HandleCSBT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
-	case 10: // cancel pledge of token
-		log.Info("HandleNFT(), CancelPledgedToken>>>>>>>>>>", "wormholes.Type", wormholes.Type,
+	case 4: // cancel pledge of token
+		log.Info("HandleCSBT(), CancelPledgedToken>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
 		stakerpledged := evm.Context.GetStakerPledged(evm.StateDB, caller.Address(), addr)
@@ -855,7 +849,7 @@ func (evm *EVM) HandleNFT(
 
 		if pledgedBalance.Cmp(value) != 0 {
 			if types.StakerBase().Cmp(new(big.Int).Sub(pledgedBalance, value)) > 0 {
-				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+				log.Error("HandleCSBT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
 					"error", "the after revocation is less than 700ERB", "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, errors.New("the after revocation is less than 700ERB")
 			}
@@ -863,68 +857,43 @@ func (evm *EVM) HandleNFT(
 
 		//if caller.Address() == addr {
 		//	if !evm.Context.VerifyCancelValidatorPledgedBalance(evm.StateDB, addr, value) {
-		//		log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+		//		log.Error("HandleCSBT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
 		//			"the pledged amount is less than the pledged amount at other address", "blocknumber", evm.Context.BlockNumber.Uint64())
 		//		return nil, gas, errors.New("the pledged amount is less than the pledged amount at other address")
 		//	}
 		//}
 
 		if big.NewInt(types.CancelDayPledgedInterval).Cmp(new(big.Int).Sub(evm.Context.BlockNumber, stakerpledged.BlockNumber)) <= 0 {
-			log.Info("HandleNFT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
+			log.Info("HandleCSBT(), CancelPledgedToken, cancel all", "wormholes.Type", wormholes.Type,
 				"blocknumber", evm.Context.BlockNumber.Uint64())
 
 			err := evm.Context.NewCancelStakerPledge(evm.StateDB, caller.Address(), addr, value, evm.Context.BlockNumber)
 			if err != nil {
-				log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+				log.Error("HandleCSBT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
 					"error", err, "blocknumber", evm.Context.BlockNumber.Uint64())
 				return nil, gas, err
 			}
 		} else {
-			log.Error("HandleNFT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
+			log.Error("HandleCSBT(), CancelPledgedToken", "wormholes.Type", wormholes.Type,
 				"error", ErrTooCloseToCancel, "blocknumber", evm.Context.BlockNumber.Uint64())
 			return nil, gas, ErrTooCloseToCancel
 		}
 
-		log.Info("HandleNFT(), CancelPledgedToken<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+		log.Info("HandleCSBT(), CancelPledgedToken<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
-	case 31:
-		//MinerConsign
-		log.Info("HandleNFT()", "MinerConsign.req", wormholes, "blocknumber", evm.Context.BlockNumber.Uint64())
-		//if evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
-		log.Info("HandleNFT(), Start|MinerConsign>>>>>>>>>>", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
-
-		// exist pledge by others,unable to set proxy, start------------------
-		isBool := evm.Context.IsExistOtherPledged(evm.StateDB, caller.Address())
-		if isBool {
-			log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-				"error", "exist pledge by others,unable to set proxy", "blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, errors.New("exist pledge by others,unable to set proxy")
-		}
-		// exist pledge by others,unable to set proxy, end------------------
-
-		err := evm.Context.MinerConsign(evm.StateDB, caller.Address(), &wormholes)
-		if err != nil {
-			log.Error("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-				"blocknumber", evm.Context.BlockNumber.Uint64())
-			return nil, gas, err
-		}
-		log.Info("HandleNFT(), End|MinerConsign<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-			"blocknumber", evm.Context.BlockNumber.Uint64())
-
-	case 26:
-		log.Info("HandleNFT(), RecoverValidatorCoefficient>>>>>>>>>>", "wormholes.Type", wormholes.Type,
+	case 5:
+		log.Info("HandleCSBT(), RecoverValidatorCoefficient>>>>>>>>>>", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 		err := evm.Context.RecoverValidatorCoefficient(evm.StateDB, caller.Address())
 		if err != nil {
 			return nil, gas, err
 		}
-		log.Info("HandleNFT(), RecoverValidatorCoefficient<<<<<<<<<<", "wormholes.Type", wormholes.Type,
+		log.Info("HandleCSBT(), RecoverValidatorCoefficient<<<<<<<<<<", "wormholes.Type", wormholes.Type,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 
 	default:
-		log.Error("HandleNFT()", "wormholes.Type", wormholes.Type, "error", ErrNotExistNFTType,
+		log.Error("HandleCSBT()", "wormholes.Type", wormholes.Type, "error", ErrNotExistNFTType,
 			"blocknumber", evm.Context.BlockNumber.Uint64())
 		return nil, gas, ErrNotExistNFTType
 	}

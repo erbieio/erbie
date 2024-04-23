@@ -127,48 +127,25 @@ func (list *InjectedOfficialNFTList) DeepCopy() *InjectedOfficialNFTList {
 // Wormholes struct for handling NFT transactions
 type Wormholes struct {
 	Type         uint8  `json:"type"`
-	NFTAddress   string `json:"nft_address,omitempty"`
+	CSBTAddress  string `json:"csbt_address,omitempty"`
 	ProxyAddress string `json:"proxy_address,omitempty"`
 	ProxySign    string `json:"proxy_sign,omitempty"`
-	Exchanger    string `json:"exchanger,omitempty"`
-	Royalty      uint16 `json:"royalty,omitempty"`
-	MetaURL      string `json:"meta_url,omitempty"`
-	//ApproveAddress string		`json:"approve_address"`
-	FeeRate       uint16           `json:"fee_rate,omitempty"`
-	Name          string           `json:"name,omitempty"`
-	Url           string           `json:"url,omitempty"`
-	Dir           string           `json:"dir,omitempty"`
-	StartIndex    string           `json:"start_index,omitempty"`
-	Number        uint64           `json:"number,omitempty"`
-	Buyer         Payload          `json:"buyer,omitempty"`
-	Seller1       Payload          `json:"seller1,omitempty"`
-	Seller2       MintSellPayload  `json:"seller2,omitempty"`
-	ExchangerAuth ExchangerPayload `json:"exchanger_auth,omitempty"`
-	Creator       string           `json:"creator,omitempty"`
-	Version       string           `json:"version,omitempty"`
-	RewardFlag    uint8            `json:"reward_flag,omitempty"`
-	BuyerAuth     TraderPayload    `json:"buyer_auth,omitempty"`
-	SellerAuth    TraderPayload    `json:"seller_auth,omitempty"`
-	NoAutoMerge   bool             `json:"no_automerge,omitempty"`
+	Creator      string `json:"creator,omitempty"`
+	Version      string `json:"version,omitempty"`
 }
 
 const WormholesVersion = "v0.0.1"
 const PattenAddr = "^0x[0-9a-fA-F]{40}$"
 
-// var PattenAddr = "^0[xX][0-9a-fA-F]{40}$"
-// var PattenHex = "^[0-9a-fA-F]+$"
 func (w *Wormholes) CheckFormat() error {
-	//regHex, _ := regexp.Compile(PattenHex)
-	//regAddr, _ := regexp.Compile(PattenAddr)
 
 	switch w.Type {
 
 	case 1:
-	case 9:
-	case 10:
-
-	case 26:
-	case 31:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
 	default:
 		return errors.New("not exist nft type")
 	}
@@ -181,15 +158,14 @@ func (w *Wormholes) TxGas() (uint64, error) {
 	switch w.Type {
 	case 1:
 		return params.WormholesTx1, nil
-	case 9:
-		return params.WormholesTx9, nil
-	case 10:
-		return params.WormholesTx10, nil
-
-	case 26:
-		return params.WormholesTx26, nil
-	case 31:
-		return params.WormholesTx31, nil
+	case 2:
+		return params.WormholesTx2, nil
+	case 3:
+		return params.WormholesTx3, nil
+	case 4:
+		return params.WormholesTx4, nil
+	case 5:
+		return params.WormholesTx5, nil
 	default:
 		return 0, errors.New("not exist nft type")
 	}

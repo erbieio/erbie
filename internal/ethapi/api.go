@@ -890,58 +890,6 @@ func (s *PublicBlockChainAPI) GetValidatorLen(ctx context.Context, number rpc.Bl
 	return len(validatorList.Validators)
 }
 
-type NominatedNFTInfo struct {
-	Dir        string         `json:"dir"`
-	StartIndex *big.Int       `json:"start_index"`
-	Number     uint64         `json:"number"`
-	Royalty    uint16         `json:"royalty"`
-	Creator    string         `json:"creator"`
-	Address    common.Address `json:"address"`
-	VoteWeight *big.Int       `json:"vote_weight"`
-}
-
-func (s *PublicBlockChainAPI) GetNominatedNFTInfo(ctx context.Context, number rpc.BlockNumber) *NominatedNFTInfo {
-	st, _, err := s.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-
-	nominee := st.GetNominee(types.NominatedStorageAddress)
-
-	var Info NominatedNFTInfo
-	Info.Address = nominee.Address
-	Info.VoteWeight = nominee.VoteWeight
-	Info.Dir = nominee.Dir
-	Info.StartIndex = nominee.StartIndex
-	Info.Number = nominee.Number
-	Info.Royalty = nominee.Royalty
-	Info.Creator = nominee.Creator
-
-	return &Info
-}
-
-func (s *PublicBlockChainAPI) GetCurrentNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFT {
-	st, _, err := s.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
-	if length := len(InjectedList.InjectedOfficialNFTs); length > 0 {
-		return InjectedList.InjectedOfficialNFTs[length-1]
-	} else {
-		return nil
-	}
-}
-
-func (s *PublicBlockChainAPI) GetInjectedNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFTList {
-	st, _, err := s.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
-	return InjectedList
-}
-
 func (s *PublicBlockChainAPI) GetShouldParticipantsCoefficientByNumber(ctx context.Context, number rpc.BlockNumber) ([]*BlockParticipants, error) {
 	var participants []*BlockParticipants
 	parentHeader, err := s.b.HeaderByNumber(ctx, number-1)
@@ -1613,7 +1561,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args TransactionArgs, blockNr
 			wormholes, err := args.GetWormholes()
 			if err == nil {
 				switch wormholes.Type {
-				case 10:
+				case 4:
 
 				default:
 					if args.Value.ToInt().Cmp(available) >= 0 {
@@ -2297,48 +2245,6 @@ func (w *PublicWormholesAPI) GetValidatorLen(ctx context.Context, number rpc.Blo
 	return len(validatorList.Validators)
 }
 
-func (w *PublicWormholesAPI) GetNominatedNFTInfo(ctx context.Context, number rpc.BlockNumber) *NominatedNFTInfo {
-	st, _, err := w.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-
-	nominee := st.GetNominee(types.NominatedStorageAddress)
-
-	var Info NominatedNFTInfo
-	Info.Address = nominee.Address
-	Info.VoteWeight = nominee.VoteWeight
-	Info.Dir = nominee.Dir
-	Info.StartIndex = nominee.StartIndex
-	Info.Number = nominee.Number
-	Info.Royalty = nominee.Royalty
-	Info.Creator = nominee.Creator
-
-	return &Info
-}
-
-func (w *PublicWormholesAPI) GetCurrentNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFT {
-	st, _, err := w.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
-	if length := len(InjectedList.InjectedOfficialNFTs); length > 0 {
-		return InjectedList.InjectedOfficialNFTs[length-1]
-	} else {
-		return nil
-	}
-}
-
-func (w *PublicWormholesAPI) GetInjectedNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFTList {
-	st, _, err := w.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetCsbts(types.CsbtInjectedStorageAddress)
-	return InjectedList
-}
-
 type BlockParticipants struct {
 	Address     common.Address
 	Coefficient uint8
@@ -2471,9 +2377,9 @@ func (w *PublicWormholesAPI) Transfer(ctx context.Context, args TransactionArgs)
 	}
 
 	transaction := types.Wormholes{
-		Type:       1,
-		NFTAddress: TxData["nftAddress"].(string),
-		Version:    types.WormholesVersion,
+		Type:        1,
+		CSBTAddress: TxData["nftAddress"].(string),
+		Version:     types.WormholesVersion,
 	}
 
 	tr, err := json.Marshal(transaction)

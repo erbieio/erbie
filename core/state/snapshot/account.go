@@ -38,7 +38,7 @@ type Account struct {
 	CodeHash []byte
 
 	Worm   *types.WormholesExtension `rlp:"nil"`
-	Nft    *types.AccountNFT         `rlp:"nil"`
+	Csbt   *types.AccountCSBT        `rlp:"nil"`
 	Staker *types.AccountStaker      `rlp:"nil"`
 	Extra  []byte
 }
@@ -49,7 +49,7 @@ func SlimAccount(nonce uint64,
 	root common.Hash,
 	codehash []byte,
 	worm *types.WormholesExtension,
-	nft *types.AccountNFT,
+	csbt *types.AccountCSBT,
 	staker *types.AccountStaker,
 	extra []byte) Account {
 	//func SlimAccount(nonce uint64, balance *big.Int, root common.Hash, codehash []byte) Account {
@@ -67,8 +67,8 @@ func SlimAccount(nonce uint64,
 	if worm != nil {
 		slim.Worm = worm
 	}
-	if nft != nil {
-		slim.Nft = nft
+	if csbt != nil {
+		slim.Csbt = csbt
 	}
 
 	if staker != nil {
@@ -89,7 +89,7 @@ func SlimAccountRLP(nonce uint64,
 	root common.Hash,
 	codehash []byte,
 	worm *types.WormholesExtension,
-	nft *types.AccountNFT,
+	csbt *types.AccountCSBT,
 	staker *types.AccountStaker,
 	extra []byte) []byte {
 	data, err := rlp.EncodeToBytes(SlimAccount(nonce,
@@ -97,7 +97,7 @@ func SlimAccountRLP(nonce uint64,
 		root,
 		codehash,
 		worm,
-		nft,
+		csbt,
 		staker,
 		extra))
 	//func SlimAccountRLP(nonce uint64, balance *big.Int, root common.Hash, codehash []byte) []byte {

@@ -8,8 +8,6 @@ import (
 type WormholesExtension struct {
 	PledgedBalance     *big.Int
 	PledgedBlockNumber *big.Int
-	VoteBlockNumber    *big.Int
-	VoteWeight         *big.Int
 	Coefficient        uint8
 
 	StakerExtension    StakersExtensionList
@@ -28,12 +26,6 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 	}
 
 	newWorm.ValidatorProxy = worm.ValidatorProxy
-	if worm.VoteBlockNumber != nil {
-		newWorm.VoteBlockNumber = new(big.Int).Set(worm.VoteBlockNumber)
-	}
-	if worm.VoteWeight != nil {
-		newWorm.VoteWeight = new(big.Int).Set(worm.VoteWeight)
-	}
 	newWorm.Coefficient = worm.Coefficient
 
 	newWorm.StakerExtension = *worm.StakerExtension.DeepCopy()
@@ -42,33 +34,24 @@ func (worm *WormholesExtension) DeepCopy() *WormholesExtension {
 	return &newWorm
 }
 
-type AccountNFT struct {
-	//Account
-	Name    string
-	Symbol  string
+type AccountCSBT struct {
 	Owner   common.Address
 	Creator common.Address
-	MetaURL string
 }
 
-func (nft *AccountNFT) DeepCopy() *AccountNFT {
-	newNft := &AccountNFT{
-		Name:    nft.Name,
-		Symbol:  nft.Symbol,
-		Owner:   nft.Owner,
-		Creator: nft.Creator,
-		MetaURL: nft.MetaURL,
+func (csbt *AccountCSBT) DeepCopy() *AccountCSBT {
+	newCsbt := &AccountCSBT{
+		Owner:   csbt.Owner,
+		Creator: csbt.Creator,
 	}
 
-	return newNft
+	return newCsbt
 }
 
 type AccountStaker struct {
-	Mint       MintDeep
-	Validators ValidatorList
-	Stakers    StakerList
-	Csbts      InjectedOfficialNFTList
-	Nominee    *NominatedOfficialNFT `rlp:"nil"`
+	Mint         MintDeep
+	Validators   ValidatorList
+	CSBTCreators StakerList
 }
 
 func (staker *AccountStaker) DeepCopy() *AccountStaker {
@@ -82,22 +65,7 @@ func (staker *AccountStaker) DeepCopy() *AccountStaker {
 	}
 
 	newStaker.Validators = *staker.Validators.DeepCopy()
-	newStaker.Stakers = *staker.Stakers.DeepCopy()
-	newStaker.Csbts = *staker.Csbts.DeepCopy()
-
-	if staker.Nominee != nil {
-		nominee := &NominatedOfficialNFT{}
-
-		nominee.Dir = staker.Nominee.Dir
-		nominee.StartIndex = new(big.Int).Set(staker.Nominee.StartIndex)
-		nominee.Number = staker.Nominee.Number
-		nominee.Royalty = staker.Nominee.Royalty
-		nominee.Creator = staker.Nominee.Creator
-		nominee.Address = staker.Nominee.Address
-		nominee.VoteWeight = new(big.Int).Set(staker.Nominee.VoteWeight)
-
-		newStaker.Nominee = nominee
-	}
+	newStaker.CSBTCreators = *staker.CSBTCreators.DeepCopy()
 
 	return &newStaker
 }

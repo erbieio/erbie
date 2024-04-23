@@ -335,22 +335,6 @@ func (tx *Transaction) GetWormholes() (*Wormholes, error) {
 	return nil, errors.New("Unmarshal wormholes error")
 }
 
-func (tx *Transaction) GetExchangerOwner() (common.Address, bool) {
-	if tx.IsWormholesNFTTx() {
-		wormholes, err := tx.GetWormholes()
-		if err != nil {
-			return common.Address{}, false
-		}
-		if wormholes.Type == 18 ||
-			wormholes.Type == 19 ||
-			wormholes.Type == 24 {
-			return common.HexToAddress(wormholes.ExchangerAuth.ExchangerOwner), true
-		}
-	}
-
-	return common.Address{}, false
-}
-
 // GasFee returns gas * gasPrice .
 func (tx *Transaction) GasFee() *big.Int {
 	total := new(big.Int).Mul(tx.GasPrice(), new(big.Int).SetUint64(tx.Gas()))

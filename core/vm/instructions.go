@@ -926,22 +926,22 @@ func opNOwnerOf(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 //	return nil, nil
 //}
 
-func opNTokenURI(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	v := scope.Stack.peek()
-	nftAddr := common.Address(v.Bytes20())
-	uri := interpreter.evm.StateDB.GetNFTMetaURL(nftAddr)
-	fmt.Println("nft.tokenURI()---", nftAddr.String(), uri)
-	data := []byte(uri)
-	len := uint64(len(data))
-	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
-	freeOffset := offset + (len/32+2)*32
-	scope.Memory.Resize(freeOffset)
-	scope.Memory.Set32(offset, v.SetUint64(len))
-	scope.Memory.Set(offset+32, len, data)
-	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
-	v.SetUint64(offset)
-	return nil, nil
-}
+//func opNTokenURI(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	v := scope.Stack.peek()
+//	nftAddr := common.Address(v.Bytes20())
+//	uri := interpreter.evm.StateDB.GetNFTMetaURL(nftAddr)
+//	fmt.Println("nft.tokenURI()---", nftAddr.String(), uri)
+//	data := []byte(uri)
+//	len := uint64(len(data))
+//	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
+//	freeOffset := offset + (len/32+2)*32
+//	scope.Memory.Resize(freeOffset)
+//	scope.Memory.Set32(offset, v.SetUint64(len))
+//	scope.Memory.Set(offset+32, len, data)
+//	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
+//	v.SetUint64(offset)
+//	return nil, nil
+//}
 
 //func opNMint(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
 //	uri, royalty, to := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.peek()
@@ -962,39 +962,39 @@ func opNTokenURI(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) (
 //	}
 //}
 
-func opNName(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	v := scope.Stack.peek()
-	nftAddr := common.Address(v.Bytes20())
-	name := interpreter.evm.StateDB.GetNFTName(nftAddr)
-	fmt.Println("nft.name()---", nftAddr.String(), name)
-	data := []byte(name)
-	len := uint64(len(data))
-	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
-	freeOffset := offset + (len/32+2)*32
-	scope.Memory.Resize(freeOffset)
-	scope.Memory.Set32(offset, v.SetUint64(len))
-	scope.Memory.Set(offset+32, len, data)
-	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
-	v.SetUint64(offset)
-	return nil, nil
-}
+//func opNName(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	v := scope.Stack.peek()
+//	nftAddr := common.Address(v.Bytes20())
+//	name := interpreter.evm.StateDB.GetNFTName(nftAddr)
+//	fmt.Println("nft.name()---", nftAddr.String(), name)
+//	data := []byte(name)
+//	len := uint64(len(data))
+//	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
+//	freeOffset := offset + (len/32+2)*32
+//	scope.Memory.Resize(freeOffset)
+//	scope.Memory.Set32(offset, v.SetUint64(len))
+//	scope.Memory.Set(offset+32, len, data)
+//	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
+//	v.SetUint64(offset)
+//	return nil, nil
+//}
 
-func opNSymbol(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	v := scope.Stack.peek()
-	nftAddr := common.Address(v.Bytes20())
-	symbol := interpreter.evm.StateDB.GetNFTSymbol(nftAddr)
-	fmt.Println("nft.symbol()---", nftAddr.String(), symbol)
-	data := []byte(symbol)
-	len := uint64(len(data))
-	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
-	freeOffset := offset + (len/32+2)*32
-	scope.Memory.Resize(freeOffset)
-	scope.Memory.Set32(offset, v.SetUint64(len))
-	scope.Memory.Set(offset+32, len, data)
-	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
-	v.SetUint64(offset)
-	return nil, nil
-}
+//func opNSymbol(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	v := scope.Stack.peek()
+//	nftAddr := common.Address(v.Bytes20())
+//	symbol := interpreter.evm.StateDB.GetNFTSymbol(nftAddr)
+//	fmt.Println("nft.symbol()---", nftAddr.String(), symbol)
+//	data := []byte(symbol)
+//	len := uint64(len(data))
+//	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
+//	freeOffset := offset + (len/32+2)*32
+//	scope.Memory.Resize(freeOffset)
+//	scope.Memory.Set32(offset, v.SetUint64(len))
+//	scope.Memory.Set(offset+32, len, data)
+//	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
+//	v.SetUint64(offset)
+//	return nil, nil
+//}
 
 func opNCreator(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
 	slot := scope.Stack.peek()

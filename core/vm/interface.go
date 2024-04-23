@@ -89,23 +89,14 @@ type StateDB interface {
 	ResetMinerBecome(common.Address) error
 	CancelPledgedToken(common.Address, *big.Int)
 	NewCancelStakerPledge(common.Address, common.Address, *big.Int, *big.Int) error
-	GetNFTName(common.Address) string
-	GetNFTSymbol(common.Address) string
 	GetNFTCreator(common.Address) common.Address
-	GetNFTMetaURL(common.Address) string
 	IsExistNFT(common.Address) bool
 	GetPledgedBalance(common.Address) *big.Int
 	GetStakerPledgedBalance(common.Address, common.Address) *big.Int
-	InjectOfficialNFT(string, *big.Int, uint64, uint16, string)
-	VoteOfficialNFT(*types.NominatedOfficialNFT, *big.Int) error
-	ElectNominatedOfficialNFT(*big.Int)
-	SubVoteWeight(common.Address, *big.Int)
-	AddVoteWeight(common.Address, *big.Int)
 	AddValidatorCoefficient(common.Address, uint8)
 	SubValidatorCoefficient(common.Address, uint8)
 	RemoveValidatorCoefficient(common.Address)
 	GetValidatorCoefficient(common.Address) uint8
-	NextIndex() *big.Int
 	CalculateExchangeAmount(uint8, uint32) *big.Int
 	GetExchangAmount(common.Address, *big.Int) *big.Int
 	IsOfficialNFT(common.Address) bool

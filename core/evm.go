@@ -82,8 +82,8 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		ParentHeader: chain.GetHeader(header.ParentHash, header.Number.Uint64()),
 
 		// *** modify to support nft transaction 20211215 begin ***
-		VerifyNFTOwner: VerifyNFTOwner,
-		TransferNFT:    TransferNFT,
+		VerifyCSBTOwner: VerifyCSBTOwner,
+		TransferCSBT:    TransferCSBT,
 		// *** modify to support nft transaction 20211215 end ***
 		PledgeToken:                         PledgeToken,
 		StakerPledge:                        StakerPledge,
@@ -95,20 +95,12 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		ResetMinerBecome:                    ResetMinerBecome,
 		CancelPledgedToken:                  CancelPledgedToken,
 		NewCancelStakerPledge:               NewCancelStakerPledge,
-		GetNFTName:                          GetNFTName,
-		GetNFTSymbol:                        GetNFTSymbol,
 		GetNFTCreator:                       GetNFTCreator,
-		GetNFTMetaURL:                       GetNFTMetaURL,
 		IsExistNFT:                          IsExistNFT,
 		VerifyPledgedBalance:                VerifyPledgedBalance,
 		VerifyStakerPledgedBalance:          VerifyStakerPledgedBalance,
 		VerifyCancelValidatorPledgedBalance: VerifyCancelValidatorPledgedBalance,
-		InjectOfficialNFT:                   InjectOfficialNFT,
 		GetNftAddressAndLevel:               GetNftAddressAndLevel,
-		VoteOfficialNFT:                     VoteOfficialNFT,
-		ElectNominatedOfficialNFT:           ElectNominatedOfficialNFT,
-		NextIndex:                           NextIndex,
-		VoteOfficialNFTByApprovedExchanger:  VoteOfficialNFTByApprovedExchanger,
 		RecoverValidatorCoefficient:         RecoverValidatorCoefficient,
 		IsExistStakerStorageAddress:         IsExistStakerStorageAddress,
 	}
@@ -170,8 +162,8 @@ func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int) 
 
 // *** modify to support nft transaction 20211215 begin ***
 
-// CanTransferNFT checks whether the owner own the nft
-func VerifyNFTOwner(db vm.StateDB, nftAddr string, owner common.Address) bool {
+// CanTransferCSBT checks whether the owner own the csbt
+func VerifyCSBTOwner(db vm.StateDB, nftAddr string, owner common.Address) bool {
 	address, _, err := GetNftAddressAndLevel(nftAddr)
 	if err != nil {
 		return false
@@ -207,8 +199,8 @@ func GetNftAddressAndLevel(nftAddress string) (common.Address, int, error) {
 	return address, level, nil
 }
 
-// TransferNFT change the NFT's owner
-func TransferNFT(db vm.StateDB, nftAddr string, newOwner common.Address, blocknumber *big.Int) error {
+// TransferCSBT change the NFT's owner
+func TransferCSBT(db vm.StateDB, nftAddr string, newOwner common.Address, blocknumber *big.Int) error {
 	address, level, err := GetNftAddressAndLevel(nftAddr)
 	if err != nil {
 		return err
@@ -237,7 +229,6 @@ func PledgeToken(db vm.StateDB, address common.Address, amount *big.Int, wh *typ
 }
 
 func StakerPledge(db vm.StateDB, from, address common.Address, amount *big.Int, blocknumber *big.Int, wh *types.Wormholes) error {
-	log.Info("staker fee rate =", fmt.Sprint(wh.FeeRate), "&wormholes =", fmt.Sprint(wh))
 	return db.StakerPledge(from, address, amount, blocknumber, wh)
 }
 
@@ -299,20 +290,8 @@ func NewCancelStakerPledge(db vm.StateDB, from common.Address, address common.Ad
 	return db.NewCancelStakerPledge(from, address, amount, blocknumber)
 }
 
-func GetNFTName(db vm.StateDB, addr common.Address) string {
-	return db.GetNFTName(addr)
-}
-
-func GetNFTSymbol(db vm.StateDB, addr common.Address) string {
-	return db.GetNFTSymbol(addr)
-}
-
 func GetNFTCreator(db vm.StateDB, addr common.Address) common.Address {
 	return db.GetNFTCreator(addr)
-}
-
-func GetNFTMetaURL(db vm.StateDB, addr common.Address) string {
-	return db.GetNFTMetaURL(addr)
 }
 
 func IsExistNFT(db vm.StateDB, addr common.Address) bool {
@@ -339,10 +318,6 @@ func VerifyCancelValidatorPledgedBalance(db vm.StateDB, addr common.Address, amo
 	return new(big.Int).Sub(db.GetStakerPledged(addr, addr).Balance, amount).
 		Cmp(new(big.Int).Sub(db.GetPledgedBalance(addr), db.GetStakerPledged(addr, addr).Balance)) >= 0
 
-}
-
-func InjectOfficialNFT(db vm.StateDB, dir string, startIndex *big.Int, number uint64, royalty uint16, creator string) {
-	db.InjectOfficialNFT(dir, startIndex, number, royalty, creator)
 }
 
 // hashMsg return the hash of plain msg
@@ -377,98 +352,6 @@ func RecoverAddress(msg string, sigStr string) (common.Address, error) {
 		return common.Address{}, err
 	}
 	return crypto.PubkeyToAddress(*rpk), nil
-}
-
-func VoteOfficialNFT(db vm.StateDB, nominatedOfficialNFT *types.NominatedOfficialNFT, blocknumber *big.Int) error {
-	return db.VoteOfficialNFT(nominatedOfficialNFT, blocknumber)
-}
-
-func ElectNominatedOfficialNFT(db vm.StateDB, blocknumber *big.Int) {
-	db.ElectNominatedOfficialNFT(blocknumber)
-}
-
-func NextIndex(db vm.StateDB) *big.Int {
-	return db.NextIndex()
-}
-
-func VoteOfficialNFTByApprovedExchanger(
-	db vm.StateDB,
-	blocknumber *big.Int,
-	caller common.Address,
-	to common.Address,
-	wormholes *types.Wormholes,
-	amount *big.Int) error {
-
-	var number uint64 = 4096
-	var royalty uint16 = 1000 // default 10%
-
-	exchangerMsg := wormholes.ExchangerAuth.ExchangerOwner +
-		wormholes.ExchangerAuth.To +
-		wormholes.ExchangerAuth.BlockNumber
-
-	originalExchanger, err := RecoverAddress(exchangerMsg, wormholes.ExchangerAuth.Sig)
-	if err != nil {
-		log.Error("VoteOfficialNFTByApprovedExchanger()", "Get buyer public key error", err)
-		return ErrRecoverAddress
-	}
-	exchangerOwner := common.HexToAddress(wormholes.ExchangerAuth.ExchangerOwner)
-	if originalExchanger != exchangerOwner {
-		log.Error("VoteOfficialNFTByApprovedExchanger(), exchangerAuth",
-			"wormholes.ExchangerAuth.ExchangerOwner", wormholes.ExchangerAuth.ExchangerOwner,
-			"recovered exchanger ", originalExchanger)
-		return ErrNotMatchAddress
-	}
-
-	//check if the exchanger_auth.to is same with sender,
-	//return error if they are not same.
-	approvedAddr := common.HexToAddress(wormholes.ExchangerAuth.To)
-	if approvedAddr != caller {
-		log.Error("BuyAndMintNFTByApprovedExchanger(), from of the tx is not approved!",
-			"caller", caller.String(), "wormholes.ExchangerAuth.To", wormholes.ExchangerAuth.To)
-		return errors.New("from of the tx is not approved!")
-	}
-
-	if !strings.HasPrefix(wormholes.ExchangerAuth.BlockNumber, "0x") &&
-		!strings.HasPrefix(wormholes.ExchangerAuth.BlockNumber, "0X") {
-		log.Error("BuyAndMintNFTByApprovedExchanger(), exchanger blocknumber format error",
-			"wormholes.ExchangerAuth.BlockNumber", wormholes.ExchangerAuth.BlockNumber)
-		return errors.New("exchanger blocknumber is not string of 0x!")
-	}
-	exchangerBlockNumber, ok := new(big.Int).SetString(wormholes.ExchangerAuth.BlockNumber[2:], 16)
-	if !ok {
-		log.Error("BuyAndMintNFTByApprovedExchanger(), exchanger blocknumber format error", "ok", ok)
-		return errors.New("exchanger blocknumber is not string of 0x!")
-	}
-	if blocknumber.Cmp(exchangerBlockNumber) > 0 {
-		log.Error("BuyAndMintNFTByApprovedExchanger(), exchanger's data is expired!",
-			"exchangerBlockNumber", exchangerBlockNumber.Text(16), "blocknumber", blocknumber.Text(16))
-		return errors.New("exchanger's data is expired!")
-	}
-
-	startIndex := db.NextIndex()
-	var dir = wormholes.Dir
-	if len(dir) <= 0 {
-		dir = types.DefaultDir
-	}
-	var creator = wormholes.Creator
-	if len(creator) <= 0 {
-		creator = originalExchanger.Hex()
-	}
-
-	nominatedNFT := types.NominatedOfficialNFT{
-		InjectedOfficialNFT: types.InjectedOfficialNFT{
-			Dir:        dir,
-			StartIndex: startIndex,
-			//Number: wormholes.Number,
-			Number: number,
-			//Royalty: wormholes.Royalty,
-			Royalty: royalty,
-			Creator: creator,
-			Address: originalExchanger,
-		},
-	}
-
-	return db.VoteOfficialNFT(&nominatedNFT, blocknumber)
 }
 
 func RecoverValidatorCoefficient(db vm.StateDB, address common.Address) error {

@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"math"
 	"math/big"
 
@@ -222,7 +221,7 @@ func (st *StateTransition) buyGas() error {
 	wormholes, err := st.GetWormholes()
 	if err == nil {
 		switch wormholes.Type {
-		case 10:
+		case 4:
 			if have, want := st.state.GetBalance(st.msg.From()), balanceCheck; have.Cmp(want) < 0 {
 				return fmt.Errorf("%w: address %v have %v want %v", ErrInsufficientFunds, st.msg.From().Hex(), have, want)
 			}
@@ -353,7 +352,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	wormholes, err := st.GetWormholes()
 	if err == nil {
 		switch wormholes.Type {
-		case 10:
+		case 4:
 			//pledgedBalance := st.state.GetStakerPledgedBalance(msg.From(), st.to())
 			//if pledgedBalance.Cmp(msg.Value()) != 0 {
 			//if msg.Value().Sign() > 0 && !st.evm.Context.VerifyStakerPledgedBalance(st.state, msg.From(), st.to(), new(big.Int).Add(msg.Value(), types.StakerBase())) {
@@ -404,33 +403,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	//	effectiveTip = cmath.BigMin(st.gasTipCap, new(big.Int).Sub(st.gasFeeCap, st.evm.Context.BaseFee))
 	//}
 
-	if st.IsWormholesNFTTx() {
-		wormholes, _ := st.GetWormholes()
-		log.Info("TransitionDb()", "tx type", wormholes.Type, "gasfee", new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
-		//if exchanging nft is successful, tx is free.
-		if wormholes.Type == 6 && vmerr == nil {
-			st.state.AddBalance(st.msg.From(), new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
-		} else {
-			st.state.AddBalance(st.evm.Context.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
-		}
-
-		if wormholes.Type == 18 ||
-			wormholes.Type == 19 ||
-			wormholes.Type == 24 ||
-			wormholes.Type == 27 ||
-			wormholes.Type == 28 {
-			//if vmerr == nil ||
-			//	(vmerr != ErrRecoverAddress &&
-			//		vmerr != ErrNotMatchAddress) {
-			if vmerr == nil {
-				st.state.AddBalance(st.msg.From(), new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
-				st.state.SubBalance(common.HexToAddress(wormholes.ExchangerAuth.ExchangerOwner),
-					new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
-			}
-		}
-	} else {
-		st.state.AddBalance(st.evm.Context.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
-	}
+	st.state.AddBalance(st.evm.Context.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), effectiveTip))
 
 	// if s-nft redeem success，gasfee free
 	//if st.IsWormholesNFTTx() {
