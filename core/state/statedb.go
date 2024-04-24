@@ -1561,7 +1561,6 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 	//validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 
 	if fromObject != nil && toObject != nil {
-		emptyAddress := common.Address{}
 
 		newProxy := common.Address{}
 		if wh.ProxyAddress != "" {
@@ -1572,7 +1571,9 @@ func (s *StateDB) StakerPledge(from common.Address, address common.Address,
 		fromObject.StakerPledge(address, amount, blocknumber)
 		toObject.AddPledgedBalance(amount)
 
-		if from == address && newProxy != emptyAddress {
+		// If the miner pledges himself, if no proxy address is set,
+		//the previously set proxy address will also be cleared
+		if from == address {
 			toObject.SetValidatorProxy(newProxy)
 		}
 		toObject.AddValidatorExtension(from, amount, blocknumber)
@@ -1654,11 +1655,19 @@ func (s *StateDB) ResetMinerBecome(address common.Address) error {
 		if stateObject.PledgedBalance().Cmp(types.ValidatorBase()) < 0 {
 			return nil
 		}
+
+		// If the same proxy address has been added to the validator list,
+		// the other validators with the same proxy address cannot be added to the validator list
+		proxy := stateObject.GetValidatorProxy()
+		if validatorStateObject.GetValidators().Exist(proxy) {
+			return errors.New("cannot have the same proxy")
+		}
+
 		coefficient := s.GetValidatorCoefficient(address)
 		if coefficient == 0 {
 			s.AddValidatorCoefficient(address, VALIDATOR_COEFFICIENT)
 		}
-		proxy := stateObject.GetValidatorProxy()
+
 		validatorStateObject.SetValidatorAmount(address, stateObject.PledgedBalance(), proxy)
 	}
 	return nil
@@ -1734,10 +1743,12 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 	if fromObject != nil && toObject != nil {
 		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 		if from == address {
-			coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
+			// A maximum of 6.9 ERB is deducted
 			punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
-			punishErb.Mul(punishErb, coebaseErb)
-			if fromObject.Coefficient() > 0 {
+			if punishErb.Cmp(big.NewInt(0)) > 0 {
+				coebaseErb, _ := new(big.Int).SetString("10000000000000000", 10)
+				punishErb.Mul(punishErb, coebaseErb)
+
 				if amount.Cmp(punishErb) < 0 {
 					return errors.New("cancel pledge for insufficient punish amount")
 				}
@@ -1745,6 +1756,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 				Zeroaddress := s.GetOrNewAccountStateObject(common.HexToAddress("0x0000000000000000000000000000000000000000"))
 				Zeroaddress.AddBalance(punishErb)
 				fromObject.SetCoefficient(VALIDATOR_COEFFICIENT)
+
 			} else {
 				fromObject.AddBalance(amount)
 			}

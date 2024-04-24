@@ -365,7 +365,7 @@ func RecoverValidatorCoefficient(db vm.StateDB, address common.Address) error {
 	}
 	needRecoverCoe := VALIDATOR_COEFFICIENT - coe
 	if needRecoverCoe > 0 {
-		recoverAmount := new(big.Int).Mul(big.NewInt(int64(needRecoverCoe)), big.NewInt(100000000000000000))
+		recoverAmount := new(big.Int).Mul(big.NewInt(int64(needRecoverCoe)), big.NewInt(10000000000000000))
 		if db.GetBalance(address).Cmp(recoverAmount) < 0 {
 			return errors.New("insufficient balance for transfer")
 		}

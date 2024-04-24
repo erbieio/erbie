@@ -6,7 +6,9 @@ import (
 )
 
 type WormholesExtension struct {
-	PledgedBalance     *big.Int
+	// validator's sum pledged balance
+	PledgedBalance *big.Int
+	// the last blocknumber that staker pledged
 	PledgedBlockNumber *big.Int
 	Coefficient        uint8
 
