@@ -1746,7 +1746,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 			// A maximum of 6.9 ERB is deducted
 			punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
 			if punishErb.Cmp(big.NewInt(0)) > 0 {
-				coebaseErb, _ := new(big.Int).SetString("10000000000000000", 10)
+				coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
 				punishErb.Mul(punishErb, coebaseErb)
 
 				if amount.Cmp(punishErb) < 0 {
