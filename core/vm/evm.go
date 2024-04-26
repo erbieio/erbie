@@ -766,11 +766,10 @@ func (evm *EVM) HandleCSBT(
 		if evm.Context.VerifyCSBTOwner(evm.StateDB, wormholes.CSBTAddress, caller.Address()) {
 
 			// whether csbt is first transfer
-			if IsOfficialNFT(common.HexToAddress(wormholes.CSBTAddress)) {
-				if !evm.Context.IsExistStakerStorageAddress(evm.StateDB, caller.Address()) {
-					log.Info("HandleCSBT(), TransferCSBT csbt not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
-						"blocknumber", evm.Context.BlockNumber.Uint64())
-				}
+			if !evm.Context.IsExistStakerStorageAddress(evm.StateDB, caller.Address()) {
+				log.Info("HandleCSBT(), TransferCSBT csbt not in Staker Storage >>>>>>>>>>", "wormholes.Type", wormholes.Type,
+					"blocknumber", evm.Context.BlockNumber.Uint64())
+				return nil, gas, ErrNotCreator
 			}
 
 			log.Info("HandleCSBT(), TransferCSBT>>>>>>>>>>", "wormholes.Type", wormholes.Type,

@@ -35,7 +35,7 @@ var (
 	ErrReturnDataOutOfBounds      = errors.New("return data out of bounds")
 	ErrGasUintOverflow            = errors.New("gas uint64 overflow")
 	ErrInvalidCode                = errors.New("invalid code: must not begin with 0xef")
-	ErrNotOwner                   = errors.New("not the owner of the nft")
+	ErrNotOwner                   = errors.New("not the owner of the csbt")
 	ErrNotExistNFTType            = errors.New("not exist nft type")
 	ErrInsufficientPledgedBalance = errors.New("not sufficient pledged balance")
 	ErrStartIndex                 = errors.New("StartIndex is not string of 0x!")
@@ -63,6 +63,7 @@ var (
 	ErrHasBeenPledged             = errors.New("has been pledged")
 	ErrNotExistFrozenAccount      = errors.New("not exist frozen account or unfrozen time not arrive in")
 	ErrNoTrade                    = errors.New("non-tradable")
+	ErrNotCreator                 = errors.New("not csbt creator")
 )
 
 // ErrStackUnderflow wraps an evm error when the items on the stack less
