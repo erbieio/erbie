@@ -306,7 +306,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 		//statedb.AddValidatorCoefficient(addr, VALIDATOR_COEFFICIENT)
 
 		var wh types.Wormholes
-		wh.ProxyAddress = addr.String()
+		wh.ProxyAddress = account.Proxy
 		statedb.StakerPledge(addr, addr, account.Balance, big.NewInt(0), &wh)
 		proxy := common.HexToAddress(account.Proxy)
 		statedb.MinerBecome(addr, proxy)
