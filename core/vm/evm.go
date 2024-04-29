@@ -832,7 +832,7 @@ func (evm *EVM) HandleCSBT(
 		err := evm.Context.ResetMinerBecome(evm.StateDB, addr)
 		if err != nil {
 			log.Error("HandleCSBT(), StakerPledge<<<<<<<<<<", "wormholes.Type", wormholes.Type,
-				"blocknumber", evm.Context.BlockNumber.Uint64())
+				"blocknumber", evm.Context.BlockNumber.Uint64(), "err", err)
 			return nil, gas, err
 		}
 

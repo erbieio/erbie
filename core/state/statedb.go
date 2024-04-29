@@ -1644,6 +1644,7 @@ func (s *StateDB) MinerBecome(address common.Address, proxy common.Address) erro
 }
 
 func (s *StateDB) ResetMinerBecome(address common.Address) error {
+	emptyAddress := common.Address{}
 	stateObject := s.GetOrNewAccountStateObject(address)
 
 	validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
@@ -1659,7 +1660,8 @@ func (s *StateDB) ResetMinerBecome(address common.Address) error {
 		// If the same proxy address has been added to the validator list,
 		// the other validators with the same proxy address cannot be added to the validator list
 		proxy := stateObject.GetValidatorProxy()
-		if validatorStateObject.GetValidators().Exist(proxy) {
+		if proxy != emptyAddress &&
+			validatorStateObject.GetValidators().Exist(proxy) {
 			return errors.New("cannot have the same proxy")
 		}
 
