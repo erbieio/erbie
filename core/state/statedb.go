@@ -1765,7 +1765,7 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 
 			validators := fromObject.GetStakerExtension()
 			pledgedAmount := validators.GetBalance(from)
-			if pledgedAmount == amount {
+			if pledgedAmount.Cmp(amount) == 0 {
 				// withdraw all pledged amount
 				fromObject.RemoveStakerPledge(address, amount)
 				toObject.RemoveValidatorExtension(from, amount)
