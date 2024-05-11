@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-// NFT and sNFT minting sequence storage address
+// NFT and CSBT minting sequence storage address
 var MintDeepStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000001")
 
 // validators storage address
@@ -13,30 +13,6 @@ var ValidatorStorageAddress = common.HexToAddress("0x000000000000000000000000000
 
 // stakers storage address
 var StakerStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000003")
-
-// Storage address for selected creator information
-var SnftInjectedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000004")
-
-// Information of the creator with the highest voting weight
-var NominatedStorageAddress = common.HexToAddress("0x0000000000000000000000000000000000000005")
-
-// Next dividend amount address
-var PreDividendAmountAddress = common.HexToAddress("0x0000000000000000000000000000000000000006")
-
-// Dividend amount generated per block
-var DividendAmountEachBlock, _ = new(big.Int).SetString("1800000000000000000", 10)
-
-// Current dividend amount address
-var DividendAmountAddress = common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-// Each dividend cycle
-var DividendBlockInterval uint64 = 120960 // a week
-
-// Storage address for the snft level 3 address list
-var SNFTLevel3AddressList = common.HexToAddress("0x0000000000000000000000000000000000000008")
-
-// Storage address for the information of the address list of SNFT level 3 participants in the current dividend
-var DividendAddressList = common.HexToAddress("0x0000000000000000000000000000000000000009")
 
 // Voting contract address
 var VoteContractAddress = common.HexToAddress("0x0000000000000000000000000000000000000010")
@@ -46,6 +22,10 @@ var VoteAmountEachBlock, _ = new(big.Int).SetString("800000000000000000", 10)
 
 // validator reward 0.16 ERB
 var DREBlockReward = big.NewInt(1.6e+17)
+
+// The percentage of rewards that validator receives
+// 10 represents 10 percent
+var PercentageValidatorReward = 10
 
 // Deflation rate
 var DeflationRate = 0.85
@@ -74,19 +54,19 @@ var ConsensusValidatorsNum = 11
 // Number of validators receiving rewards
 var ValidatorRewardNum = 7
 
-// The number of stakers receiving SNFT rewards
+// The number of stakers receiving CSBT rewards
 var StakerRewardNum = 4
 
-// 一期包含的snft碎片数量
-// snft版税
-// 系统默认的snft的创建者
-// The default location for storing metadata of SNFT in the system
+// 一期包含的CSBT碎片数量
+// CSBT版税
+// 系统默认的CSBT的创建者
+// The default location for storing metadata of CSBT in the system
 var DefaultDir string = "/ipfs/Qmf3xw9rEmsjJdQTV3ZcyF4KfYGtxMkXdNQ8YkVqNmLHY8"
 
-// The number of SNFT fragments included in the first phase
+// The number of CSBT fragments included in the first phase
 var DefaultNumber uint64 = 4096
 
-// snft royalty
+// CSBT royalty
 var DefaultRoyalty uint16 = 1000
 
 // default creator
@@ -96,3 +76,19 @@ var DefaultCreator string = "0x0000000000000000000000000000000000000000"
 // if TransactionType is erbie, the input data of the transaction is "type Wormholes struct".
 var TransactionType = "erbie:"
 var TransactionTypeLen = 6
+
+func StakerBase() *big.Int {
+	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+	Erb100 := big.NewInt(700)
+	Erb100.Mul(Erb100, baseErb)
+
+	return Erb100
+}
+
+func ValidatorBase() *big.Int {
+	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
+	Erb100000 := big.NewInt(70000)
+	Erb100000.Mul(Erb100000, baseErb)
+
+	return Erb100000
+}

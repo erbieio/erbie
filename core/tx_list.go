@@ -341,26 +341,9 @@ func (l *txList) Filter(costLimit *big.Int, gasLimit uint64) (types.Transactions
 		wormholes, err := tx.GetWormholes()
 		if err == nil {
 			switch wormholes.Type {
-			case 10:
+			case 4:
 				return false
-			case 14:
-				return false
-			case 17:
-				return false
-			case 18:
-				return false
-			case 19:
-				return false
-			case 20:
-				return false
-			case 22:
-				return false
-			case 24:
-				return false
-			case 27:
-				return false
-			case 28:
-				return false
+
 			}
 		}
 

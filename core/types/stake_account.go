@@ -92,6 +92,15 @@ func (sl *StakerList) CancelStaker(addr common.Address) bool {
 	return false
 }
 
+func (sl *StakerList) IsExist(addr common.Address) bool {
+	for _, v := range sl.Stakers {
+		if v.Address() == addr {
+			return true
+		}
+	}
+	return false
+}
+
 // Query K validators closest to random numbers based on distance and pledge amount
 func (sl *StakerList) ValidatorByDistanceAndWeight(addr []*big.Int, k int, randomHash common.Hash) []common.Address {
 

@@ -861,140 +861,140 @@ func opNOwnerOf(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	return nil, nil
 }
 
-func opNTransferFrom(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	id, to, from := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop()
-	nftAddr := common.Address(id.Bytes20())
-	fromAddr := common.Address(from.Bytes20())
-	toAddr := common.Address(to.Bytes20())
-	owner := interpreter.evm.StateDB.GetNFTOwner16(nftAddr)
-	caller := scope.Contract.Caller()
-	fmt.Println("nft.transferFrom()---", caller.String(), fromAddr.String(), toAddr.String(), nftAddr.String())
-	if owner == fromAddr && owner == caller || interpreter.evm.StateDB.IsApproved(nftAddr, fromAddr) {
-		interpreter.evm.StateDB.ChangeNFTOwner(nftAddr, toAddr, 0, interpreter.evm.Context.BlockNumber)
-		return nil, nil
-	} else {
-		return makeRevertRet("NFT Transfer Failed: caller Not owner or approved"), ErrExecutionReverted
-	}
-}
+//func opNTransferFrom(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	id, to, from := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.pop()
+//	nftAddr := common.Address(id.Bytes20())
+//	fromAddr := common.Address(from.Bytes20())
+//	toAddr := common.Address(to.Bytes20())
+//	owner := interpreter.evm.StateDB.GetNFTOwner16(nftAddr)
+//	caller := scope.Contract.Caller()
+//	fmt.Println("nft.transferFrom()---", caller.String(), fromAddr.String(), toAddr.String(), nftAddr.String())
+//	if owner == fromAddr && owner == caller || interpreter.evm.StateDB.IsApproved(nftAddr, fromAddr) {
+//		interpreter.evm.StateDB.ChangeNFTOwner(nftAddr, toAddr, 0, interpreter.evm.Context.BlockNumber)
+//		return nil, nil
+//	} else {
+//		return makeRevertRet("NFT Transfer Failed: caller Not owner or approved"), ErrExecutionReverted
+//	}
+//}
 
-func opNApprove(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	to, id := scope.Stack.pop(), scope.Stack.pop()
-	nftAddr := common.Address(id.Bytes20())
-	toAddr := common.Address(to.Bytes20())
-	caller := scope.Contract.Caller()
-	fmt.Println("nft.approve()---", caller.String(), nftAddr.String(), toAddr.String())
-	if caller == interpreter.evm.StateDB.GetNFTOwner16(nftAddr) {
-		interpreter.evm.StateDB.ChangeNFTApproveAddress(nftAddr, toAddr)
-		return nil, nil
-	} else {
-		return makeRevertRet("NFT Approve Failed: Caller is not owner"), ErrExecutionReverted
-	}
-}
+//func opNApprove(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	to, id := scope.Stack.pop(), scope.Stack.pop()
+//	nftAddr := common.Address(id.Bytes20())
+//	toAddr := common.Address(to.Bytes20())
+//	caller := scope.Contract.Caller()
+//	fmt.Println("nft.approve()---", caller.String(), nftAddr.String(), toAddr.String())
+//	if caller == interpreter.evm.StateDB.GetNFTOwner16(nftAddr) {
+//		interpreter.evm.StateDB.ChangeNFTApproveAddress(nftAddr, toAddr)
+//		return nil, nil
+//	} else {
+//		return makeRevertRet("NFT Approve Failed: Caller is not owner"), ErrExecutionReverted
+//	}
+//}
 
-func opNSetApprovalForAll(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	approved, to := scope.Stack.pop(), scope.Stack.pop()
-	toAddr := common.Address(to.Bytes20())
-	caller := scope.Contract.Caller()
-	if approved.IsZero() {
-		interpreter.evm.StateDB.CancelApproveAddress(caller, toAddr)
-	} else {
-		interpreter.evm.StateDB.ChangeApproveAddress(caller, toAddr)
-	}
-	fmt.Println("nft.setApprovalForAll()---", caller.String(), toAddr.String(), approved.String())
-	return nil, nil
-}
+//func opNSetApprovalForAll(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	approved, to := scope.Stack.pop(), scope.Stack.pop()
+//	toAddr := common.Address(to.Bytes20())
+//	caller := scope.Contract.Caller()
+//	if approved.IsZero() {
+//		interpreter.evm.StateDB.CancelApproveAddress(caller, toAddr)
+//	} else {
+//		interpreter.evm.StateDB.ChangeApproveAddress(caller, toAddr)
+//	}
+//	fmt.Println("nft.setApprovalForAll()---", caller.String(), toAddr.String(), approved.String())
+//	return nil, nil
+//}
 
-func opNGetApproved(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	slot := scope.Stack.peek()
-	nftAddr := common.Address(slot.Bytes20())
-	approved := interpreter.evm.StateDB.GetNFTApproveAddress(nftAddr)
-	slot.SetBytes(approved.Bytes())
-	fmt.Println("nft.getApproved()---", nftAddr.String(), approved.String())
-	return nil, nil
-}
+//func opNGetApproved(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	slot := scope.Stack.peek()
+//	nftAddr := common.Address(slot.Bytes20())
+//	approved := interpreter.evm.StateDB.GetNFTApproveAddress(nftAddr)
+//	slot.SetBytes(approved.Bytes())
+//	fmt.Println("nft.getApproved()---", nftAddr.String(), approved.String())
+//	return nil, nil
+//}
 
-func opNIsApprovedForAll(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	to, owner := scope.Stack.pop(), scope.Stack.pop()
-	toAddr := common.Address(to.Bytes20())
-	ownerAddr := common.Address(owner.Bytes20())
-	if interpreter.evm.StateDB.IsApprovedForAll(ownerAddr, toAddr) {
-		scope.Stack.push(uint256.NewInt(1))
-	} else {
-		scope.Stack.push(uint256.NewInt(0))
-	}
-	fmt.Println("nft.isApprovedForAll()---", ownerAddr.String(), toAddr.String())
-	return nil, nil
-}
+//func opNIsApprovedForAll(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	to, owner := scope.Stack.pop(), scope.Stack.pop()
+//	toAddr := common.Address(to.Bytes20())
+//	ownerAddr := common.Address(owner.Bytes20())
+//	if interpreter.evm.StateDB.IsApprovedForAll(ownerAddr, toAddr) {
+//		scope.Stack.push(uint256.NewInt(1))
+//	} else {
+//		scope.Stack.push(uint256.NewInt(0))
+//	}
+//	fmt.Println("nft.isApprovedForAll()---", ownerAddr.String(), toAddr.String())
+//	return nil, nil
+//}
 
-func opNTokenURI(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	v := scope.Stack.peek()
-	nftAddr := common.Address(v.Bytes20())
-	uri := interpreter.evm.StateDB.GetNFTMetaURL(nftAddr)
-	fmt.Println("nft.tokenURI()---", nftAddr.String(), uri)
-	data := []byte(uri)
-	len := uint64(len(data))
-	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
-	freeOffset := offset + (len/32+2)*32
-	scope.Memory.Resize(freeOffset)
-	scope.Memory.Set32(offset, v.SetUint64(len))
-	scope.Memory.Set(offset+32, len, data)
-	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
-	v.SetUint64(offset)
-	return nil, nil
-}
+//func opNTokenURI(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	v := scope.Stack.peek()
+//	nftAddr := common.Address(v.Bytes20())
+//	uri := interpreter.evm.StateDB.GetNFTMetaURL(nftAddr)
+//	fmt.Println("nft.tokenURI()---", nftAddr.String(), uri)
+//	data := []byte(uri)
+//	len := uint64(len(data))
+//	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
+//	freeOffset := offset + (len/32+2)*32
+//	scope.Memory.Resize(freeOffset)
+//	scope.Memory.Set32(offset, v.SetUint64(len))
+//	scope.Memory.Set(offset+32, len, data)
+//	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
+//	v.SetUint64(offset)
+//	return nil, nil
+//}
 
-func opNMint(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	uri, royalty, to := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.peek()
-	caller := scope.Contract.Caller()
-	if interpreter.evm.StateDB.GetExchangerFlag(caller) {
-		offset := int64(uri.Uint64())
-		length := int64(uri.SetBytes(scope.Memory.GetPtr(offset, 32)).Uint64())
-		uriStr := scope.Memory.GetCopy(offset+32, length)
-		toAddr := common.Address(to.Bytes20())
-		nftAddr, _ := interpreter.evm.StateDB.CreateNFTByUser(caller, toAddr, uint16(royalty.Uint64()), string(uriStr), interpreter.evm.Context.BlockNumber)
+//func opNMint(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	uri, royalty, to := scope.Stack.pop(), scope.Stack.pop(), scope.Stack.peek()
+//	caller := scope.Contract.Caller()
+//	if interpreter.evm.StateDB.GetExchangerFlag(caller) {
+//		offset := int64(uri.Uint64())
+//		length := int64(uri.SetBytes(scope.Memory.GetPtr(offset, 32)).Uint64())
+//		uriStr := scope.Memory.GetCopy(offset+32, length)
+//		toAddr := common.Address(to.Bytes20())
+//		nftAddr, _ := interpreter.evm.StateDB.CreateNFTByUser(caller, toAddr, uint16(royalty.Uint64()), string(uriStr), interpreter.evm.Context.BlockNumber)
+//
+//		to.SetBytes(nftAddr.Bytes())
+//		fmt.Println("nft.mint()---", caller.String(), toAddr.String(), royalty.Uint64(), string(uriStr), nftAddr.String())
+//		return nil, nil
+//	} else {
+//		fmt.Println("nft.mint()---", caller.String(), royalty.Uint64())
+//		return makeRevertRet("NFT Mint Failed: caller Not exchanger"), ErrExecutionReverted
+//	}
+//}
 
-		to.SetBytes(nftAddr.Bytes())
-		fmt.Println("nft.mint()---", caller.String(), toAddr.String(), royalty.Uint64(), string(uriStr), nftAddr.String())
-		return nil, nil
-	} else {
-		fmt.Println("nft.mint()---", caller.String(), royalty.Uint64())
-		return makeRevertRet("NFT Mint Failed: caller Not exchanger"), ErrExecutionReverted
-	}
-}
+//func opNName(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	v := scope.Stack.peek()
+//	nftAddr := common.Address(v.Bytes20())
+//	name := interpreter.evm.StateDB.GetNFTName(nftAddr)
+//	fmt.Println("nft.name()---", nftAddr.String(), name)
+//	data := []byte(name)
+//	len := uint64(len(data))
+//	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
+//	freeOffset := offset + (len/32+2)*32
+//	scope.Memory.Resize(freeOffset)
+//	scope.Memory.Set32(offset, v.SetUint64(len))
+//	scope.Memory.Set(offset+32, len, data)
+//	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
+//	v.SetUint64(offset)
+//	return nil, nil
+//}
 
-func opNName(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	v := scope.Stack.peek()
-	nftAddr := common.Address(v.Bytes20())
-	name := interpreter.evm.StateDB.GetNFTName(nftAddr)
-	fmt.Println("nft.name()---", nftAddr.String(), name)
-	data := []byte(name)
-	len := uint64(len(data))
-	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
-	freeOffset := offset + (len/32+2)*32
-	scope.Memory.Resize(freeOffset)
-	scope.Memory.Set32(offset, v.SetUint64(len))
-	scope.Memory.Set(offset+32, len, data)
-	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
-	v.SetUint64(offset)
-	return nil, nil
-}
-
-func opNSymbol(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	v := scope.Stack.peek()
-	nftAddr := common.Address(v.Bytes20())
-	symbol := interpreter.evm.StateDB.GetNFTSymbol(nftAddr)
-	fmt.Println("nft.symbol()---", nftAddr.String(), symbol)
-	data := []byte(symbol)
-	len := uint64(len(data))
-	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
-	freeOffset := offset + (len/32+2)*32
-	scope.Memory.Resize(freeOffset)
-	scope.Memory.Set32(offset, v.SetUint64(len))
-	scope.Memory.Set(offset+32, len, data)
-	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
-	v.SetUint64(offset)
-	return nil, nil
-}
+//func opNSymbol(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	v := scope.Stack.peek()
+//	nftAddr := common.Address(v.Bytes20())
+//	symbol := interpreter.evm.StateDB.GetNFTSymbol(nftAddr)
+//	fmt.Println("nft.symbol()---", nftAddr.String(), symbol)
+//	data := []byte(symbol)
+//	len := uint64(len(data))
+//	offset := v.SetBytes(scope.Memory.GetPtr(0x40, 32)).Uint64()
+//	freeOffset := offset + (len/32+2)*32
+//	scope.Memory.Resize(freeOffset)
+//	scope.Memory.Set32(offset, v.SetUint64(len))
+//	scope.Memory.Set(offset+32, len, data)
+//	scope.Memory.Set32(0x40, v.SetUint64(freeOffset))
+//	v.SetUint64(offset)
+//	return nil, nil
+//}
 
 func opNCreator(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
 	slot := scope.Stack.peek()
@@ -1018,14 +1018,14 @@ func opNIsExist(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([
 	return nil, nil
 }
 
-func opNRoyaltyRatio(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
-	slot := scope.Stack.peek()
-	nftAddr := common.Address(slot.Bytes20())
-	royaltyRatio := interpreter.evm.StateDB.GetNFTRoyalty(nftAddr)
-	slot.SetUint64(uint64(royaltyRatio))
-	fmt.Println("nft.royaltyRatio()---", nftAddr.String(), royaltyRatio)
-	return nil, nil
-}
+//func opNRoyaltyRatio(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+//	slot := scope.Stack.peek()
+//	nftAddr := common.Address(slot.Bytes20())
+//	royaltyRatio := interpreter.evm.StateDB.GetNFTRoyalty(nftAddr)
+//	slot.SetUint64(uint64(royaltyRatio))
+//	fmt.Println("nft.royaltyRatio()---", nftAddr.String(), royaltyRatio)
+//	return nil, nil
+//}
 
 // opPush1 is a specialized version of pushN
 func opPush1(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {

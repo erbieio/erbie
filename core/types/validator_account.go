@@ -120,11 +120,8 @@ func (vl *ValidatorList) RemoveValidator(addr common.Address, balance *big.Int) 
 			//return true
 			//}
 
-			Erb100000 := big.NewInt(70000)
-			baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-			Erb100000.Mul(Erb100000, baseErb)
 			v.Balance.Sub(v.Balance, balance)
-			if v.Balance.Cmp(Erb100000) < 0 {
+			if v.Balance.Cmp(ValidatorBase()) < 0 {
 				log.Info("", "RemoveValidator", "validator balance less than 70000ERB")
 				vl.Validators = append(vl.Validators[:i], vl.Validators[i+1:]...)
 			}

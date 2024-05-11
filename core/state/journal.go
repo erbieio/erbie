@@ -147,41 +147,11 @@ type (
 		oldOwner common.Address
 	}
 	// *** modify to support nft transaction 20211215 end ***
-	nftApproveAddressChange struct {
-		nftAddr               *common.Address
-		oldApproveAddressList []common.Address
-	}
-
-	nftApproveAddressChangeOne struct {
-		nftAddr                  *common.Address
-		oldNFTApproveAddressList common.Address
-	}
-
-	openExchangerChange struct {
-		address               *common.Address
-		oldExchangerFlag      bool
-		oldBlockNumber        *big.Int
-		oldFeeRate            uint16
-		oldExchangerName      string
-		oldExchangerURL       string
-		oldSNFTAgentRecipient common.Address
-	}
 
 	nftInfoChange struct {
-		address                  *common.Address
-		oldName                  string
-		oldSymbol                string
-		oldOwner                 common.Address
-		oldNFTApproveAddressList common.Address
-		oldMergeLevel            uint8
-		oldMergeNumber           uint32
-		//oldPledgedFlag           bool
-		//oldNFTPledgedBlockNumber *big.Int
-		oldCreator       common.Address
-		oldRoyalty       uint16
-		oldExchanger     common.Address
-		oldMetaURL       string
-		oldSNFTRecipient common.Address
+		address    *common.Address
+		oldOwner   common.Address
+		oldCreator common.Address
 	}
 
 	pledgedBalanceChange struct {
@@ -194,36 +164,6 @@ type (
 		prev    *big.Int
 	}
 
-	exchangerBalanceChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	blockNumberChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	voteBlockNumberChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	voteWeightChange struct {
-		account *common.Address
-		prev    *big.Int
-	}
-
-	//pledgedNFTInfo struct {
-	//	account               *common.Address
-	//	pledgedFlag           bool
-	//	nftPledgedBlockNumber *big.Int
-	//}
-
-	//RewardFlagChange struct {
-	//	account    *common.Address
-	//	rewardFlag uint8
-	//}
 	coefficientChange struct {
 		account *common.Address
 		prev    uint8
@@ -259,39 +199,14 @@ type (
 		oldStakerExtension types.StakersExtensionList
 	}
 
-	snftsChange struct {
-		account  *common.Address
-		oldSnfts types.InjectedOfficialNFTList
-	}
-
-	nomineeChange struct {
-		account    *common.Address
-		oldNominee types.NominatedOfficialNFT
-	}
-
-	sNFTAgentRecipientChange struct {
+	validatorExtensionChange struct {
 		account               *common.Address
-		oldSNFTAgentRecipient common.Address
+		oldValidatorExtension types.ValidatorsExtensionList
 	}
 
-	sNFTNoMergeChange struct {
-		account        *common.Address
-		oldSNFTNoMerge bool
-	}
-
-	sNFTL3AddrsChange struct {
-		account        *common.Address
-		oldSNFTL3Addrs []common.Address
-	}
-
-	dividendAddrsChange struct {
-		account          *common.Address
-		oldDividendAddrs []common.Address
-	}
-
-	lockSNFTFlagChange struct {
-		account         *common.Address
-		oldLockSNFTFlag bool
+	validatorProxyChange struct {
+		account           *common.Address
+		oldValidatorProxy common.Address
 	}
 )
 
@@ -433,51 +348,10 @@ func (ch nftOwnerChange) dirtied() *common.Address {
 	return ch.nftAddr
 }
 
-// *** modify to support nft transaction 20211215 end ***
-func (ch nftApproveAddressChange) revert(s *StateDB) {
-	s.getStateObject(*ch.nftAddr).setJournalApproveAddress(ch.oldApproveAddressList)
-}
-
-func (ch nftApproveAddressChange) dirtied() *common.Address {
-	return ch.nftAddr
-}
-
-// *** modify to support nft transaction 20211215 end ***
-func (ch nftApproveAddressChangeOne) revert(s *StateDB) {
-	s.getStateObject(*ch.nftAddr).setJournalNFTApproveAddress(ch.oldNFTApproveAddressList)
-}
-
-func (ch nftApproveAddressChangeOne) dirtied() *common.Address {
-	return ch.nftAddr
-}
-
-func (ch openExchangerChange) revert(s *StateDB) {
-	s.getStateObject(*ch.address).setExchangerInfo(
-		ch.oldExchangerFlag,
-		ch.oldBlockNumber,
-		ch.oldFeeRate,
-		ch.oldExchangerName,
-		ch.oldExchangerURL,
-		ch.oldSNFTAgentRecipient)
-}
-
-func (ch openExchangerChange) dirtied() *common.Address {
-	return ch.address
-}
-
 func (ch nftInfoChange) revert(s *StateDB) {
 	s.getStateObject(*ch.address).setJournalNFTInfo(
-		ch.oldName,
-		ch.oldSymbol,
-		nil,
-		0,
 		ch.oldOwner,
-		ch.oldNFTApproveAddressList,
-		ch.oldMergeLevel,
-		ch.oldCreator,
-		ch.oldRoyalty,
-		ch.oldExchanger,
-		ch.oldMetaURL)
+		ch.oldCreator)
 }
 
 func (ch nftInfoChange) dirtied() *common.Address {
@@ -497,38 +371,6 @@ func (ch pledgedBlockNumberChange) revert(s *StateDB) {
 }
 
 func (ch pledgedBlockNumberChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch exchangerBalanceChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setExchangerBalance(ch.prev)
-}
-
-func (ch exchangerBalanceChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch blockNumberChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setBlockNumber(ch.prev)
-}
-
-func (ch blockNumberChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch voteBlockNumberChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setVoteBlockNumber(ch.prev)
-}
-
-func (ch voteBlockNumberChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch voteWeightChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setVoteWeight(ch.prev)
-}
-
-func (ch voteWeightChange) dirtied() *common.Address {
 	return ch.account
 }
 
@@ -604,63 +446,18 @@ func (ch stakerExtensionChange) dirtied() *common.Address {
 	return ch.account
 }
 
-func (ch snftsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSnfts(&ch.oldSnfts)
+func (ch validatorExtensionChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setValidatorExtension(&ch.oldValidatorExtension)
 }
 
-func (ch snftsChange) dirtied() *common.Address {
+func (ch validatorExtensionChange) dirtied() *common.Address {
 	return ch.account
 }
 
-func (ch nomineeChange) revert(s *StateDB) {
-	emptyNominee := types.NominatedOfficialNFT{}
-	if ch.oldNominee != emptyNominee {
-		s.getStateObject(*ch.account).setNominee(&ch.oldNominee)
-	} else {
-		s.getStateObject(*ch.account).setNominee(nil)
-	}
+func (ch validatorProxyChange) revert(s *StateDB) {
+	s.getStateObject(*ch.account).setValidatorProxy(ch.oldValidatorProxy)
 }
 
-func (ch nomineeChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch sNFTAgentRecipientChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSNFTAgentRecipient(ch.oldSNFTAgentRecipient)
-}
-
-func (ch sNFTAgentRecipientChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch sNFTNoMergeChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSNFTNoMerge(ch.oldSNFTNoMerge)
-}
-
-func (ch sNFTNoMergeChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch sNFTL3AddrsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setSNFTL3Addrs(ch.oldSNFTL3Addrs)
-}
-
-func (ch sNFTL3AddrsChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch dividendAddrsChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setDividendAddrs(ch.oldDividendAddrs)
-}
-
-func (ch dividendAddrsChange) dirtied() *common.Address {
-	return ch.account
-}
-
-func (ch lockSNFTFlagChange) revert(s *StateDB) {
-	s.getStateObject(*ch.account).setLockSNFTFlag(ch.oldLockSNFTFlag)
-}
-
-func (ch lockSNFTFlagChange) dirtied() *common.Address {
+func (ch validatorProxyChange) dirtied() *common.Address {
 	return ch.account
 }

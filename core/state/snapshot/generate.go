@@ -613,7 +613,7 @@ func (dl *diskLayer) generate(stats *generatorStats) {
 			CodeHash []byte
 
 			Worm   *types.WormholesExtension `rlp:"nil"`
-			Nft    *types.AccountNFT         `rlp:"nil"`
+			Csbt   *types.AccountCSBT        `rlp:"nil"`
 			Staker *types.AccountStaker      `rlp:"nil"`
 			Extra  []byte
 		}
@@ -638,7 +638,7 @@ func (dl *diskLayer) generate(stats *generatorStats) {
 					acc.Root,
 					acc.CodeHash,
 					acc.Worm,
-					acc.Nft,
+					acc.Csbt,
 					acc.Staker,
 					acc.Extra)
 				//data := SlimAccountRLP(acc.Nonce, acc.Balance, acc.Root, acc.CodeHash)

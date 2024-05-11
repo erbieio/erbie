@@ -101,7 +101,7 @@ var (
 	BloomBitsIndexPrefix = []byte("iB") // BloomBitsIndexPrefix is the data table of a chain indexer to track its progress
 
 	mintDeepPrefix             = []byte("mint-deep-")
-	snftExchangePoolPrefix     = []byte("snft-exchange-pool-")
+	csbtExchangePoolPrefix     = []byte("csbt-exchange-pool-")
 	officialNFTPrefix          = []byte("official-nft-")
 	nominatedOfficialNFTPrefix = []byte("nominated-official-nft-")
 
@@ -257,9 +257,9 @@ func MintDeepKey(number uint64, hash common.Hash) []byte {
 	return append(append(mintDeepPrefix, encodeBlockNumber(number)...), hash.Bytes()...)
 }
 
-// snftExchangePoolKey = snftExchangePoolPrefix + num (uint64 big endian) + hash
-func snftExchangePoolKey(number uint64, hash common.Hash) []byte {
-	return append(append(snftExchangePoolPrefix, encodeBlockNumber(number)...), hash.Bytes()...)
+// csbtExchangePoolKey = csbtExchangePoolPrefix + num (uint64 big endian) + hash
+func csbtExchangePoolKey(number uint64, hash common.Hash) []byte {
+	return append(append(csbtExchangePoolPrefix, encodeBlockNumber(number)...), hash.Bytes()...)
 }
 
 // officialNFTPoolKey = officialNFTPrefix + num (uint64 big endian) + hash

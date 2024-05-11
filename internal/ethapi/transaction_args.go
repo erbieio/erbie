@@ -337,19 +337,3 @@ func (args *TransactionArgs) GetWormholes() (*types.Wormholes, error) {
 
 	return nil, errors.New("Unmarshal wormholes error")
 }
-
-func (args *TransactionArgs) GetExchangerOwner() (common.Address, bool) {
-	if args.IsWormholesNFTTx() {
-		wormholes, err := args.GetWormholes()
-		if err != nil {
-			return common.Address{}, false
-		}
-		if wormholes.Type == 18 ||
-			wormholes.Type == 19 ||
-			wormholes.Type == 24 {
-			return common.HexToAddress(wormholes.ExchangerAuth.ExchangerOwner), true
-		}
-	}
-
-	return common.Address{}, false
-}

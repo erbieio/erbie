@@ -782,11 +782,9 @@ func (s *PublicBlockChainAPI) GetBlockBeneficiaryAddressByNumber(ctx context.Con
 		beneficiaryList = append(beneficiaryList, &beneficiaryAddress)
 	}
 	for _, owner := range exchangers {
-		//nftAddr, _, ok := snftExchangePool.PopAddress(new(big.Int).SetUint64(uint64(number)))
-		//if !ok {
+
 		nftAddr := common.BytesToAddress(officialMint.Bytes())
 		officialMint.Add(officialMint, big.NewInt(1))
-		//}
 
 		beneficiaryAddress := BeneficiaryAddress{
 			Address:    owner,
@@ -890,58 +888,6 @@ func (s *PublicBlockChainAPI) GetValidatorLen(ctx context.Context, number rpc.Bl
 
 	validatorList := statedb.GetValidators(types.ValidatorStorageAddress)
 	return len(validatorList.Validators)
-}
-
-type NominatedNFTInfo struct {
-	Dir        string         `json:"dir"`
-	StartIndex *big.Int       `json:"start_index"`
-	Number     uint64         `json:"number"`
-	Royalty    uint16         `json:"royalty"`
-	Creator    string         `json:"creator"`
-	Address    common.Address `json:"address"`
-	VoteWeight *big.Int       `json:"vote_weight"`
-}
-
-func (s *PublicBlockChainAPI) GetNominatedNFTInfo(ctx context.Context, number rpc.BlockNumber) *NominatedNFTInfo {
-	st, _, err := s.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-
-	nominee := st.GetNominee(types.NominatedStorageAddress)
-
-	var Info NominatedNFTInfo
-	Info.Address = nominee.Address
-	Info.VoteWeight = nominee.VoteWeight
-	Info.Dir = nominee.Dir
-	Info.StartIndex = nominee.StartIndex
-	Info.Number = nominee.Number
-	Info.Royalty = nominee.Royalty
-	Info.Creator = nominee.Creator
-
-	return &Info
-}
-
-func (s *PublicBlockChainAPI) GetCurrentNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFT {
-	st, _, err := s.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
-	if length := len(InjectedList.InjectedOfficialNFTs); length > 0 {
-		return InjectedList.InjectedOfficialNFTs[length-1]
-	} else {
-		return nil
-	}
-}
-
-func (s *PublicBlockChainAPI) GetInjectedNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFTList {
-	st, _, err := s.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
-	return InjectedList
 }
 
 func (s *PublicBlockChainAPI) GetShouldParticipantsCoefficientByNumber(ctx context.Context, number rpc.BlockNumber) ([]*BlockParticipants, error) {
@@ -1058,7 +1004,7 @@ func (s *PublicBlockChainAPI) CalculateExchangeAmount(level uint8, mergenumber u
 	}
 }
 
-func (s *PublicBlockChainAPI) GetForcedSaleSNFTAddresses(ctx context.Context,
+func (s *PublicBlockChainAPI) GetForcedSaleCSBTAddresses(ctx context.Context,
 	nftParentAddress string, buyer common.Address, blockNrOrHash rpc.BlockNumberOrHash) []common.Address {
 
 	var nftAddrs []common.Address
@@ -1101,7 +1047,7 @@ func (s *PublicBlockChainAPI) GetForcedSaleSNFTAddresses(ctx context.Context,
 		siblingOwner := st.GetNFTOwner16(siblingAddr)
 		if siblingOwner != emptyAddress &&
 			siblingOwner != buyer {
-			log.Debug("GetForcedSaleSNFTAddresses",
+			log.Debug("GetForcedSaleCSBTAddresses",
 				"siblingAddr", siblingAddr.String(), "owner", siblingOwner.String(), "buyer", buyer.String())
 			nftAddrs = append(nftAddrs, siblingAddr)
 		}
@@ -1615,25 +1561,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args TransactionArgs, blockNr
 			wormholes, err := args.GetWormholes()
 			if err == nil {
 				switch wormholes.Type {
-				case 10:
-
-				case 14:
-
-				case 17:
-
-				case 18:
-
-				case 19:
-
-				case 20:
-
-				case 22:
-
-				case 24:
-
-				case 27:
-
-				case 28:
+				case 4:
 
 				default:
 					if args.Value.ToInt().Cmp(available) >= 0 {
@@ -2224,11 +2152,9 @@ func (w *PublicWormholesAPI) GetBlockBeneficiaryAddressByNumber(ctx context.Cont
 		beneficiaryList = append(beneficiaryList, &beneficiaryAddress)
 	}
 	for _, owner := range exchangers {
-		//nftAddr, _, ok := snftExchangePool.PopAddress(new(big.Int).SetUint64(uint64(number)))
-		//if !ok {
+
 		nftAddr := common.BytesToAddress(officialMint.Bytes())
 		officialMint.Add(officialMint, big.NewInt(1))
-		//}
 
 		beneficiaryAddress := BeneficiaryAddress{
 			Address:    owner,
@@ -2317,48 +2243,6 @@ func (w *PublicWormholesAPI) GetValidatorLen(ctx context.Context, number rpc.Blo
 
 	validatorList := statedb.GetValidators(types.ValidatorStorageAddress)
 	return len(validatorList.Validators)
-}
-
-func (w *PublicWormholesAPI) GetNominatedNFTInfo(ctx context.Context, number rpc.BlockNumber) *NominatedNFTInfo {
-	st, _, err := w.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-
-	nominee := st.GetNominee(types.NominatedStorageAddress)
-
-	var Info NominatedNFTInfo
-	Info.Address = nominee.Address
-	Info.VoteWeight = nominee.VoteWeight
-	Info.Dir = nominee.Dir
-	Info.StartIndex = nominee.StartIndex
-	Info.Number = nominee.Number
-	Info.Royalty = nominee.Royalty
-	Info.Creator = nominee.Creator
-
-	return &Info
-}
-
-func (w *PublicWormholesAPI) GetCurrentNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFT {
-	st, _, err := w.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
-	if length := len(InjectedList.InjectedOfficialNFTs); length > 0 {
-		return InjectedList.InjectedOfficialNFTs[length-1]
-	} else {
-		return nil
-	}
-}
-
-func (w *PublicWormholesAPI) GetInjectedNFTInfo(ctx context.Context, number rpc.BlockNumber) *types.InjectedOfficialNFTList {
-	st, _, err := w.b.StateAndHeaderByNumber(ctx, number)
-	if st == nil || err != nil {
-		return nil
-	}
-	InjectedList := st.GetSnfts(types.SnftInjectedStorageAddress)
-	return InjectedList
 }
 
 type BlockParticipants struct {
@@ -2470,60 +2354,6 @@ func (w *PublicWormholesAPI) Version(ctx context.Context) string {
 	return version
 }
 
-func (w *PublicWormholesAPI) Mint(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:      0,
-		Royalty:   uint16(TxData["royalty"].(float64)),
-		MetaURL:   TxData["metaUrl"].(string),
-		Exchanger: TxData["exchanger"].(string),
-		Version:   types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-
-	args.Update(Txdata)
-
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
 func (w *PublicWormholesAPI) Transfer(ctx context.Context, args TransactionArgs) (common.Hash, error) {
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: args.from()}
@@ -2547,241 +2377,9 @@ func (w *PublicWormholesAPI) Transfer(ctx context.Context, args TransactionArgs)
 	}
 
 	transaction := types.Wormholes{
-		Type:       1,
-		NFTAddress: TxData["nftAddress"].(string),
-		Version:    types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) Author(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:       2,
-		NFTAddress: TxData["nftAddress"].(string),
-		Version:    types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) AuthorRevoke(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:       3,
-		NFTAddress: TxData["nftAddress"].(string),
-		Version:    types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) AccountAuthor(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	transaction := types.Wormholes{
-		Type:    4,
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) AccountAuthorRevoke(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	transaction := types.Wormholes{
-		Type:    5,
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) SNFTToERB(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:       6,
-		NFTAddress: TxData["nftAddress"].(string),
-		Version:    types.WormholesVersion,
+		Type:        1,
+		CSBTAddress: TxData["nftAddress"].(string),
+		Version:     types.WormholesVersion,
 	}
 
 	tr, err := json.Marshal(transaction)
@@ -2889,292 +2487,6 @@ func (w *PublicWormholesAPI) TokenRevokesPledge(ctx context.Context, args Transa
 	return SubmitTransaction(ctx, w.b, signed)
 }
 
-func (w *PublicWormholesAPI) OpenExchanger(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:    11,
-		FeeRate: uint16(TxData["royalty"].(float64)),
-		Name:    TxData["name"].(string),
-		Url:     TxData["url"].(string),
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) CloseExchanger(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	transaction := types.Wormholes{
-		Type:    12,
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) AdditionalPledgeAmount(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	transaction := types.Wormholes{
-		Type:    21,
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) RevokesPledgeAmount(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	transaction := types.Wormholes{
-		Type:    22,
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) VoteOfficialNFT(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:       23,
-		Dir:        TxData["dir"].(string),
-		StartIndex: TxData["startIndex"].(string),
-		Number:     uint64(TxData["number"].(float64)),
-		Royalty:    uint16(TxData["royalty"].(float64)),
-		Creator:    TxData["creater"].(string),
-		Version:    types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) Unfrozen(ctx context.Context, args TransactionArgs) (common.Hash, error) {
-	// Look up the wallet containing the requested signer
-	account := accounts.Account{Address: args.from()}
-
-	wallet, err := w.b.AccountManager().Find(account)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	if args.Nonce == nil {
-		// Hold the addresse's mutex around signing to prevent concurrent assignment of
-		// the same nonce to multiple accounts.
-		w.nonceLock.LockAddr(args.from())
-		defer w.nonceLock.UnlockAddr(args.from())
-	}
-
-	TxData := make(map[string]interface{})
-	err = json.Unmarshal(args.data(), &TxData)
-	if err != nil {
-		return common.Hash{}, err
-	}
-
-	transaction := types.Wormholes{
-		Type:    25,
-		Version: types.WormholesVersion,
-	}
-
-	tr, err := json.Marshal(transaction)
-	if err != nil {
-		log.Info("ethapi Mint() failed to format wormholes data", "err=", err)
-		return common.Hash{}, err
-	}
-	Txdata := append([]byte(types.TransactionType), tr...)
-	args.Update(Txdata)
-	// Set some sanity defaults and terminate on failure
-	if err := args.setDefaults(ctx, w.b); err != nil {
-		return common.Hash{}, err
-	}
-	// Assemble the transaction and sign with the wallet
-	tx := args.toTransaction()
-
-	signed, err := wallet.SignTx(account, tx, w.b.ChainConfig().ChainID)
-	if err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, signed)
-}
-
-func (w *PublicWormholesAPI) RawMint(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
 func (w *PublicWormholesAPI) RawTransfer(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
 	tx := new(types.Transaction)
 	if err := tx.UnmarshalBinary(input); err != nil {
@@ -3183,45 +2495,6 @@ func (w *PublicWormholesAPI) RawTransfer(ctx context.Context, input hexutil.Byte
 	return SubmitTransaction(ctx, w.b, tx)
 }
 
-func (w *PublicWormholesAPI) RawAuthor(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
-func (w *PublicWormholesAPI) RawAuthorRevoke(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
-func (w *PublicWormholesAPI) RawAccountAuthor(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
-func (w *PublicWormholesAPI) RawAccountAuthorRevoke(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
-func (w *PublicWormholesAPI) RawSNFTToERB(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
 func (w *PublicWormholesAPI) RawTokenPledge(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
 	tx := new(types.Transaction)
 	if err := tx.UnmarshalBinary(input); err != nil {
@@ -3231,22 +2504,6 @@ func (w *PublicWormholesAPI) RawTokenPledge(ctx context.Context, input hexutil.B
 }
 
 func (w *PublicWormholesAPI) RawTokenRevokesPledge(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
-func (w *PublicWormholesAPI) RawOpenExchanger(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
-	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(input); err != nil {
-		return common.Hash{}, err
-	}
-	return SubmitTransaction(ctx, w.b, tx)
-}
-
-func (w *PublicWormholesAPI) RawCloseExchanger(ctx context.Context, input hexutil.Bytes) (common.Hash, error) {
 	tx := new(types.Transaction)
 	if err := tx.UnmarshalBinary(input); err != nil {
 		return common.Hash{}, err
