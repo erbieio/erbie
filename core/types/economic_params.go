@@ -20,12 +20,12 @@ var VoteContractAddress = common.HexToAddress("0x0000000000000000000000000000000
 // The amount of voting contract generated per block
 var VoteAmountEachBlock, _ = new(big.Int).SetString("800000000000000000", 10)
 
-// validator reward 0.16 ERB
-var DREBlockReward = big.NewInt(1.6e+17)
+// validator reward 0.54360 ERB
+var DREBlockReward = big.NewInt(5.436e+17)
 
 // The percentage of rewards that validator receives
 // 10 represents 10 percent
-var PercentageValidatorReward = 10
+var PercentageValidatorReward = 7
 
 // Deflation rate
 var DeflationRate = 0.85
@@ -43,8 +43,8 @@ var SNFTL1 = "60000000000000000"
 var SNFTL2 = "180000000000000000"
 var SNFTL3 = "1000000000000000000"
 
-// Redemption staking time
-var CancelDayPledgedInterval int64 = 720 * 24 // blockNumber of per hour * 24h
+// Redemption staking time(one month)
+var CancelDayPledgedInterval int64 = 720 * 24 * 30 // blockNumber of per hour * 24h * 30
 // for test
 // var CancelDayPledgedInterval int64 = 5 // blockNumber of per hour * 24h
 
@@ -79,7 +79,7 @@ var TransactionTypeLen = 6
 
 func StakerBase() *big.Int {
 	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-	Erb100 := big.NewInt(700)
+	Erb100 := big.NewInt(350)
 	Erb100.Mul(Erb100, baseErb)
 
 	return Erb100
@@ -87,7 +87,7 @@ func StakerBase() *big.Int {
 
 func ValidatorBase() *big.Int {
 	baseErb, _ := new(big.Int).SetString("1000000000000000000", 10)
-	Erb100000 := big.NewInt(70000)
+	Erb100000 := big.NewInt(35000)
 	Erb100000.Mul(Erb100000, baseErb)
 
 	return Erb100000
