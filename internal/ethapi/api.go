@@ -771,7 +771,7 @@ func (s *PublicBlockChainAPI) GetBlockBeneficiaryAddressByNumber(ctx context.Con
 	exchangers := istanbulExtra.ExchangerAddr
 
 	//beneficiaryAddrs := append(istanbulExtra.ExchangerAddr, istanbulExtra.ValidatorAddr...)
-	rewardAmount := state.GetRewardAmount(header.Number.Uint64(), big.NewInt(1.6e+17))
+	rewardAmount := state.GetRewardAmount(header.Number.Uint64(), types.DREBlockReward)
 	for _, owner := range validators {
 
 		beneficiaryAddress := BeneficiaryAddress{
