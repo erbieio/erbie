@@ -592,11 +592,11 @@ func (e *Engine) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 			//The current block issues a reward for the previous block,
 			//but if the participant in the previous block consensus sends a validator to cancel the transaction
 			//and package it in the previous block, the current block does not send him a reward
-			for index, a := range validatorAddr {
-				if !validatorList.Exist(a) {
-					validatorAddr = append(validatorAddr[:index], validatorAddr[index+1:]...)
-				}
-			}
+			//for index, a := range validatorAddr {
+			//	if !validatorList.Exist(a) {
+			//		validatorAddr = append(validatorAddr[:index], validatorAddr[index+1:]...)
+			//	}
+			//}
 
 			//If the reward address is on a proxy account, it will be restored to a pledge account
 			for index, a := range validatorAddr {
