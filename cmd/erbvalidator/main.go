@@ -21,15 +21,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	ExecCmd(*cmd, *nodeUrl, *validatorKey, *proxyKey, *value)
+	h, err := ExecCmd(*cmd, *nodeUrl, *validatorKey, *proxyKey, *value)
+	if err != nil {
+		fmt.Println("hash", h, "Error ", err)
+	}
 
 }
 
-func ExecCmd(cmd int, url string, validatorKey string, proxyKey string, value int64) error {
+func ExecCmd(cmd int, url string, validatorKey string, proxyKey string, value int64) (string, error) {
+	var hash string
+	var err error
 	if cmd == 1 {
-		Pledge(url, validatorKey, proxyKey, value)
+		hash, err = Pledge(url, validatorKey, proxyKey, value)
 	} else if cmd == 2 {
-		UndoPledge(url, validatorKey, value)
+		hash, err = UndoPledge(url, validatorKey, value)
 	} else if cmd == 3 {
 		if validatorKey != "" {
 			if strings.HasPrefix(validatorKey, "0x") ||
@@ -51,7 +56,7 @@ func ExecCmd(cmd int, url string, validatorKey string, proxyKey string, value in
 
 	} else {
 		fmt.Println("cmd must be a value of 1,2, 3")
-		return errors.New("cmd must be a value of 1,2, 3")
+		return "", errors.New("cmd must be a value of 1,2, 3")
 	}
-	return nil
+	return hash, err
 }
