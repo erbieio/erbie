@@ -9,11 +9,11 @@ import (
 
 func Pledge(url string, validatorKey string, proxyKey string, value int64) (string, error) {
 
-	if strings.HasPrefix(validatorKey, "0x") &&
+	if strings.HasPrefix(validatorKey, "0x") ||
 		strings.HasPrefix(validatorKey, "0X") {
 		validatorKey = validatorKey[2:]
 	}
-	if strings.HasPrefix(proxyKey, "0x") &&
+	if strings.HasPrefix(proxyKey, "0x") ||
 		strings.HasPrefix(proxyKey, "0X") {
 		proxyKey = proxyKey[2:]
 	}

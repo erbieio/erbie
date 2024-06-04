@@ -32,7 +32,7 @@ func ExecCmd(cmd int, url string, validatorKey string, proxyKey string, value in
 		UndoPledge(url, validatorKey, value)
 	} else if cmd == 3 {
 		if validatorKey != "" {
-			if strings.HasPrefix(validatorKey, "0x") &&
+			if strings.HasPrefix(validatorKey, "0x") ||
 				strings.HasPrefix(validatorKey, "0X") {
 				validatorKey = validatorKey[2:]
 			}
@@ -41,7 +41,7 @@ func ExecCmd(cmd int, url string, validatorKey string, proxyKey string, value in
 		}
 
 		if proxyKey != "" {
-			if strings.HasPrefix(proxyKey, "0x") &&
+			if strings.HasPrefix(proxyKey, "0x") ||
 				strings.HasPrefix(proxyKey, "0X") {
 				proxyKey = proxyKey[2:]
 			}

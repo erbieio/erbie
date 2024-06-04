@@ -8,7 +8,7 @@ import (
 )
 
 func UndoPledge(url string, validatorKey string, value int64) (string, error) {
-	if strings.HasPrefix(validatorKey, "0x") &&
+	if strings.HasPrefix(validatorKey, "0x") ||
 		strings.HasPrefix(validatorKey, "0X") {
 		validatorKey = validatorKey[2:]
 	}
