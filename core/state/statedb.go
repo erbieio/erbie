@@ -1746,7 +1746,15 @@ func (s *StateDB) NewCancelStakerPledge(from, address common.Address, amount *bi
 		validatorStateObject := s.GetOrNewStakerStateObject(types.ValidatorStorageAddress)
 		if from == address {
 			// A maximum of 6.9 ERB is deducted
-			punishErb := big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
+			punishErb := big.NewInt(0)
+			// if toObject.Coefficient() != 0
+			//With a credit score of 0, miners have never been validators
+			//When the miner who pledged 350 has not yet become a validator,
+			//it is then revoked without deducting the erb of the credit value
+			if toObject.Coefficient() != 0 {
+				punishErb = big.NewInt(VALIDATOR_COEFFICIENT - int64(toObject.Coefficient()))
+			}
+
 			if punishErb.Cmp(big.NewInt(0)) > 0 {
 				coebaseErb, _ := new(big.Int).SetString("100000000000000000", 10)
 				punishErb.Mul(punishErb, coebaseErb)
