@@ -97,32 +97,12 @@ avoiding processing the entire history of the Erbie Chain network, which is very
 
 2. Start Erbie.
 
-   **Method 1: Running the following command starts Erbie. After successful launch, a private key will be generated automatically for you.**
+   **Running the following command starts Erbie. After successful launch, a private key will be generated automatically for you.**
 
 	````
-	./build/bin/erbie --devnet --http --mine --syncmode=full
+	./build/bin/erbie --mainnet --http --mine --syncmode=full
 	````
-   --http: This enables the http-rpc server that allows external programs to interact with Erbie by sending it http requests. By default the http server is only exposed locally using port 8545: localhost:8545. 
-
-   **Method 2: If you have an private key, please refer to the following steps：**
-
-   1. Running the following command, and paste your private key.
-   
-      ````
-      bash ./addkey.sh
-      ````
-   2. Running the following command starts Erbie.
-
-      ````
-      ./build/bin/erbie --devnet --http --mine --syncmode=full
-      ````     
-   3. Check that your private key is properly bound. 
-
-      ````
-      ./build/bin/erbie attach ${ipc file path}/erbie.ipc
-      eth.coinbase
-      ```` 
-      If the address returned is the same as yours, the binding is successful.
+   --http: This enables the http-rpc server that allows external programs to interact with Erbie by sending it http requests. By default the http server is only exposed locally using port 8545: localhost:8545.
 
 There are then many combinations of commands that configure precisely how erbie will run. The same information can be obtained at any time from your Erbie instance by running:
 
