@@ -797,6 +797,101 @@ func (s *PublicBlockChainAPI) GetBlockBeneficiaryAddressByNumber(ctx context.Con
 	return beneficiaryList, nil
 }
 
+type StakerReward struct {
+	StakerAddr   common.Address
+	RewardAmount *big.Int
+}
+type BeneficiaryAddressNew struct {
+	Address       common.Address
+	NftAddress    common.Address
+	RewardAmount  *big.Int
+	StakerRewards []*StakerReward
+}
+type BeneficiaryAddressNewList []*BeneficiaryAddressNew
+
+func DistributeRewardsToStakers(validator common.Address, rewardAmount *big.Int, st *state.StateDB) *BeneficiaryAddressNew {
+	var benefiNew BeneficiaryAddressNew
+	stakersPercentage := 100 - types.PercentageValidatorReward
+	sumStakerReward := new(big.Int).Div(new(big.Int).Mul(rewardAmount, big.NewInt(int64(stakersPercentage))), big.NewInt(100))
+
+	validatorObject := st.GetOrNewAccountStateObject(validator)
+	if validatorObject != nil {
+		stakerList := validatorObject.GetValidatorExtension()
+		validatorStakerBalance := stakerList.GetBalance(validator)
+		sumStakerBalance := new(big.Int).Sub(stakerList.GetAllBalance(), validatorStakerBalance)
+		actualSumStakerReward := big.NewInt(0)
+		for _, staker := range stakerList.ValidatorExtensions {
+			if staker.Addr != validator {
+				stakerReward := new(big.Int).Div(new(big.Int).Mul(sumStakerReward, staker.Balance), sumStakerBalance)
+				stakerRd := &StakerReward{
+					StakerAddr:   staker.Addr,
+					RewardAmount: stakerReward,
+				}
+				benefiNew.StakerRewards = append(benefiNew.StakerRewards, stakerRd)
+				actualSumStakerReward.Add(actualSumStakerReward, stakerReward)
+			}
+		}
+		validatorRdAmount := new(big.Int).Sub(rewardAmount, actualSumStakerReward)
+		benefiNew.Address = validator
+		benefiNew.RewardAmount = validatorRdAmount
+	}
+
+	return &benefiNew
+}
+
+func (s *PublicBlockChainAPI) GetBlockBeneficiaryAddressByNumberNew(ctx context.Context, number rpc.BlockNumber, fullTx bool) (BeneficiaryAddressNewList, error) {
+	//var address []common.Address
+	//var nftAddress []common.Address
+	var beneficiaryList BeneficiaryAddressNewList
+	block, err := s.b.BlockByNumber(ctx, number)
+	if block == nil || err != nil {
+		return nil, err
+	}
+	parentHeader, err := s.b.HeaderByNumber(ctx, number-1)
+	if parentHeader == nil || err != nil {
+		return nil, err
+	}
+
+	header := block.Header()
+	istanbulExtra, err := types.ExtractIstanbulExtra(header)
+	if err != nil {
+		return nil, err
+	}
+
+	statedb, _, err := s.b.StateAndHeaderByNumber(ctx, number-1)
+	if err != nil {
+		return nil, err
+	}
+
+	officialMint := statedb.GetOfficialMint()
+
+	validators := istanbulExtra.ValidatorAddr
+	exchangers := istanbulExtra.ExchangerAddr
+
+	//beneficiaryAddrs := append(istanbulExtra.ExchangerAddr, istanbulExtra.ValidatorAddr...)
+	rewardAmount := state.GetRewardAmount(header.Number.Uint64(), types.DREBlockReward)
+	for _, owner := range validators {
+
+		beneficiaryAddress := DistributeRewardsToStakers(owner, rewardAmount, statedb)
+
+		beneficiaryList = append(beneficiaryList, beneficiaryAddress)
+	}
+	for _, owner := range exchangers {
+
+		nftAddr := common.BytesToAddress(officialMint.Bytes())
+		officialMint.Add(officialMint, big.NewInt(1))
+
+		beneficiaryAddress := BeneficiaryAddressNew{
+			Address:    owner,
+			NftAddress: nftAddr,
+		}
+
+		beneficiaryList = append(beneficiaryList, &beneficiaryAddress)
+	}
+
+	return beneficiaryList, nil
+}
+
 func (s *PublicBlockChainAPI) checkBeneficiaryList(ctx context.Context, number rpc.BlockNumber, list BeneficiaryAddressList) bool {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, number)
 	if err != nil {
